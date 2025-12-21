@@ -728,7 +728,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">Choisissez votre Protocole</span>
-            <h2 className="font-display text-4xl md:text-5xl text-white font-bold">
+            <h2 className="font-heading text-4xl md:text-5xl text-white font-medium tracking-tight">
               Architecture des Programmes
             </h2>
             <p className="text-white/40 mt-4 max-w-xl mx-auto">
@@ -745,7 +745,7 @@ export default function Landing() {
               <div className="flex items-center gap-2 mb-3">
                 <span className="px-2 py-0.5 rounded bg-white/5 text-[10px] font-mono uppercase tracking-wider text-white/50">Urgence & Douleur</span>
               </div>
-              <h3 className="font-display text-2xl font-bold text-white mb-1">Rapid Patch</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Rapid Patch</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">14 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">49€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
@@ -789,7 +789,7 @@ export default function Landing() {
               <div className="flex items-center gap-2 mb-3 mt-2">
                 <span className="px-2 py-0.5 rounded bg-primary/15 text-[10px] font-mono uppercase tracking-wider text-primary">Réalignement</span>
               </div>
-              <h3 className="font-display text-2xl font-bold text-white mb-1">System Reboot</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">System Reboot</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">21 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">99€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
@@ -827,7 +827,7 @@ export default function Landing() {
               <div className="flex items-center gap-2 mb-3">
                 <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono uppercase tracking-wider text-white/70">Performance & Pro</span>
               </div>
-              <h3 className="font-display text-2xl font-bold text-white mb-1">Architect Mode</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Architect Mode</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">30 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">149€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
@@ -876,7 +876,7 @@ export default function Landing() {
                     <Map className={`w-5 h-5 ${selectedProgram === 'SYSTEM_REBOOT' ? 'text-primary' : 'text-white'}`} />
                     <span className="font-mono text-xs text-white/40 uppercase tracking-widest">Architecture du Programme</span>
                   </div>
-                  <h3 className="font-display text-3xl md:text-4xl text-white font-bold">{details.title}</h3>
+                  <h3 className="font-heading text-3xl md:text-4xl text-white font-medium tracking-tight">{details.title}</h3>
                   <p className="text-sm text-white/40 mt-2">
                     {selectedProgram === 'RAPID_PATCH' && 'Focus : Soulagement Urgent & Décompression'}
                     {selectedProgram === 'SYSTEM_REBOOT' && 'Focus : Réalignement & Habitude'}
@@ -969,7 +969,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <span className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 block">Analyse Comparative</span>
-            <h2 className="font-display text-3xl md:text-4xl text-white font-bold max-w-3xl mx-auto leading-tight">
+            <h2 className="font-heading text-3xl md:text-4xl text-white font-medium tracking-tight max-w-3xl mx-auto leading-tight">
               Pourquoi le modèle classique échoue pour les pros du digital
             </h2>
           </div>
@@ -1028,7 +1028,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-3xl">
           <div className="text-center mb-12">
             <span className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 block">Questions Fréquentes</span>
-            <h2 className="font-display text-3xl md:text-4xl text-white font-bold">
+            <h2 className="font-heading text-3xl md:text-4xl text-white font-medium tracking-tight">
               Transparence Totale
             </h2>
           </div>
@@ -1096,7 +1096,7 @@ export default function Landing() {
               <span className="font-mono text-[10px] text-primary uppercase tracking-widest mb-6 block">Le Manifeste</span>
               
               {/* Text Reveal Animation */}
-              <h2 className="font-display text-3xl md:text-5xl text-white font-bold mb-6 leading-tight">
+              <h2 className="font-heading text-3xl md:text-5xl text-white font-medium tracking-tight mb-6 leading-[1.1]">
                 <motion.span 
                   style={{ opacity: useTransform(manifesteScrollProgress, [0, 0.3], [0.2, 1]) }}
                 >
