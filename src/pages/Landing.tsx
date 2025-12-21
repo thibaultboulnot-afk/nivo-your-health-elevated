@@ -116,9 +116,16 @@ export default function Landing() {
     offset: ["start 0.8", "end 0.4"]
   });
 
+  // Ref for roadmap scroll
+  const roadmapRef = useRef<HTMLDivElement>(null);
+
   const handleSelectProgram = (program: 'RAPID_PATCH' | 'SYSTEM_REBOOT' | 'ARCHITECT_MODE') => {
     if (program !== selectedProgram) {
       setIsTransitioning(true);
+      
+      // Scroll doux vers le tableau
+      roadmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
       setTimeout(() => {
         setSelectedProgram(program);
         setIsTransitioning(false);
@@ -860,7 +867,7 @@ export default function Landing() {
           </div>
 
           {/* DYNAMIC ROADMAP DISPLAY */}
-          <div className={`bg-[#0a0a12] rounded-b-3xl md:rounded-3xl md:rounded-t-none border border-white/5 border-t-0 md:border-t p-8 md:p-12 relative overflow-hidden transition-all duration-500 ease-apple ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+          <div ref={roadmapRef} className={`bg-[#0a0a12] rounded-b-3xl md:rounded-3xl md:rounded-t-none border border-white/5 border-t-0 md:border-t p-8 md:p-12 relative overflow-hidden transition-all duration-500 ease-apple ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
             
             <div className={`absolute top-0 left-0 right-0 h-1 transition-colors duration-500 ease-apple ${
