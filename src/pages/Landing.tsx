@@ -151,31 +151,34 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030307] relative overflow-hidden text-white selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-deep-dark relative overflow-hidden text-foreground selection:bg-primary selection:text-primary-foreground">
+      {/* Radial Gradient Background - Premium Dark Mode */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,#0a0a0a,#030307)] pointer-events-none" />
+      
       {/* Aurora Background Effect */}
       <div className="aurora absolute inset-0 pointer-events-none opacity-40" />
       
       {/* Grid Background */}
-      <div className="grid-background absolute inset-0 pointer-events-none opacity-20" />
+      <div className="grid-background absolute inset-0 pointer-events-none opacity-15" />
 
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 backdrop-blur-md">
+      {/* Navbar - Glass Premium */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/10">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-radioactive">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-glow-primary">
               <span className="font-sans text-primary-foreground font-bold text-lg">N</span>
             </div>
-            <span className="font-sans text-xl font-bold tracking-tight">NIVO</span>
+            <span className="font-sans text-xl font-bold tracking-tight text-foreground">NIVO</span>
           </div>
           
           <div className="flex items-center gap-4">
             <Link to="/login">
-              <Button variant="ghost" className="text-white/50 hover:text-white font-mono text-xs transition-all duration-500 ease-apple">
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground font-mono text-xs transition-all duration-500 ease-apple">
                 Connexion Système
               </Button>
             </Link>
             <Link to="/diagnostic">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium glow-primary-sm transition-all duration-500 ease-apple">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-medium shadow-glow-primary transition-all duration-500 ease-apple">
                 Lancer le Scan
               </Button>
             </Link>
@@ -191,29 +194,29 @@ export default function Landing() {
             initial="hidden"
             animate="visible"
           >
-            {/* Badge */}
+            {/* Badge - Glass Premium */}
             <motion.div 
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 mb-8 backdrop-blur-md"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-8"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-white/80">
-                Protocole Clinique Validé
+              <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/80">
+                V2.0 • Protocole Clinique Validé
               </span>
             </motion.div>
 
-            {/* Title - Word by word animation */}
-            <motion.h1 className="font-display text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
-              <motion.span variants={itemVariants} className="inline-block">La </motion.span>
-              <motion.span variants={itemVariants} className="inline-block italic text-white/40">Maintenance </motion.span>
-              <motion.span variants={itemVariants} className="inline-block italic text-white/40">Système</motion.span>
+            {/* Title - Word by word animation with gradient */}
+            <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1] tracking-tight">
+              <motion.span variants={itemVariants} className="inline-block text-foreground">La </motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">Maintenance </motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">Système</motion.span>
               <br />
               <motion.span 
                 variants={itemVariants} 
-                className="inline-block bg-gradient-to-r from-white via-white/80 to-white/50 bg-clip-text text-transparent"
+                className="inline-block text-foreground"
               >
                 pour le Corps Humain.
               </motion.span>
@@ -228,19 +231,19 @@ export default function Landing() {
               <span className="text-white/30">Basé sur les standards cliniques de décompression (Méthodes McKenzie & McGill).</span>
             </motion.p>
 
-            {/* CTA - With Shimmer Effect */}
+            {/* CTA - With Shimmer Effect & Orange Glow */}
             <motion.div 
               variants={itemVariants}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Link to="/diagnostic">
-                <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary h-14 min-h-[48px] px-8 text-lg rounded-full font-medium transition-all duration-500 ease-apple hover:scale-105">
-                  Lancer le Scan Corporel
+                <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-primary h-14 min-h-[48px] px-8 text-lg rounded-full font-sans font-semibold transition-all duration-500 ease-apple hover:scale-105">
+                  Lancer le Scan
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/login">
-                <Button variant="outline" size="lg" className="border-white/10 text-white/80 hover:text-white hover:bg-white/5 h-14 min-h-[48px] px-8 rounded-full transition-all duration-500 ease-apple btn-outline-glow">
+                <Button variant="hero-outline" size="lg" className="h-14 min-h-[48px] px-8 rounded-full font-sans transition-all duration-500 ease-apple">
                   <ChevronRight className="mr-2 h-4 w-4" />
                   Connexion Système
                 </Button>
@@ -514,8 +517,8 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 */}
-            <div className="group relative p-8 rounded-3xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 hover:border-red-500/30 transition-all duration-500 ease-apple overflow-hidden">
+            {/* Card 1 - Glass Premium Style */}
+            <div className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-red-500/30 transition-all duration-500 ease-apple overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50"></div>
               
               {/* Hover Data Overlay */}
@@ -542,9 +545,9 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Card 2 - With Parallax */}
+            {/* Card 2 - Glass Premium Style with Parallax */}
             <motion.div 
-              className="group relative p-8 rounded-3xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 hover:border-orange-500/30 transition-all duration-500 ease-apple overflow-hidden"
+              className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-orange-500/30 transition-all duration-500 ease-apple overflow-hidden"
               style={{ y: isMobile ? 0 : parallaxY }}
             >
               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50"></div>
@@ -573,8 +576,8 @@ export default function Landing() {
               </div>
             </motion.div>
 
-            {/* Card 3 */}
-            <div className="group relative p-8 rounded-3xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 hover:border-yellow-500/30 transition-all duration-500 ease-apple overflow-hidden">
+            {/* Card 3 - Glass Premium Style */}
+            <div className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-yellow-500/30 transition-all duration-500 ease-apple overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50"></div>
               
               {/* Hover Data Overlay */}
