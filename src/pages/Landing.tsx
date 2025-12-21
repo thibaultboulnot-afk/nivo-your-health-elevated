@@ -1031,20 +1031,50 @@ export default function Landing() {
           </div>
 
           <Accordion type="single" collapsible className="space-y-4">
-            {[
-              { q: "Est-ce dangereux si j'ai une hernie discale ?", a: "<span class='text-primary font-medium'>Non, au contraire.</span> Le protocole est basé sur la méthode McKenzie, utilisée mondialement par les kinésithérapeutes pour traiter les hernies. Les mouvements de décompression aident à centraliser le disque. Cependant, si vous êtes en phase aiguë (douleur intense depuis moins de 72h), consultez d'abord un professionnel." },
-              { q: "Quelle différence avec les vidéos YouTube gratuites ?", a: "<span class='text-primary font-medium'>Structure et progression.</span> YouTube vous donne des exercices isolés. NIVO vous donne un protocole séquencé sur 21 jours avec une logique de progression (décompression → mobilisation → renforcement → neuroplasticité). C'est la différence entre avoir des ingrédients et avoir une recette." },
-              { q: "Combien de temps par jour ?", a: "<span class='text-primary font-medium font-mono'>15 minutes.</span> Conçu pour s'intégrer dans votre flux de travail : entre deux meetings, pendant une pause café, ou juste avant de commencer votre journée. La régularité compte plus que la durée." },
-              { q: "Y a-t-il une garantie ?", a: "<span class='text-primary font-medium'>Oui, 30 jours satisfait ou remboursé.</span> Si vous suivez le protocole pendant 21 jours et ne voyez aucune amélioration, nous vous remboursons intégralement. Aucune question posée." },
-              { q: "Besoin de matériel spécifique ?", a: "<span class='text-primary font-medium'>Non.</span> Tous les exercices se font au poids du corps. Vous pouvez les faire dans votre chambre, à côté de votre bureau, ou même en déplacement dans une chambre d'hôtel." },
-            ].map((item, idx) => (
-              <AccordionItem key={idx} value={`item-${idx}`} className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
-                <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
-                  {item.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-white/50 pb-5" dangerouslySetInnerHTML={{ __html: item.a }} />
-              </AccordionItem>
-            ))}
+            <AccordionItem value="item-0" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
+              <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
+                Est-ce dangereux si j'ai une hernie discale ?
+              </AccordionTrigger>
+              <AccordionContent className="text-white/50 pb-5">
+                <span className="text-primary font-medium">Non, au contraire.</span> Le protocole est basé sur la méthode McKenzie, utilisée mondialement par les kinésithérapeutes pour traiter les hernies. Les mouvements de décompression aident à centraliser le disque. Cependant, si vous êtes en phase aiguë (douleur intense depuis moins de 72h), consultez d'abord un professionnel.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-1" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
+              <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
+                Quelle différence avec les vidéos YouTube gratuites ?
+              </AccordionTrigger>
+              <AccordionContent className="text-white/50 pb-5">
+                <span className="text-primary font-medium">Structure et progression.</span> YouTube vous donne des exercices isolés. NIVO vous donne un protocole séquencé sur 21 jours avec une logique de progression (décompression → mobilisation → renforcement → neuroplasticité). C'est la différence entre avoir des ingrédients et avoir une recette.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-2" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
+              <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
+                Combien de temps par jour ?
+              </AccordionTrigger>
+              <AccordionContent className="text-white/50 pb-5">
+                <span className="text-primary font-medium font-mono">15 minutes.</span> Conçu pour s'intégrer dans votre flux de travail : entre deux meetings, pendant une pause café, ou juste avant de commencer votre journée. La régularité compte plus que la durée.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-3" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
+              <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
+                Y a-t-il une garantie ?
+              </AccordionTrigger>
+              <AccordionContent className="text-white/50 pb-5">
+                <span className="text-primary font-medium">Oui, 30 jours satisfait ou remboursé.</span> Si vous suivez le protocole pendant 21 jours et ne voyez aucune amélioration, nous vous remboursons intégralement. Aucune question posée.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-4" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
+              <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
+                Besoin de matériel spécifique ?
+              </AccordionTrigger>
+              <AccordionContent className="text-white/50 pb-5">
+                <span className="text-primary font-medium">Non.</span> Tous les exercices se font au poids du corps. Vous pouvez les faire dans votre chambre, à côté de votre bureau, ou même en déplacement dans une chambre d'hôtel.
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </div>
       </section>
