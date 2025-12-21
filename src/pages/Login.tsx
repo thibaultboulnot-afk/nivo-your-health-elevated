@@ -104,7 +104,7 @@ const Login = () => {
           className="inline-flex items-center gap-2 text-white/40 hover:text-primary mb-8 transition-colors font-mono text-sm group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          <span>&lt;-- cd /home</span>
+          <span>&lt;-- cd /accueil</span>
         </Link>
 
         {/* Terminal Window */}
@@ -133,7 +133,7 @@ const Login = () => {
                 </motion.div>
                 <div>
                   <h1 className="font-mono text-sm font-semibold text-white">
-                    SYSTEM_ACCESS <span className="text-primary">//</span> NIVO_OS
+                    ACCÈS_SYSTÈME <span className="text-primary">//</span> NIVO_OS
                   </h1>
                   <div className="flex items-center gap-2 mt-0.5">
                     <ShieldCheck className="w-3 h-3 text-emerald-500" />
@@ -167,13 +167,13 @@ const Login = () => {
                       <div className="space-y-2">
                         <label className="font-mono text-xs text-white/50 flex items-center gap-2">
                           <Terminal className="w-3 h-3" />
-                          USR_IDENTIFIER &gt;
+                          IDENTIFIANT_USR &gt;
                         </label>
                         <input
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="user@nivo.system"
+                          placeholder="utilisateur@nivo.system"
                           className="w-full bg-transparent border-0 border-b border-white/20 focus:border-primary px-0 py-3 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
                         />
                       </div>
@@ -182,7 +182,7 @@ const Login = () => {
                       <div className="space-y-2">
                         <label className="font-mono text-xs text-white/50 flex items-center gap-2">
                           <Lock className="w-3 h-3" />
-                          SECURITY_KEY &gt;
+                          CLÉ_SÉCURITÉ &gt;
                         </label>
                         <input
                           type="password"
@@ -201,7 +201,7 @@ const Login = () => {
                           className="flex items-center gap-2 text-destructive font-mono text-sm p-3 bg-destructive/10 rounded-lg border border-destructive/20"
                         >
                           <AlertCircle className="w-4 h-4" />
-                          <span>ERR: {error}</span>
+                          <span>ERREUR: {error}</span>
                         </motion.div>
                       )}
 
@@ -231,7 +231,7 @@ const Login = () => {
                         to="#" 
                         className="block font-mono text-xs text-white/40 hover:text-primary transition-colors"
                       >
-                        &gt; reset_credentials --force
+                        &gt; réinitialiser_identifiants --force
                       </Link>
 
                       {/* Checkout CTA */}
@@ -309,7 +309,7 @@ const Login = () => {
                       <ShieldCheck className="w-8 h-8 text-emerald-500" />
                     </motion.div>
                     <p className="font-mono text-emerald-500 text-lg">ACCÈS AUTORISÉ</p>
-                    <p className="font-mono text-white/40 text-sm mt-2">Redirection vers le dashboard...</p>
+                    <p className="font-mono text-white/40 text-sm mt-2">Redirection vers le cockpit...</p>
                   </motion.div>
                 )}
 
@@ -340,7 +340,7 @@ const Login = () => {
 
         {/* Footer */}
         <p className="text-center font-mono text-xs text-white/20 mt-8">
-          &gt; NIVO_OS v2.0.4 | Secure Authentication Protocol
+          &gt; NIVO_OS v2.0.4 | Protocole d'Authentification Sécurisé
         </p>
       </div>
     </div>

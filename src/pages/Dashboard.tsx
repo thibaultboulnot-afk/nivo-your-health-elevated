@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,11 @@ import {
   Settings,
   BarChart3,
   User,
-  Radio
+  Radio,
+  History,
+  Droplets,
+  Brain,
+  HeartPulse
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { PROGRAMS, getPhaseLabel, getCurrentSession, type ProgramTier } from '@/data/programs';
@@ -45,6 +49,7 @@ const ZONE_ICONS: Record<string, string> = {
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [currentProgramId, setCurrentProgramId] = useState<ProgramTier>('SYSTEM_REBOOT');
   const [showRationale, setShowRationale] = useState(false);
   const [activeNav, setActiveNav] = useState('home');
@@ -74,7 +79,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
           <div className="font-mono text-[#ff6b4a] animate-pulse mb-4">
-            <div className="text-sm mb-2">&gt; LOADING_SYSTEM...</div>
+            <div className="text-sm mb-2">&gt; CHARGEMENT_SYSTÈME...</div>
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#ff6b4a]" />
           </div>
           <div className="font-mono text-xs text-white/30">
@@ -95,11 +100,31 @@ export default function Dashboard() {
   const isProgramComplete = currentDay > totalDays;
 
   const navItems = [
-    { id: 'home', icon: Home, label: 'Cockpit' },
-    { id: 'stats', icon: BarChart3, label: 'Télémétrie' },
-    { id: 'profile', icon: User, label: 'Profil' },
-    { id: 'settings', icon: Settings, label: 'Config' },
+    { id: 'home', icon: Home, label: 'Cockpit', path: '/dashboard' },
+    { id: 'program', icon: Target, label: 'Mon Programme', path: '/dashboard' },
+    { id: 'history', icon: History, label: 'Historique', path: '/dashboard' },
+    { id: 'settings', icon: Settings, label: 'Réglages', path: '/settings' },
   ];
+
+  const handleNavClick = (item: typeof navItems[0]) => {
+    if (item.path !== '/dashboard') {
+      navigate(item.path);
+    } else {
+      setActiveNav(item.id);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  // Fake telemetry data
+  const telemetryData = {
+    stress: 35,
+    mobility: 68,
+    hydration: 72,
+  };
 
   return (
     <div className="min-h-screen bg-[#050510] flex relative">
@@ -107,45 +132,137 @@ export default function Dashboard() {
       <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
       <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
 
-      {/* Sidebar - Console Dock */}
-      <aside className="w-16 bg-[#050510]/80 backdrop-blur-sm border-r border-white/5 flex flex-col items-center py-6 relative z-20">
+      {/* Sidebar - Télémétrie & Navigation */}
+      <aside className="w-72 bg-[#050510]/80 backdrop-blur-sm border-r border-white/5 flex flex-col relative z-20">
         {/* Logo */}
-        <div className="w-10 h-10 rounded-lg bg-[#ff6b4a] flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(255,107,74,0.4)]">
-          <span className="font-bold text-black text-lg">N</span>
+        <div className="p-6 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#ff6b4a] flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
+              <span className="font-bold text-black text-lg">N</span>
+            </div>
+            <div>
+              <span className="font-bold text-white text-lg">NIVO</span>
+              <p className="font-mono text-[10px] text-white/30">OS v2.0.4</p>
+            </div>
+          </div>
         </div>
 
-        {/* Nav Items */}
-        <nav className="flex-1 flex flex-col gap-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveNav(item.id)}
-              className={`relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 group ${
-                activeNav === item.id 
-                  ? 'text-[#ff6b4a] bg-[#ff6b4a]/10' 
-                  : 'text-white/30 hover:text-white/60 hover:bg-white/5'
-              }`}
-            >
-              <item.icon className="h-5 w-5" />
-              {activeNav === item.id && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#ff6b4a] rounded-r shadow-[0_0_10px_rgba(255,107,74,0.8)]" />
-              )}
-              {/* Tooltip */}
-              <span className="absolute left-14 px-2 py-1 bg-black/90 border border-white/10 rounded text-xs font-mono text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {item.label}
-              </span>
-            </button>
-          ))}
+        {/* Télémétrie Section */}
+        <div className="p-6 border-b border-white/5">
+          <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider mb-4">
+            Biométrie Pilote
+          </p>
+          
+          {/* Avatar & Name */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 flex items-center justify-center">
+              <User className="h-6 w-6 text-[#ff6b4a]" />
+            </div>
+            <div>
+              <p className="font-semibold text-white text-sm">
+                {profile?.first_name || 'Utilisateur'} {profile?.last_name || ''}
+              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-mono text-[10px] text-emerald-500">SYSTÈME ACTIF</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Gauges */}
+          <div className="space-y-3">
+            {/* Stress */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-3 w-3 text-white/30" />
+                  <span className="font-mono text-[10px] text-white/40">Niveau de Stress</span>
+                </div>
+                <span className="font-mono text-[10px] text-[#ff6b4a]">{telemetryData.stress}%</span>
+              </div>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-[#ff6b4a] rounded-full transition-all"
+                  style={{ width: `${telemetryData.stress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Mobility */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <HeartPulse className="h-3 w-3 text-white/30" />
+                  <span className="font-mono text-[10px] text-white/40">Mobilité</span>
+                </div>
+                <span className="font-mono text-[10px] text-emerald-400">{telemetryData.mobility}%</span>
+              </div>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 rounded-full transition-all"
+                  style={{ width: `${telemetryData.mobility}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Hydration */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-3 w-3 text-white/30" />
+                  <span className="font-mono text-[10px] text-white/40">Hydratation</span>
+                </div>
+                <span className="font-mono text-[10px] text-cyan-400">{telemetryData.hydration}%</span>
+              </div>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-cyan-500 rounded-full transition-all"
+                  style={{ width: `${telemetryData.hydration}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4">
+          <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider mb-3 px-2">
+            Navigation
+          </p>
+          <div className="space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item)}
+                className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 group ${
+                  activeNav === item.id 
+                    ? 'text-[#ff6b4a] bg-[#ff6b4a]/10' 
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                }`}
+              >
+                {activeNav === item.id && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#ff6b4a] rounded-r shadow-[0_0_10px_rgba(255,107,74,0.8)]" />
+                )}
+                <item.icon className="h-4 w-4" />
+                <span className="font-mono text-xs">{item.label}</span>
+              </button>
+            ))}
+          </div>
         </nav>
 
-        {/* System Status Badge */}
-        <div className="mt-auto">
-          <button onClick={signOut} className="w-10 h-10 rounded-lg flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/5 transition-all mb-4">
-            <LogOut className="h-5 w-5" />
+        {/* Bottom Section */}
+        <div className="p-4 border-t border-white/5">
+          <button 
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all group"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="font-mono text-xs">Arrêter le Système</span>
           </button>
-          <div className="flex flex-col items-center gap-1">
+          
+          <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/5">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-            <span className="font-mono text-[8px] text-emerald-500/80 tracking-wider">ONLINE</span>
+            <span className="font-mono text-[10px] text-emerald-500/80 tracking-wider">SYSTÈME EN LIGNE</span>
           </div>
         </div>
       </aside>
@@ -251,7 +368,7 @@ export default function Dashboard() {
                           <Volume2 className="h-4 w-4 text-[#ff6b4a]" />
                         </div>
                         <div>
-                          <p className="font-mono text-xs text-[#ff6b4a] mb-1">AUDIO_CUE</p>
+                          <p className="font-mono text-xs text-[#ff6b4a] mb-1">CONSIGNE_AUDIO</p>
                           <p className="text-white/80 italic">"{currentSession.audioCue}"</p>
                         </div>
                       </div>
@@ -263,7 +380,7 @@ export default function Dashboard() {
                       className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors w-full mb-4"
                     >
                       <FlaskConical className="h-4 w-4" />
-                      <span className="font-mono text-xs">SCIENCE_RATIONALE</span>
+                      <span className="font-mono text-xs">JUSTIFICATION_SCIENTIFIQUE</span>
                       {showRationale ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
                     </button>
                     {showRationale && (
@@ -362,7 +479,7 @@ export default function Dashboard() {
                 <div className="bg-black/50 rounded-xl border border-white/10 p-6 animate-fade-in hover:border-[#ff6b4a]/30 transition-colors group" style={{ animationDelay: '0.5s' }}>
                   <div className="flex items-center gap-2 mb-4">
                     <Zap className="h-4 w-4 text-white/30 group-hover:text-[#ff6b4a] transition-colors" />
-                    <span className="font-mono text-xs text-white/40">SYSTEM_STATUS</span>
+                    <span className="font-mono text-xs text-white/40">STATUT_SYSTÈME</span>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -377,7 +494,7 @@ export default function Dashboard() {
                       <span className="font-mono text-xs text-white/40">STATUT</span>
                       <span className="font-mono text-sm text-emerald-400 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        ACTIVE
+                        ACTIF
                       </span>
                     </div>
                   </div>
