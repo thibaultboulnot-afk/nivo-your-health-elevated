@@ -66,8 +66,8 @@ export default {
         },
       },
       fontFamily: {
-        // Design System Typography
-        heading: ['Outfit', 'sans-serif'],
+        // Design System Typography - NIVO Identity
+        heading: ['Switzer', 'sans-serif'],
         body: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
