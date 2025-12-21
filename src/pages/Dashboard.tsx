@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -272,10 +273,12 @@ export default function Dashboard() {
                     )}
 
                     {/* Launch Button */}
-                    <Button className="w-full h-14 bg-[#ff6b4a] hover:bg-[#ff8a6a] text-black font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                      <Play className="h-6 w-6 mr-2" />
-                      LANCER LA SÉQUENCE
-                    </Button>
+                    <Link to={`/session/${currentProgramId.toLowerCase().replace('_', '-')}`} className="block w-full">
+                      <Button className="w-full h-14 bg-[#ff6b4a] hover:bg-[#ff8a6a] text-black font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                        <Play className="h-6 w-6 mr-2" />
+                        LANCER LA SÉQUENCE
+                      </Button>
+                    </Link>
                   </div>
                 </div>
 
