@@ -146,11 +146,13 @@ export default function Diagnostic() {
 
   const getRecommendation = () => {
     if (answers.crashSource === 'cervicales') {
-      return { name: 'Rapid Patch (Neck)', price: '29€', type: 'neck' };
+      return { name: 'Rapid Patch (Neck)', price: '49€', plan: 'RAPID_PATCH' };
     } else if (answers.crashSource === 'lombaires') {
-      return { name: 'Rapid Patch (Back)', price: '29€', type: 'back' };
+      return { name: 'Rapid Patch (Back)', price: '49€', plan: 'RAPID_PATCH' };
+    } else if (answers.performanceImpact === 'critique' || answers.crashSource === 'fatigue') {
+      return { name: 'System Reboot (Full)', price: '99€', plan: 'SYSTEM_REBOOT' };
     } else {
-      return { name: 'System Reboot (Full)', price: '79€', type: 'full' };
+      return { name: 'Rapid Patch', price: '49€', plan: 'RAPID_PATCH' };
     }
   };
 
@@ -519,13 +521,15 @@ export default function Diagnostic() {
               </div>
 
               {/* CTA Button */}
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-background font-medium shadow-radioactive shimmer-btn group animate-pulse"
-              >
-                Installer le Patch
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link to={`/checkout?plan=${getRecommendation().plan}`}>
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-background font-medium shadow-radioactive shimmer-btn group animate-pulse"
+                >
+                  Installer le Patch
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
 
               <p className="mt-4 font-mono text-xs text-slate-600">
                 Accès immédiat • Protocole personnalisé • Garantie 30 jours
