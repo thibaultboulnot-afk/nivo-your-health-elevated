@@ -20,7 +20,7 @@ export default function Session() {
   };
 
   const currentProgramId = programMap[programId || 'system-reboot'] || 'SYSTEM_REBOOT';
-  const currentDay = 1; // TODO: Get from user profile
+  const currentDay = 1; // TODO: Récupérer depuis le profil utilisateur
   const session = getCurrentSession(currentDay, currentProgramId);
   const totalExercises = session?.steps.length || 5;
 

@@ -10,6 +10,7 @@ import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Session from "./pages/Session";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,7 +29,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session/:programId" element={<Session />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/settings" element={<Settings />} />
+            {/* AJOUTER TOUTES LES ROUTES PERSONNALISÉES AU-DESSUS DE LA ROUTE CATCH-ALL "*" */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

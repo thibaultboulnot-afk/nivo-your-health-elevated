@@ -22,11 +22,11 @@ const CHECKOUT_PROGRAMS: Record<ProgramTier, {
     tag: 'URGENCE & DOULEUR',
     promise: 'Éteindre l\'inflammation et stopper la douleur en 2 semaines.',
     features: [
-      'module_decompression_lombaire',
-      'protocol_tech_neck',
-      'audio_guide_basic',
-      'sessions_video_hd[14]',
-      'lifetime_access: true'
+      'module_décompression_lombaire',
+      'protocole_tech_neck',
+      'guide_audio_basique',
+      'sessions_vidéo_hd[14]',
+      'accès_à_vie: true'
     ]
   },
   SYSTEM_REBOOT: {
@@ -36,13 +36,13 @@ const CHECKOUT_PROGRAMS: Record<ProgramTier, {
     tag: 'RECOMMANDÉ • STANDARD',
     promise: 'La correction complète. Réalignez votre posture par défaut.',
     features: [
-      'include: RAPID_PATCH.*',
+      'inclut: RAPID_PATCH.*',
       'module_reprogrammation_neuro',
-      'integration_neuroplasticite',
-      'access_scientific_rationale',
-      'sessions_video_hd[21]',
-      'updates: automatic',
-      'lifetime_access: true'
+      'intégration_neuroplasticité',
+      'accès_justification_scientifique',
+      'sessions_vidéo_hd[21]',
+      'mises_à_jour: automatiques',
+      'accès_à_vie: true'
     ]
   },
   ARCHITECT_MODE: {
@@ -52,13 +52,13 @@ const CHECKOUT_PROGRAMS: Record<ProgramTier, {
     tag: 'PERFORMANCE & PRO',
     promise: 'Devenez Anti-Fragile. Pour ceux qui veulent optimiser leur focus.',
     features: [
-      'include: SYSTEM_REBOOT.*',
-      'protocol_vision_vestibulaire',
+      'inclut: SYSTEM_REBOOT.*',
+      'protocole_vision_vestibulaire',
       'routine_deep_work',
-      'support_priority: true',
-      'sessions_video_hd[30]',
+      'support_prioritaire: true',
+      'sessions_vidéo_hd[30]',
       'bonus_micro_exercices',
-      'lifetime_access: true'
+      'accès_à_vie: true'
     ]
   }
 };
@@ -153,14 +153,14 @@ export default function Checkout() {
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
                   <Terminal className="w-4 h-4 text-primary" />
-                  <span className="font-mono text-sm text-primary">SECURE PAYMENT GATEWAY</span>
+                  <span className="font-mono text-sm text-primary">PASSERELLE DE PAIEMENT SÉCURISÉE</span>
                 </div>
 
                 <h1 className="font-heading font-medium text-3xl md:text-4xl tracking-tight mb-2">
                   Initialisation du protocole
                 </h1>
                 <p className="text-muted-foreground font-mono text-sm">
-                  {'>'} authorization_required: true
+                  {'>'} autorisation_requise: true
                 </p>
               </div>
 
@@ -171,7 +171,7 @@ export default function Checkout() {
                   <div className="w-3 h-3 rounded-full bg-red-500/80" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                   <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  <span className="ml-3 font-mono text-xs text-muted-foreground">nivo_payment_gateway.sh</span>
+                  <span className="ml-3 font-mono text-xs text-muted-foreground">nivo_passerelle_paiement.sh</span>
                 </div>
 
                 <div className="grid md:grid-cols-2">
@@ -180,7 +180,7 @@ export default function Checkout() {
                     <div className="flex items-center gap-2 mb-6">
                       <Shield className="w-4 h-4 text-primary" />
                       <span className="font-mono text-xs text-primary uppercase tracking-widest">
-                        Package Authorization
+                        Autorisation du Package
                       </span>
                     </div>
 
@@ -212,7 +212,7 @@ export default function Checkout() {
                               className="flex items-center gap-2 text-slate-400"
                             >
                               <Check className="w-3 h-3 text-green-500" />
-                              <span>{feature}... <span className="text-green-500">[LOADED]</span></span>
+                              <span>{feature}... <span className="text-green-500">[CHARGÉ]</span></span>
                             </motion.div>
                           ))}
                         </div>
@@ -220,7 +220,7 @@ export default function Checkout() {
                         {/* Price - Critical Data */}
                         <div className="pt-4 border-t border-white/10">
                           <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
-                            TOTAL_TRANSFER
+                            TOTAL_TRANSFERT
                           </span>
                           <span className="font-heading font-medium text-4xl tracking-tight text-primary">
                             {program.price}€
@@ -236,7 +236,7 @@ export default function Checkout() {
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
                       <Lock className="w-4 h-4 text-green-500" />
                       <div className="font-mono text-xs">
-                        <span className="text-green-500">SSL_ENCRYPTED</span>
+                        <span className="text-green-500">SSL_CHIFFRÉ</span>
                         <span className="text-muted-foreground"> • 256-bit</span>
                       </div>
                     </div>
@@ -247,7 +247,7 @@ export default function Checkout() {
                     <div className="flex items-center gap-2 mb-6">
                       <Download className="w-4 h-4 text-primary" />
                       <span className="font-mono text-xs text-primary uppercase tracking-widest">
-                        Secure Transaction Protocol
+                        Protocole de Transaction Sécurisé
                       </span>
                     </div>
 
@@ -260,7 +260,7 @@ export default function Checkout() {
                       {/* Email */}
                       <div>
                         <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-2">
-                          USR_EMAIL {'>'}
+                          EMAIL_USR {'>'}
                         </label>
                         <input 
                           type="email" 
@@ -278,7 +278,7 @@ export default function Checkout() {
                       {/* Name */}
                       <div>
                         <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-2">
-                          CARD_HOLDER ::
+                          TITULAIRE_CARTE ::
                         </label>
                         <input 
                           type="text" 
@@ -296,7 +296,7 @@ export default function Checkout() {
                       {/* Card Number */}
                       <div>
                         <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-2">
-                          CARD_DATA ::
+                          DONNÉES_CARTE ::
                         </label>
                         <input 
                           type="text" 
@@ -315,7 +315,7 @@ export default function Checkout() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-2">
-                            EXP_DATE ::
+                            DATE_EXP ::
                           </label>
                           <input 
                             type="text" 
@@ -331,7 +331,7 @@ export default function Checkout() {
                         </div>
                         <div>
                           <label className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block mb-2">
-                            SEC_CODE ::
+                            CODE_SEC ::
                           </label>
                           <input 
                             type="text" 
@@ -367,7 +367,7 @@ export default function Checkout() {
                     </Button>
 
                     <p className="text-center font-mono text-[10px] text-muted-foreground mt-4">
-                      {'>'} secure_transfer: confirmed
+                      {'>'} transfert_sécurisé: confirmé
                     </p>
                   </div>
                 </div>
@@ -449,8 +449,8 @@ export default function Checkout() {
                 INSTALLATION RÉUSSIE
               </h2>
               <p className="font-mono text-sm text-muted-foreground mb-6">
-                {'>'} package_downloaded: true<br />
-                {'>'} redirecting_to_access_portal...
+                {'>'} package_téléchargé: true<br />
+                {'>'} redirection_vers_portail_accès...
               </p>
 
               <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30">

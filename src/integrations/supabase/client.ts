@@ -10,6 +10,7 @@ export const supabase = {
             id: 'demo-user-123',
             email: 'utilisateur@nivo.app',
             first_name: 'Thomas',
+            last_name: 'Martin',
             full_name: 'Thomas Martin',
             current_day: 3,
             pain_zone: 'lombaires',
@@ -23,6 +24,10 @@ export const supabase = {
           error: null,
         }),
       }),
+    }),
+    upsert: async (data: unknown) => ({
+      data: null,
+      error: null,
     }),
   }),
   auth: {
