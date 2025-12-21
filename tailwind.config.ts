@@ -66,8 +66,10 @@ export default {
         },
       },
       fontFamily: {
+        // Design System Typography
+        heading: ['Outfit', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Instrument Serif', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
       },
       borderRadius: {
