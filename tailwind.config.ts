@@ -108,6 +108,41 @@ export default {
           "0%": { left: "-100%" },
           "50%, 100%": { left: "100%" },
         },
+        // Linear Style - Border Beam Effect
+        "border-beam": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        // Aurora Drift Animation
+        "aurora-drift": {
+          "0%, 100%": { 
+            backgroundPosition: "50% 0%, 100% 50%, 0% 80%",
+            opacity: "0.4"
+          },
+          "50%": { 
+            backgroundPosition: "60% 10%, 90% 60%, 10% 70%",
+            opacity: "0.6"
+          },
+        },
+        // Spotlight Pulse
+        "spotlight-pulse": {
+          "0%, 100%": { opacity: "0.03" },
+          "50%": { opacity: "0.08" },
+        },
+        // Glow Pulse
+        "glow-pulse": {
+          "0%, 100%": { 
+            boxShadow: "0 0 20px -5px rgba(255, 107, 74, 0.3), 0 0 40px -10px rgba(255, 107, 74, 0.2)",
+          },
+          "50%": { 
+            boxShadow: "0 0 30px -5px rgba(255, 107, 74, 0.5), 0 0 60px -10px rgba(255, 107, 74, 0.3)",
+          },
+        },
+        // Float Animation
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -118,6 +153,11 @@ export default {
         "slide-up": "slide-up 0.5s ease-out",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         shimmer: "shimmer 3s infinite",
+        "border-beam": "border-beam 4s linear infinite",
+        "aurora-drift": "aurora-drift 15s ease-in-out infinite",
+        "spotlight-pulse": "spotlight-pulse 4s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        "float": "float 6s ease-in-out infinite",
       },
       transitionTimingFunction: {
         apple: "cubic-bezier(0.25, 0.1, 0.25, 1)",

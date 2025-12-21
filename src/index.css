@@ -115,58 +115,146 @@
 }
 
 @layer components {
-  /* Glass Effect - Premium Cards */
+  /* ============================================
+     GLASS EFFECTS - Premium Frosted Glass
+     ============================================ */
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
   }
 
   .glass-border {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
-  /* Premium Deep Background - Radial Gradient */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 20px 50px -20px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ============================================
+     DEEP DARK BACKGROUNDS - Premium Gradients
+     ============================================ */
   .bg-deep-dark {
-    background: radial-gradient(ellipse 80% 80% at 50% -20%, #0a0a0a 0%, #030307 100%);
+    background: 
+      radial-gradient(ellipse 80% 80% at 50% -20%, #0a0a0f 0%, #030307 100%);
   }
 
-  /* Aurora Background Effect */
+  .bg-elevated {
+    background: 
+      linear-gradient(180deg, #0a0a12 0%, #050508 100%);
+  }
+
+  /* ============================================
+     AURORA EFFECT - Animated Color Clouds
+     ============================================ */
   .aurora {
     background: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 107, 74, 0.12), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 50%, rgba(255, 140, 100, 0.06), transparent),
-      radial-gradient(ellipse 50% 30% at 0% 80%, rgba(255, 107, 74, 0.08), transparent);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 107, 74, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(255, 140, 100, 0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 20% 80%, rgba(255, 107, 74, 0.1), transparent),
+      radial-gradient(ellipse 40% 40% at 50% 100%, rgba(255, 80, 60, 0.05), transparent);
+    animation: aurora-drift 15s ease-in-out infinite;
   }
 
-  /* Premium Card Style */
-  .card-premium {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  @keyframes aurora-drift {
+    0%, 100% {
+      opacity: 0.4;
+      filter: blur(60px);
+    }
+    50% {
+      opacity: 0.6;
+      filter: blur(80px);
+    }
   }
 
-  /* Grid Background */
+  /* ============================================
+     GRID BACKGROUND - Linear Style
+     ============================================ */
   .grid-background {
     background-image: 
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
   }
 
-  /* Primary Glow Effects */
+  /* ============================================
+     PREMIUM CARD STYLES
+     ============================================ */
+  .card-premium {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .card-premium:hover {
+    @apply border-white/20;
+    transform: translateY(-2px);
+    box-shadow: 
+      0 20px 40px -20px rgba(0, 0, 0, 0.5),
+      0 0 40px -10px rgba(255, 107, 74, 0.1);
+  }
+
+  /* ============================================
+     GLOW EFFECTS - Primary & White
+     ============================================ */
   .glow-primary {
-    box-shadow: 0 0 40px -10px hsl(var(--primary));
+    box-shadow: 
+      0 0 20px -5px hsl(var(--primary) / 0.4),
+      0 0 40px -10px hsl(var(--primary) / 0.2);
   }
 
   .glow-primary-sm {
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 15px -5px hsl(var(--primary) / 0.4);
+  }
+
+  .glow-primary-intense {
+    box-shadow: 
+      0 0 30px -5px hsl(var(--primary) / 0.5),
+      0 0 60px -10px hsl(var(--primary) / 0.3),
+      0 0 100px -20px hsl(var(--primary) / 0.2);
   }
 
   /* Radioactive Shadow - Signature NIVO Effect */
   .shadow-radioactive {
     box-shadow: 
       0 0 20px -5px hsl(var(--primary) / 0.4),
-      0 0 40px -10px hsl(var(--primary) / 0.2);
+      0 0 40px -10px hsl(var(--primary) / 0.25),
+      0 0 80px -20px hsl(var(--primary) / 0.15);
+    animation: glow-pulse 3s ease-in-out infinite;
   }
 
-  /* Shimmer Button Effect */
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 
+        0 0 20px -5px hsl(var(--primary) / 0.4),
+        0 0 40px -10px hsl(var(--primary) / 0.25);
+    }
+    50% {
+      box-shadow: 
+        0 0 30px -5px hsl(var(--primary) / 0.5),
+        0 0 60px -10px hsl(var(--primary) / 0.35);
+    }
+  }
+
+  /* ============================================
+     SHIMMER BUTTON EFFECT
+     ============================================ */
   .shimmer-btn {
     position: relative;
     overflow: hidden;
@@ -181,19 +269,33 @@
     height: 100%;
     background: linear-gradient(
       90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 100%
     );
-    animation: shimmer 3s infinite;
+    animation: shimmer 3s ease-in-out infinite;
   }
 
   @keyframes shimmer {
-    0% { left: -100%; }
-    50%, 100% { left: 100%; }
+    0% { 
+      left: -100%;
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% { 
+      left: 100%;
+      opacity: 0;
+    }
   }
 
-  /* Spotlight Card Effect */
+  /* ============================================
+     SPOTLIGHT EFFECT - Mouse Following
+     ============================================ */
   .spotlight {
     position: relative;
     overflow: hidden;
@@ -207,21 +309,85 @@
     right: 0;
     bottom: 0;
     background: radial-gradient(
-      400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(255, 107, 74, 0.06),
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 107, 74, 0.08),
       transparent 40%
     );
     pointer-events: none;
     z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
-  /* Outline Button Glow */
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* ============================================
+     BORDER BEAM EFFECT - Rotating Gradient Border
+     ============================================ */
+  .border-beam {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .border-beam::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 60deg,
+      hsl(var(--primary)) 120deg,
+      hsl(var(--primary) / 0.8) 180deg,
+      transparent 240deg,
+      transparent 360deg
+    );
+    animation: border-beam 4s linear infinite;
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .border-beam::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: hsl(var(--background));
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  @keyframes border-beam {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* ============================================
+     OUTLINE BUTTON GLOW
+     ============================================ */
   .btn-outline-glow {
     position: relative;
+    transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .btn-outline-glow:hover {
-    box-shadow: 0 0 30px -10px rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 0 20px -5px rgba(255, 255, 255, 0.2),
+      0 0 40px -10px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* ============================================
+     FLOATING ELEMENT ANIMATION
+     ============================================ */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 }
 
