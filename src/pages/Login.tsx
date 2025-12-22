@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Fingerprint, Lock, ShieldCheck, Terminal, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type BootPhase = 'form' | 'booting' | 'success' | 'error';
 
@@ -56,12 +58,25 @@ const Login = () => {
       return;
     }
 
-    // TODO: Intégrer Supabase auth ici
-    // const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // Authentification Supabase
+    const { error: authError } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
     
-    // Simulation de l'authentification
+    if (authError) {
+      setError(authError.message === 'Invalid login credentials' 
+        ? 'Identifiants invalides' 
+        : authError.message);
+      toast.error('Échec de la connexion', {
+        description: 'Vérifiez vos identifiants et réessayez.'
+      });
+      await runBootSequence(false);
+      setIsLoading(false);
+      return;
+    }
+    
     await runBootSequence(true);
-    
     setIsLoading(false);
   };
 

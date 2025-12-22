@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserStats } from '@/hooks/useUserStats';
 import { Button } from '@/components/ui/button';
 import { 
   Settings,
@@ -12,42 +12,39 @@ import {
   Lock,
   Play,
   User,
-  Battery
+  Battery,
+  AlertTriangle
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
 
-// Mock user state (en attendant le backend)
-const userState = {
-  firstName: 'Alex',
-  lastName: 'Durand',
-  healthScore: 68,
-  currentProgram: 'SYSTEM_REBOOT' as ProgramTier,
-  currentDay: 1,
-  streak: 4,
-  totalPatches: 12,
-  unlockedPrograms: ['RAPID_PATCH', 'SYSTEM_REBOOT'] as ProgramTier[],
-};
-
 export default function Dashboard() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
-  const [isLoading] = useState(false);
+  const { stats, isLoading } = useUserStats();
 
   // Get current session data
-  const currentSession = getCurrentSession(userState.currentDay, userState.currentProgram);
-  const currentProgram = PROGRAMS[userState.currentProgram];
+  const currentProgram = stats ? PROGRAMS[stats.currentProgram] : PROGRAMS['SYSTEM_REBOOT'];
+  const currentSession = stats ? getCurrentSession(stats.currentDay, stats.currentProgram) : null;
 
   // Determine status based on health score
   const getStatusConfig = () => {
-    if (userState.healthScore < 50) {
+    if (!stats?.healthScore) {
+      return {
+        text: 'AUCUN DIAGNOSTIC. ANALYSE REQUISE.',
+        color: 'text-foreground/50',
+        bgColor: 'bg-white/5',
+        borderColor: 'border-white/10',
+      };
+    }
+    if (stats.healthScore < 50) {
       return {
         text: 'INTÉGRITÉ SYSTÈME CRITIQUE. MAINTENANCE REQUISE.',
         color: 'text-primary',
         bgColor: 'bg-primary/10',
         borderColor: 'border-primary/30',
       };
-    } else if (userState.healthScore >= 80) {
+    } else if (stats.healthScore >= 80) {
       return {
         text: 'SYSTÈME OPTIMISÉ. MODE PERFORMANCE ACTIF.',
         color: 'text-emerald-400',
@@ -68,7 +65,8 @@ export default function Dashboard() {
   // Calculate SVG circle parameters
   const circleRadius = 90;
   const circumference = 2 * Math.PI * circleRadius;
-  const strokeDashoffset = circumference - (userState.healthScore / 100) * circumference;
+  const displayScore = stats?.healthScore ?? 0;
+  const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
   if (isLoading) {
     return (
@@ -131,7 +129,7 @@ export default function Dashboard() {
                   <User className="h-5 w-5 text-primary" />
                 </div>
                 <div className="hidden md:block">
-                  <p className="font-medium text-foreground text-sm">{userState.firstName}</p>
+                  <p className="font-medium text-foreground text-sm">{stats?.firstName || 'Utilisateur'}</p>
                   <p className="font-mono text-[10px] text-foreground/40">Pilote Actif</p>
                 </div>
               </div>
@@ -185,7 +183,9 @@ export default function Dashboard() {
                 </svg>
                 {/* Score Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-mono text-5xl font-bold text-foreground">{userState.healthScore}%</span>
+                  <span className="font-mono text-5xl font-bold text-foreground">
+                    {stats?.healthScore ? `${stats.healthScore}%` : 'N/A'}
+                  </span>
                   <span className="font-mono text-xs text-foreground/40 mt-1">SCORE SANTÉ</span>
                 </div>
               </div>
@@ -197,6 +197,18 @@ export default function Dashboard() {
                   <p className={`font-mono text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
                 </div>
 
+                {/* No Score CTA */}
+                {!stats?.healthScore && (
+                  <div className="mb-6">
+                    <Link to="/diagnostic">
+                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        LANCER LE DIAGNOSTIC
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
                 {/* Stats Widgets */}
                 <div className="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
                   {/* Uptime */}
@@ -205,7 +217,7 @@ export default function Dashboard() {
                       <Clock className="h-4 w-4 text-foreground/40" />
                       <span className="font-mono text-[10px] text-foreground/40">SYSTEM UPTIME</span>
                     </div>
-                    <p className="font-mono text-2xl font-bold text-foreground">{userState.streak} <span className="text-sm text-foreground/40">Jours</span></p>
+                    <p className="font-mono text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-sm text-foreground/40">Jours</span></p>
                   </div>
                   {/* Total Patches */}
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
@@ -213,7 +225,7 @@ export default function Dashboard() {
                       <Activity className="h-4 w-4 text-foreground/40" />
                       <span className="font-mono text-[10px] text-foreground/40">TOTAL PATCHES</span>
                     </div>
-                    <p className="font-mono text-2xl font-bold text-foreground">{userState.totalPatches}</p>
+                    <p className="font-mono text-2xl font-bold text-foreground">{stats?.totalPatches || 0}</p>
                   </div>
                 </div>
               </div>
@@ -241,7 +253,7 @@ export default function Dashboard() {
                   {currentSession?.title || 'Session du jour'}
                 </h2>
                 <p className="font-mono text-sm text-foreground/50 mb-6">
-                  J-{userState.currentDay} :: {currentProgram.name} // {currentSession?.duration}
+                  J-{stats?.currentDay || 1} :: {currentProgram.name} // {currentSession?.duration}
                 </p>
 
                 {/* Objective */}
@@ -251,7 +263,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Launch Button */}
-                <Link to={`/session/${userState.currentProgram.toLowerCase().replace('_', '-')}`} className="block">
+                <Link to={`/session/${(stats?.currentProgram || 'system-reboot').toLowerCase().replace('_', '-')}`} className="block">
                   <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
                     <Play className="h-6 w-6 mr-2" />
                     INITIALISER LE PATCH
@@ -273,10 +285,10 @@ export default function Dashboard() {
                 <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all"
-                    style={{ width: `${userState.healthScore}%` }}
+                    style={{ width: `${displayScore}%` }}
                   />
                 </div>
-                <span className="font-mono text-sm text-foreground">{userState.healthScore}%</span>
+                <span className="font-mono text-sm text-foreground">{displayScore}%</span>
               </div>
             </div>
 
@@ -287,7 +299,7 @@ export default function Dashboard() {
                 <span className="font-mono text-[10px] text-foreground/40">MODULE ACTIF</span>
               </div>
               <p className="font-mono text-lg font-semibold text-foreground">{currentProgram.name.replace('NIVO ', '')}</p>
-              <p className="font-mono text-xs text-foreground/40">Jour {userState.currentDay} / {currentProgram.totalDays}</p>
+              <p className="font-mono text-xs text-foreground/40">Jour {stats?.currentDay || 1} / {currentProgram.totalDays}</p>
             </div>
 
             {/* Quick Stats */}
@@ -299,11 +311,11 @@ export default function Dashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs text-foreground/40">SESSIONS</span>
-                  <span className="font-mono text-sm text-foreground">{userState.totalPatches}</span>
+                  <span className="font-mono text-sm text-foreground">{stats?.totalPatches || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs text-foreground/40">SÉRIE</span>
-                  <span className="font-mono text-sm text-emerald-400">{userState.streak} jours</span>
+                  <span className="font-mono text-sm text-emerald-400">{stats?.streak || 0} jours</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs text-foreground/40">STATUT</span>
@@ -326,8 +338,8 @@ export default function Dashboard() {
 
           <div className="grid md:grid-cols-3 gap-4">
             {Object.values(PROGRAMS).map((program) => {
-              const isActive = userState.currentProgram === program.id;
-              const isUnlocked = userState.unlockedPrograms.includes(program.id);
+              const isActive = stats?.currentProgram === program.id;
+              const isUnlocked = stats?.unlockedPrograms.includes(program.id) || false;
               
               return (
                 <div 
@@ -366,19 +378,19 @@ export default function Dashboard() {
                           className="h-full bg-primary rounded-full"
                           style={{ 
                             width: isActive 
-                              ? `${(userState.currentDay / program.totalDays) * 100}%` 
+                              ? `${((stats?.currentDay || 1) / program.totalDays) * 100}%` 
                               : '0%' 
                           }}
                         />
                       </div>
                       <span className="font-mono text-[10px] text-foreground/40">
-                        {isActive ? `J${userState.currentDay}/${program.totalDays}` : `${program.totalDays}j`}
+                        {isActive ? `J${stats?.currentDay || 1}/${program.totalDays}` : `${program.totalDays}j`}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <Lock className="h-3 w-3 text-foreground/30" />
-                      <span className="font-mono text-[10px] text-foreground/30">LOCKED</span>
+                      <span className="font-mono text-[10px] text-foreground/30">VERROUILLÉ</span>
                     </div>
                   )}
                 </div>

@@ -1,14 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  email?: string;
-  user_metadata?: { first_name?: string };
-}
-
-interface Session {
-  user: User;
-}
+import { supabase } from '@/integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -25,18 +17,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulated auth state - replace with real Supabase auth when Cloud is enabled
-    setIsLoading(false);
-    
-    // Mock user for demo
-    setUser({
-      id: 'demo-user-123',
-      email: 'utilisateur@nivo.app',
-      user_metadata: { first_name: 'Thomas' },
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+        
+        // If user just signed in, check for pending diagnostic in localStorage
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            savePendingDiagnostic(session.user.id);
+          }, 0);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     window.location.href = '/login';
@@ -47,6 +55,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+// Save pending diagnostic from localStorage to Supabase
+async function savePendingDiagnostic(userId: string) {
+  const pendingDiagnostic = localStorage.getItem('pending_diagnostic');
+  if (!pendingDiagnostic) return;
+
+  try {
+    const { healthScore, answers } = JSON.parse(pendingDiagnostic);
+    
+    const { error } = await supabase
+      .from('user_diagnostics')
+      .insert({
+        user_id: userId,
+        health_score: healthScore,
+        answers: answers,
+      });
+
+    if (!error) {
+      localStorage.removeItem('pending_diagnostic');
+    }
+  } catch (e) {
+    console.error('Failed to save pending diagnostic:', e);
+  }
 }
 
 export function useAuth() {
