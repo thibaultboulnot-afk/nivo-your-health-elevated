@@ -1,88 +1,84 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { 
-  LogOut, 
-  Play, 
-  Home,
-  Target, 
+  Settings,
   Activity,
   Zap,
-  FlaskConical,
-  ChevronDown,
-  ChevronUp,
-  Volume2,
-  CheckCircle2,
-  Settings,
-  BarChart3,
+  Shield,
+  Clock,
+  Headphones,
+  Lock,
+  Play,
   User,
-  Radio,
-  History,
-  Droplets,
-  Brain,
-  HeartPulse
+  Battery
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
-import { PROGRAMS, getPhaseLabel, getCurrentSession, type ProgramTier } from '@/data/programs';
-import { NIVO_THEMES, type ThemeId } from '@/lib/themes';
+import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
 
-const ZONE_LABELS: Record<string, string> = {
-  lombaires: 'Lombaires',
-  cervicales: 'Cervicales',
-  epaules: 'Épaules',
-  poignets: 'Poignets',
-  hanches: 'Hanches',
-  general: 'Général',
-};
-
-const ZONE_ICONS: Record<string, string> = {
-  lombaires: '🦴',
-  cervicales: '🦒',
-  epaules: '💪',
-  poignets: '🖐️',
-  hanches: '🦵',
-  general: '🧘',
+// Mock user state (en attendant le backend)
+const userState = {
+  firstName: 'Alex',
+  lastName: 'Durand',
+  healthScore: 68,
+  currentProgram: 'SYSTEM_REBOOT' as ProgramTier,
+  currentDay: 1,
+  streak: 4,
+  totalPatches: 12,
+  unlockedPrograms: ['RAPID_PATCH', 'SYSTEM_REBOOT'] as ProgramTier[],
 };
 
 export default function Dashboard() {
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [currentProgramId, setCurrentProgramId] = useState<ProgramTier>('SYSTEM_REBOOT');
-  const [showRationale, setShowRationale] = useState(false);
-  const [activeNav, setActiveNav] = useState('home');
+  const [isLoading] = useState(false);
 
-  // Get current theme based on program
-  const theme = NIVO_THEMES[currentProgramId as ThemeId];
+  // Get current session data
+  const currentSession = getCurrentSession(userState.currentDay, userState.currentProgram);
+  const currentProgram = PROGRAMS[userState.currentProgram];
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
+  // Determine status based on health score
+  const getStatusConfig = () => {
+    if (userState.healthScore < 50) {
+      return {
+        text: 'INTÉGRITÉ SYSTÈME CRITIQUE. MAINTENANCE REQUISE.',
+        color: 'text-primary',
+        bgColor: 'bg-primary/10',
+        borderColor: 'border-primary/30',
+      };
+    } else if (userState.healthScore >= 80) {
+      return {
+        text: 'SYSTÈME OPTIMISÉ. MODE PERFORMANCE ACTIF.',
+        color: 'text-emerald-400',
+        bgColor: 'bg-emerald-500/10',
+        borderColor: 'border-emerald-500/30',
+      };
+    }
+    return {
+      text: 'SYSTÈME EN COURS D\'OPTIMISATION.',
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10',
+      borderColor: 'border-amber-500/30',
+    };
+  };
 
-  // Terminal-style loading
+  const statusConfig = getStatusConfig();
+
+  // Calculate SVG circle parameters
+  const circleRadius = 90;
+  const circumference = 2 * Math.PI * circleRadius;
+  const strokeDashoffset = circumference - (userState.healthScore / 100) * circumference;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
-          <div className="font-mono text-[#ff6b4a] animate-pulse mb-4">
+          <div className="font-mono text-primary animate-pulse mb-4">
             <div className="text-sm mb-2">&gt; CHARGEMENT_SYSTÈME...</div>
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#ff6b4a]" />
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           </div>
-          <div className="font-mono text-xs text-white/30">
+          <div className="font-mono text-xs text-foreground/30">
             Initialisation du cockpit...
           </div>
         </div>
@@ -90,426 +86,306 @@ export default function Dashboard() {
     );
   }
 
-  const currentDay = profile?.current_day || 1;
-  const painZone = profile?.pain_zone || 'general';
-  const currentProgram = PROGRAMS[currentProgramId];
-  const totalDays = currentProgram.totalDays;
-  const progress = Math.min((currentDay / totalDays) * 100, 100);
-  const currentSession = getCurrentSession(currentDay, currentProgramId);
-  const phaseLabel = getPhaseLabel(currentDay, currentProgramId);
-  const isProgramComplete = currentDay > totalDays;
-
-  const navItems = [
-    { id: 'home', icon: Home, label: 'Cockpit', path: '/dashboard' },
-    { id: 'program', icon: Target, label: 'Mon Programme', path: '/dashboard' },
-    { id: 'history', icon: History, label: 'Historique', path: '/dashboard' },
-    { id: 'settings', icon: Settings, label: 'Réglages', path: '/settings' },
-  ];
-
-  const handleNavClick = (item: typeof navItems[0]) => {
-    if (item.path !== '/dashboard') {
-      navigate(item.path);
-    } else {
-      setActiveNav(item.id);
-    }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
-  // Fake telemetry data
-  const telemetryData = {
-    stress: 35,
-    mobility: 68,
-    hydration: 72,
-  };
-
   return (
-    <div className="min-h-screen bg-[#050510] flex relative">
+    <div className="min-h-screen bg-[#050510] relative overflow-hidden">
       {/* Background Effects */}
       <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
       <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
+      
+      {/* Noise Texture */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
-      {/* Sidebar - Télémétrie & Navigation */}
-      <aside className="w-72 bg-[#050510]/80 backdrop-blur-sm border-r border-white/5 flex flex-col relative z-20">
-        {/* Logo */}
-        <div className="p-6 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#ff6b4a] flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
-              <span className="font-bold text-black text-lg">N</span>
-            </div>
-            <div>
-              <span className="font-bold text-white text-lg">NIVO</span>
-              <p className="font-mono text-[10px] text-white/30">OS v2.0.4</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Télémétrie Section */}
-        <div className="p-6 border-b border-white/5">
-          <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider mb-4">
-            Biométrie Pilote
-          </p>
-          
-          {/* Avatar & Name */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 flex items-center justify-center">
-              <User className="h-6 w-6 text-[#ff6b4a]" />
-            </div>
-            <div>
-              <p className="font-semibold text-white text-sm">
-                {profile?.first_name || 'Utilisateur'} {profile?.last_name || ''}
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-mono text-[10px] text-emerald-500">SYSTÈME ACTIF</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Gauges */}
-          <div className="space-y-3">
-            {/* Stress */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <Brain className="h-3 w-3 text-white/30" />
-                  <span className="font-mono text-[10px] text-white/40">Niveau de Stress</span>
+      {/* Header */}
+      <header className="relative z-20 border-b border-white/5 bg-[#050510]/80 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left - Logo & Status */}
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
+                  <span className="font-bold text-black text-lg">N</span>
                 </div>
-                <span className="font-mono text-[10px] text-[#ff6b4a]">{telemetryData.stress}%</span>
+                <span className="font-bold text-foreground text-lg">NIVO</span>
               </div>
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-emerald-500 to-[#ff6b4a] rounded-full transition-all"
-                  style={{ width: `${telemetryData.stress}%` }}
-                />
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                <span className="font-mono text-xs text-emerald-400">SYSTEM_STATUS: ONLINE</span>
               </div>
             </div>
 
-            {/* Mobility */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <HeartPulse className="h-3 w-3 text-white/30" />
-                  <span className="font-mono text-[10px] text-white/40">Mobilité</span>
-                </div>
-                <span className="font-mono text-[10px] text-emerald-400">{telemetryData.mobility}%</span>
-              </div>
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${telemetryData.mobility}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Hydration */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <Droplets className="h-3 w-3 text-white/30" />
-                  <span className="font-mono text-[10px] text-white/40">Hydratation</span>
-                </div>
-                <span className="font-mono text-[10px] text-cyan-400">{telemetryData.hydration}%</span>
-              </div>
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-cyan-500 rounded-full transition-all"
-                  style={{ width: `${telemetryData.hydration}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <p className="font-mono text-[10px] text-white/40 uppercase tracking-wider mb-3 px-2">
-            Navigation
-          </p>
-          <div className="space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item)}
-                className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 group ${
-                  activeNav === item.id 
-                    ? 'text-[#ff6b4a] bg-[#ff6b4a]/10' 
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
-                }`}
+            {/* Right - Avatar & Settings */}
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/settings"
+                className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
               >
-                {activeNav === item.id && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#ff6b4a] rounded-r shadow-[0_0_10px_rgba(255,107,74,0.8)]" />
-                )}
-                <item.icon className="h-4 w-4" />
-                <span className="font-mono text-xs">{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        {/* Bottom Section */}
-        <div className="p-4 border-t border-white/5">
-          <button 
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all group"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="font-mono text-xs">Arrêter le Système</span>
-          </button>
-          
-          <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/5">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-            <span className="font-mono text-[10px] text-emerald-500/80 tracking-wider">SYSTÈME EN LIGNE</span>
+                <Settings className="h-5 w-5 text-foreground/60" />
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="hidden md:block">
+                  <p className="font-medium text-foreground text-sm">{userState.firstName}</p>
+                  <p className="font-mono text-[10px] text-foreground/40">Pilote Actif</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </aside>
+      </header>
 
-      {/* Main Content - Cockpit */}
-      <main className="flex-1 overflow-auto relative z-10">
-        <div className="container mx-auto px-8 py-8">
-          {/* Header */}
-          <header className="mb-10 animate-fade-in">
-            <p className="font-mono text-sm text-white/40 mb-1">
-              &gt; system.greet()
-            </p>
-            <h1 className="font-heading text-3xl font-bold text-white mb-2">
-              Bonjour, <span className="text-[#ff6b4a]">{profile?.first_name || 'Utilisateur'}</span>.
-            </h1>
-            <p className="font-mono text-xs text-white/50">
-              &gt; PROTOCOLE_ACTIF :: <span className="text-[#ff6b4a]">{currentProgramId}</span> // {phaseLabel}
-            </p>
-          </header>
+      {/* Main Content */}
+      <main className="relative z-10 container mx-auto px-6 py-8">
+        {/* Hero - État du Système */}
+        <section className="mb-10 animate-fade-in">
+          <div className="bg-black/60 rounded-2xl border border-white/10 p-8 relative overflow-hidden">
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+            </div>
 
-          {/* Program Tabs */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="flex gap-2 p-1 bg-white/5 rounded-lg border border-white/5 inline-flex">
-              {Object.values(PROGRAMS).map((program) => {
-                const isActive = currentProgramId === program.id;
-                return (
-                  <button
-                    key={program.id}
-                    onClick={() => setCurrentProgramId(program.id)}
-                    className={`px-4 py-2 rounded-md font-mono text-xs transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[#ff6b4a] text-black font-semibold shadow-[0_0_15px_rgba(255,107,74,0.4)]'
-                        : 'text-white/40 hover:text-white/70 hover:bg-white/5'
-                    }`}
-                  >
-                    {program.name.replace('NIVO ', '')}
-                  </button>
-                );
-              })}
+            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+              {/* Score Circle */}
+              <div className="relative">
+                <svg className="w-52 h-52 -rotate-90" viewBox="0 0 200 200">
+                  {/* Background circle */}
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r={circleRadius}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="8"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r={circleRadius}
+                    fill="none"
+                    stroke="url(#scoreGradient)"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-1000 ease-out"
+                  />
+                  <defs>
+                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" />
+                      <stop offset="100%" stopColor="#ff8a6a" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                {/* Score Text */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="font-mono text-5xl font-bold text-foreground">{userState.healthScore}%</span>
+                  <span className="font-mono text-xs text-foreground/40 mt-1">SCORE SANTÉ</span>
+                </div>
+              </div>
+
+              {/* Status & Stats */}
+              <div className="flex-1 text-center lg:text-left">
+                <p className="font-mono text-xs text-foreground/40 mb-2">&gt; diagnostic.status()</p>
+                <div className={`inline-block px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor} mb-6`}>
+                  <p className={`font-mono text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
+                </div>
+
+                {/* Stats Widgets */}
+                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+                  {/* Uptime */}
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-foreground/40" />
+                      <span className="font-mono text-[10px] text-foreground/40">SYSTEM UPTIME</span>
+                    </div>
+                    <p className="font-mono text-2xl font-bold text-foreground">{userState.streak} <span className="text-sm text-foreground/40">Jours</span></p>
+                  </div>
+                  {/* Total Patches */}
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity className="h-4 w-4 text-foreground/40" />
+                      <span className="font-mono text-[10px] text-foreground/40">TOTAL PATCHES</span>
+                    </div>
+                    <p className="font-mono text-2xl font-bold text-foreground">{userState.totalPatches}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          {isProgramComplete ? (
-            /* Program Complete State */
-            <div className="bg-black/50 rounded-2xl border border-white/10 p-10 text-center animate-fade-in shadow-[inset_0_0_30px_rgba(0,0,0,0.5)]">
-              <CheckCircle2 className="h-16 w-16 text-[#ff6b4a] mx-auto mb-4" />
-              <h2 className="font-heading text-2xl font-bold mb-2 text-white">Système Recalibré</h2>
-              <p className="text-white/60 mb-6 font-mono text-sm">
-                Programme {currentProgram.name} :: TERMINÉ
-              </p>
-              <Button className="bg-[#ff6b4a] text-black font-semibold hover:bg-[#ff8a6a] shadow-[0_0_20px_rgba(255,107,74,0.4)]">
-                INITIALISER ARCHITECT_MODE
-              </Button>
+        {/* Grid Layout */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Next Action */}
+          <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-black/60 rounded-2xl border border-primary/20 p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
+              {/* Glow effect */}
+              <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+              </div>
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <Headphones className="h-5 w-5 text-primary" />
+                  <span className="font-mono text-xs text-primary">PROTOCOLE DU JOUR</span>
+                </div>
+
+                <h2 className="font-heading text-3xl font-bold text-foreground mb-2">
+                  {currentSession?.title || 'Session du jour'}
+                </h2>
+                <p className="font-mono text-sm text-foreground/50 mb-6">
+                  J-{userState.currentDay} :: {currentProgram.name} // {currentSession?.duration}
+                </p>
+
+                {/* Objective */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+                  <p className="font-mono text-xs text-foreground/40 mb-1">OBJECTIF</p>
+                  <p className="text-foreground/80">{currentSession?.clinicalGoal}</p>
+                </div>
+
+                {/* Launch Button */}
+                <Link to={`/session/${userState.currentProgram.toLowerCase().replace('_', '-')}`} className="block">
+                  <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                    <Play className="h-6 w-6 mr-2" />
+                    INITIALISER LE PATCH
+                  </Button>
+                </Link>
+              </div>
             </div>
-          ) : currentSession ? (
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Central Monitor - Session du Jour */}
-              <div className="lg:col-span-2 space-y-6">
+          </section>
+
+          {/* Right Column - System Stats */}
+          <section className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            {/* Battery Status */}
+            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Battery className="h-4 w-4 text-foreground/40" />
+                <span className="font-mono text-[10px] text-foreground/40">ÉNERGIE SYSTÈME</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all"
+                    style={{ width: `${userState.healthScore}%` }}
+                  />
+                </div>
+                <span className="font-mono text-sm text-foreground">{userState.healthScore}%</span>
+              </div>
+            </div>
+
+            {/* Current Program */}
+            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="h-4 w-4 text-foreground/40" />
+                <span className="font-mono text-[10px] text-foreground/40">MODULE ACTIF</span>
+              </div>
+              <p className="font-mono text-lg font-semibold text-foreground">{currentProgram.name.replace('NIVO ', '')}</p>
+              <p className="font-mono text-xs text-foreground/40">Jour {userState.currentDay} / {currentProgram.totalDays}</p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="h-4 w-4 text-foreground/40" />
+                <span className="font-mono text-[10px] text-foreground/40">MÉTRIQUES</span>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="font-mono text-xs text-foreground/40">SESSIONS</span>
+                  <span className="font-mono text-sm text-foreground">{userState.totalPatches}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono text-xs text-foreground/40">SÉRIE</span>
+                  <span className="font-mono text-sm text-emerald-400">{userState.streak} jours</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono text-xs text-foreground/40">STATUT</span>
+                  <span className="font-mono text-sm text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    ACTIF
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Available Modules Section */}
+        <section className="mt-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-xs text-foreground/40">AVAILABLE_MODULES //</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {Object.values(PROGRAMS).map((program) => {
+              const isActive = userState.currentProgram === program.id;
+              const isUnlocked = userState.unlockedPrograms.includes(program.id);
+              
+              return (
                 <div 
-                  className="bg-black/60 rounded-2xl border border-white/10 p-8 animate-fade-in relative overflow-hidden group hover:border-[#ff6b4a]/30 transition-colors duration-500"
-                  style={{ 
-                    animationDelay: '0.2s',
-                    boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 0 30px rgba(255,107,74,0.05)'
-                  }}
+                  key={program.id}
+                  className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
+                    isActive 
+                      ? 'border-primary/50 shadow-[0_0_30px_rgba(255,107,74,0.15)]' 
+                      : isUnlocked 
+                        ? 'border-white/10 hover:border-white/20' 
+                        : 'border-white/5 opacity-60'
+                  }`}
                 >
-                  {/* Audio Wave Animation */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-                    <div className="flex gap-1 items-end h-32">
-                      {[...Array(20)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-1 bg-[#ff6b4a] rounded-full"
-                          style={{
-                            height: `${20 + Math.sin(i * 0.5) * 50 + Math.random() * 30}%`,
-                            animation: `pulse ${1 + Math.random()}s ease-in-out infinite`,
-                            animationDelay: `${i * 0.1}s`,
+                  {/* Status Badge */}
+                  <div className="absolute top-4 right-4">
+                    {isActive ? (
+                      <span className="px-2 py-1 bg-primary/20 border border-primary/30 rounded-full font-mono text-[10px] text-primary">
+                        ACTIVE
+                      </span>
+                    ) : !isUnlocked ? (
+                      <Lock className="h-4 w-4 text-foreground/30" />
+                    ) : null}
+                  </div>
+
+                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isUnlocked ? 'text-foreground' : 'text-foreground/50'}`}>
+                    {program.name.replace('NIVO ', '')}
+                  </h3>
+                  <p className={`font-mono text-xs mb-4 ${isUnlocked ? 'text-foreground/50' : 'text-foreground/30'}`}>
+                    {program.description}
+                  </p>
+
+                  {/* Progress or Lock indicator */}
+                  {isUnlocked ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary rounded-full"
+                          style={{ 
+                            width: isActive 
+                              ? `${(userState.currentDay / program.totalDays) * 100}%` 
+                              : '0%' 
                           }}
                         />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-3 h-3 rounded-full bg-[#ff6b4a] animate-pulse shadow-[0_0_10px_rgba(255,107,74,0.8)]" />
-                      <span className="font-mono text-xs text-[#ff6b4a]">{currentSession.subtitle}</span>
-                      <span className="font-mono text-xs text-white/30">• {currentSession.duration}</span>
-                    </div>
-
-                    <h2 className="font-heading text-4xl font-bold text-white mb-3">
-                      {currentSession.title}
-                    </h2>
-
-                    <p className="text-white/50 text-sm mb-6 font-mono">
-                      OBJECTIF :: {currentSession.clinicalGoal}
-                    </p>
-
-                    {/* Audio Cue */}
-                    <div className="bg-white/5 rounded-xl border border-white/10 p-4 mb-6">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#ff6b4a]/10 flex items-center justify-center flex-shrink-0">
-                          <Volume2 className="h-4 w-4 text-[#ff6b4a]" />
-                        </div>
-                        <div>
-                          <p className="font-mono text-xs text-[#ff6b4a] mb-1">CONSIGNE_AUDIO</p>
-                          <p className="text-white/80 italic">"{currentSession.audioCue}"</p>
-                        </div>
                       </div>
-                    </div>
-
-                    {/* Scientific Rationale */}
-                    <button
-                      onClick={() => setShowRationale(!showRationale)}
-                      className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors w-full mb-4"
-                    >
-                      <FlaskConical className="h-4 w-4" />
-                      <span className="font-mono text-xs">JUSTIFICATION_SCIENTIFIQUE</span>
-                      {showRationale ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
-                    </button>
-                    {showRationale && (
-                      <div className="bg-white/5 rounded-lg border border-white/10 p-4 mb-6 animate-fade-in">
-                        <p className="text-sm text-white/60">{currentSession.scientificRationale}</p>
-                      </div>
-                    )}
-
-                    {/* Launch Button */}
-                    <Link to={`/session/${currentProgramId.toLowerCase().replace('_', '-')}`} className="block w-full">
-                      <Button className="w-full h-14 bg-[#ff6b4a] hover:bg-[#ff8a6a] text-black font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                        <Play className="h-6 w-6 mr-2" />
-                        LANCER LA SÉQUENCE
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Steps */}
-                <div className="bg-black/40 rounded-xl border border-white/10 p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                  <p className="font-mono text-xs text-white/40 mb-4">ÉTAPES_SESSION</p>
-                  <div className="flex flex-wrap gap-2">
-                    {currentSession.steps.map((step, index) => (
-                      <span 
-                        key={index}
-                        className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg font-mono text-xs text-white/70 hover:border-[#ff6b4a]/30 transition-colors"
-                      >
-                        [{index + 1}] {step}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Telemetry Grid - HUD Modules */}
-              <div className="space-y-4">
-                {/* Module 1 - Streak */}
-                <div className="bg-black/50 rounded-xl border border-white/10 p-6 animate-fade-in hover:border-[#ff6b4a]/30 transition-colors group" style={{ animationDelay: '0.2s' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Radio className="h-4 w-4 text-white/30 group-hover:text-[#ff6b4a] transition-colors" />
-                    <span className="font-mono text-xs text-white/40">SÉRIE_ACTIVE</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="font-mono text-6xl font-bold text-white">J-{currentDay}</span>
-                    <p className="font-mono text-xs text-white/30 mt-2">sur {totalDays} jours</p>
-                  </div>
-                </div>
-
-                {/* Module 2 - Progress */}
-                <div className="bg-black/50 rounded-xl border border-white/10 p-6 animate-fade-in hover:border-[#ff6b4a]/30 transition-colors group" style={{ animationDelay: '0.3s' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Activity className="h-4 w-4 text-white/30 group-hover:text-[#ff6b4a] transition-colors" />
-                    <span className="font-mono text-xs text-white/40">PROGRESSION</span>
-                    <span className="font-mono text-xs text-[#ff6b4a] ml-auto">{Math.round(progress)}%</span>
-                  </div>
-                  {/* Segmented Progress Bar */}
-                  <div className="flex gap-1">
-                    {[...Array(totalDays > 21 ? 10 : totalDays)].map((_, i) => {
-                      const segmentProgress = (totalDays > 21 ? totalDays / 10 : 1);
-                      const isFilled = i < (currentDay / segmentProgress);
-                      return (
-                        <div
-                          key={i}
-                          className={`h-3 flex-1 rounded-sm transition-all duration-300 ${
-                            isFilled 
-                              ? 'bg-[#ff6b4a] shadow-[0_0_8px_rgba(255,107,74,0.6)]' 
-                              : 'bg-white/10'
-                          }`}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Module 3 - Zone Focus */}
-                <div className="bg-black/50 rounded-xl border border-white/10 p-6 animate-fade-in hover:border-[#ff6b4a]/30 transition-colors group" style={{ animationDelay: '0.4s' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Target className="h-4 w-4 text-white/30 group-hover:text-[#ff6b4a] transition-colors" />
-                    <span className="font-mono text-xs text-white/40">ZONE_FOCUS</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div 
-                      className="w-16 h-16 rounded-full bg-[#ff6b4a]/10 border border-[#ff6b4a]/20 flex items-center justify-center text-3xl"
-                      style={{ animation: 'spin 20s linear infinite' }}
-                    >
-                      {ZONE_ICONS[painZone]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{ZONE_LABELS[painZone]}</p>
-                      <p className="font-mono text-xs text-white/40">Zone ciblée</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Module 4 - System Stats */}
-                <div className="bg-black/50 rounded-xl border border-white/10 p-6 animate-fade-in hover:border-[#ff6b4a]/30 transition-colors group" style={{ animationDelay: '0.5s' }}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Zap className="h-4 w-4 text-white/30 group-hover:text-[#ff6b4a] transition-colors" />
-                    <span className="font-mono text-xs text-white/40">STATUT_SYSTÈME</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono text-xs text-white/40">DURÉE</span>
-                      <span className="font-mono text-sm text-white">{currentSession.duration}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono text-xs text-white/40">SESSIONS</span>
-                      <span className="font-mono text-sm text-white">{currentDay - 1} / {totalDays}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono text-xs text-white/40">STATUT</span>
-                      <span className="font-mono text-sm text-emerald-400 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        ACTIF
+                      <span className="font-mono text-[10px] text-foreground/40">
+                        {isActive ? `J${userState.currentDay}/${program.totalDays}` : `${program.totalDays}j`}
                       </span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-3 w-3 text-foreground/30" />
+                      <span className="font-mono text-[10px] text-foreground/30">LOCKED</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          ) : (
-            /* No session found */
-            <div className="bg-black/50 rounded-2xl border border-white/10 p-10 text-center animate-fade-in shadow-[inset_0_0_30px_rgba(0,0,0,0.5)]">
-              <p className="text-white/60 font-mono">
-                &gt; ERREUR :: Session non trouvée pour J-{currentDay}
-              </p>
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        </section>
       </main>
     </div>
   );
