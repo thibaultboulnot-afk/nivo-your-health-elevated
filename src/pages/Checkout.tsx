@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Lock, Shield, ArrowLeft, Terminal, Download, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 type ProgramTier = 'RAPID_PATCH' | 'SYSTEM_REBOOT' | 'ARCHITECT_MODE';
 
@@ -87,6 +89,8 @@ export default function Checkout() {
   const [paymentState, setPaymentState] = useState<PaymentState>('IDLE');
   const [processingStep, setProcessingStep] = useState(0);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (paymentState === 'PROCESSING') {
@@ -96,10 +100,6 @@ export default function Checkout() {
             clearInterval(interval);
             setTimeout(() => {
               setPaymentState('SUCCESS');
-              // Redirect to Lemon Squeezy after success animation
-              setTimeout(() => {
-                window.open('https://lemonsqueezy.com', '_blank');
-              }, 1500);
             }, 500);
             return prev;
           }
@@ -111,9 +111,32 @@ export default function Checkout() {
     }
   }, [paymentState]);
 
-  const handlePayment = () => {
-    setProcessingStep(0);
-    setPaymentState('PROCESSING');
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { programId: selectedPlan }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Erreur lors de la création de la session');
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('URL de paiement non reçue');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Erreur de paiement",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -359,11 +382,21 @@ export default function Checkout() {
 
                     {/* CTA Button */}
                     <Button
-                      onClick={handlePayment}
-                      className="w-full h-14 bg-primary hover:bg-primary/90 text-background font-mono font-medium text-sm shadow-radioactive transition-all hover:scale-[1.02] animate-pulse"
+                      onClick={handleCheckout}
+                      disabled={isLoading}
+                      className="w-full h-14 bg-primary hover:bg-primary/90 text-background font-mono font-medium text-sm shadow-radioactive transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Download className="w-5 h-5 mr-2" />
-                      INITIALISER LE TÉLÉCHARGEMENT
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          CONNEXION À STRIPE...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-5 h-5 mr-2" />
+                          PAYER {program.price}€
+                        </>
+                      )}
                     </Button>
 
                     <p className="text-center font-mono text-[10px] text-muted-foreground mt-4">
