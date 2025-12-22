@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, AlertTriangle, Activity, Gauge, Check, Zap, ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 type ScanState = 'IDLE' | 'SCANNING' | 'QUESTION_1' | 'QUESTION_2' | 'QUESTION_3' | 'COMPUTING' | 'RESULT';
 
@@ -62,6 +64,7 @@ const computingLines = [
 ];
 
 export default function Diagnostic() {
+  const { user } = useAuth();
   const [state, setState] = useState<ScanState>('IDLE');
   const [scanProgress, setScanProgress] = useState(0);
   const [currentScanText, setCurrentScanText] = useState(0);
@@ -72,6 +75,36 @@ export default function Diagnostic() {
   });
   const [computingLine, setComputingLine] = useState(0);
   const [healthScore, setHealthScore] = useState(0);
+
+  // Save diagnostic result when we reach RESULT state
+  useEffect(() => {
+    if (state === 'RESULT' && healthScore > 0) {
+      saveDiagnosticResult();
+    }
+  }, [state, healthScore]);
+
+  const saveDiagnosticResult = async () => {
+    const diagnosticData = {
+      healthScore,
+      crashSource: answers.crashSource,
+      alertFrequency: answers.alertFrequency,
+      performanceImpact: answers.performanceImpact,
+    };
+
+    if (user) {
+      // User is logged in - save directly to Supabase
+      await supabase
+        .from('user_diagnostics')
+        .insert([{
+          user_id: user.id,
+          health_score: healthScore,
+          answers: JSON.parse(JSON.stringify(diagnosticData)),
+        }]);
+    } else {
+      // User not logged in - save to localStorage for later
+      localStorage.setItem('pending_diagnostic', JSON.stringify(diagnosticData));
+    }
+  };
 
   // Scanning animation
   useEffect(() => {
