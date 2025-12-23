@@ -53,11 +53,11 @@ export default function Success() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-redirect after completion
+  // Auto-redirect after completion - redirect to onboarding
   useEffect(() => {
     if (isComplete) {
       const timeout = setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/onboarding');
       }, 2500);
       return () => clearTimeout(timeout);
     }
@@ -188,12 +188,12 @@ export default function Success() {
             animate={{ opacity: isComplete ? 1 : 0.5 }}
           >
             <Button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/onboarding')}
               disabled={!isComplete}
               className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowRight className="w-5 h-5 mr-2" />
-              ACCÉDER AU COCKPIT (MANUEL)
+              CONFIGURER MON PROFIL
             </Button>
           </motion.div>
 

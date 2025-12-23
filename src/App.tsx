@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Session from "./pages/Session";
 import Settings from "./pages/Settings";
 import Success from "./pages/Success";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/diagnostic" element={<Diagnostic />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/success" element={<Success />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session/:programId" element={<Session />} />
