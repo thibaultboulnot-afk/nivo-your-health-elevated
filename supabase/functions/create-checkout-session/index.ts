@@ -52,14 +52,16 @@ serve(async (req) => {
     // Try to get authenticated user (optional - supports guest checkout)
     const authHeader = req.headers.get("Authorization");
     let userEmail: string | undefined;
+    let userId: string | undefined;
     let customerId: string | undefined;
 
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data } = await supabaseClient.auth.getUser(token);
-      if (data.user?.email) {
+      if (data.user) {
+        userId = data.user.id;
         userEmail = data.user.email;
-        logStep("User authenticated", { email: userEmail });
+        logStep("User authenticated", { userId, email: userEmail });
       }
     }
 
@@ -82,6 +84,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
+      client_reference_id: userId, // Link session to user for webhook
       line_items: [
         {
           price: priceId,
