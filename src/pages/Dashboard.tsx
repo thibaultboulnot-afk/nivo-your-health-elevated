@@ -26,6 +26,9 @@ export default function Dashboard() {
   // Get current session data
   const currentProgram = stats ? PROGRAMS[stats.currentProgram] : PROGRAMS['SYSTEM_REBOOT'];
   const currentSession = stats ? getCurrentSession(stats.currentDay, stats.currentProgram) : null;
+  
+  // Check if current program is unlocked
+  const isProgramUnlocked = stats?.unlockedPrograms.includes(stats?.currentProgram || 'SYSTEM_REBOOT') || false;
 
   // Determine status based on health score
   const getStatusConfig = () => {
@@ -262,13 +265,22 @@ export default function Dashboard() {
                   <p className="text-foreground/80">{currentSession?.clinicalGoal}</p>
                 </div>
 
-                {/* Launch Button */}
-                <Link to={`/session/${(stats?.currentProgram || 'system-reboot').toLowerCase().replace('_', '-')}`} className="block">
-                  <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                    <Play className="h-6 w-6 mr-2" />
-                    INITIALISER LE PATCH
-                  </Button>
-                </Link>
+                {/* Launch Button - Show based on unlock status */}
+                {isProgramUnlocked ? (
+                  <Link to={`/session/${(stats?.currentProgram || 'system-reboot').toLowerCase().replace('_', '-')}`} className="block">
+                    <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                      <Play className="h-6 w-6 mr-2" />
+                      LANCER LA SESSION
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link to="/checkout" className="block">
+                    <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                      <Lock className="h-6 w-6 mr-2" />
+                      DÉVERROUILLER L'ACCÈS (49€)
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </section>
