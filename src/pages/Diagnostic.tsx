@@ -369,7 +369,7 @@ export default function Diagnostic() {
                       </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-3 md:gap-4">
                       {q.choices.map((choice, index) => (
                         <motion.button
                           key={choice.id}

@@ -110,38 +110,26 @@ export default function Dashboard() {
 
       {/* Header */}
       <header className="relative z-20 border-b border-white/5 bg-[#050510]/80 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Left - Logo & Status */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
-                  <span className="font-bold text-black text-lg">N</span>
-                </div>
-                <span className="font-bold text-foreground text-lg">NIVO</span>
+            {/* Left - Logo */}
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
+                <span className="font-bold text-black text-base md:text-lg">N</span>
               </div>
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                <span className="font-mono text-xs text-emerald-400">NIVEAU_FORME: ACTIF</span>
-              </div>
+              <span className="font-bold text-foreground text-base md:text-lg">NIVO</span>
             </div>
 
             {/* Right - Avatar & Settings */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <Link 
                 to="/settings"
                 className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
               >
-                <Settings className="h-5 w-5 text-foreground/60" />
+                <Settings className="h-4 w-4 md:h-5 md:w-5 text-foreground/60" />
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" />
-                </div>
-                <div className="hidden md:block">
-                  <p className="font-medium text-foreground text-sm">{stats?.firstName || 'Utilisateur'}</p>
-                  <p className="font-mono text-[10px] text-foreground/40">Pilote Actif</p>
-                </div>
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                <User className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </div>
           </div>
@@ -149,19 +137,19 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto px-6 py-8">
+      <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Hero - État du Système */}
-        <section className="mb-10 animate-fade-in">
-          <div className="bg-black/60 rounded-2xl border border-white/10 p-8 relative overflow-hidden">
+        <section className="mb-6 md:mb-10 animate-fade-in">
+          <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-8 relative overflow-hidden">
             {/* Subtle glow effect */}
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+            <div className="relative z-10 flex flex-col items-center gap-6 md:gap-8">
               {/* Score Circle */}
               <div className="relative">
-                <svg className="w-52 h-52 -rotate-90" viewBox="0 0 200 200">
+                <svg className="w-36 h-36 md:w-52 md:h-52 -rotate-90" viewBox="0 0 200 200">
                   {/* Background circle */}
                   <circle
                     cx="100"
@@ -193,25 +181,24 @@ export default function Dashboard() {
                 </svg>
                 {/* Score Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-mono text-5xl font-bold text-foreground">
+                  <span className="font-mono text-3xl md:text-5xl font-bold text-foreground">
                     {stats?.healthScore ? `${stats.healthScore}%` : 'N/A'}
                   </span>
-                  <span className="font-mono text-xs text-foreground/40 mt-1">NIVEAU DE FORME</span>
+                  <span className="font-mono text-[10px] md:text-xs text-foreground/40 mt-1">NIVEAU DE FORME</span>
                 </div>
               </div>
 
               {/* Status & Stats */}
-              <div className="flex-1 text-center lg:text-left">
-                <p className="font-mono text-xs text-foreground/40 mb-2">&gt; bilan.status()</p>
-                <div className={`inline-block px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor} mb-6`}>
-                  <p className={`font-mono text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
+              <div className="flex-1 text-center w-full">
+                <div className={`inline-block px-3 md:px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor} mb-4 md:mb-6`}>
+                  <p className={`font-mono text-xs md:text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
                 </div>
 
                 {/* No Score CTA */}
                 {!stats?.healthScore && (
-                  <div className="mb-6">
+                  <div className="mb-4 md:mb-6">
                     <Link to="/diagnostic">
-                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
+                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm">
                         <AlertTriangle className="h-4 w-4 mr-2" />
                         FAIRE MON BILAN
                       </Button>
@@ -220,22 +207,22 @@ export default function Dashboard() {
                 )}
 
                 {/* Stats Widgets */}
-                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+                <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
                   {/* Uptime */}
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock className="h-4 w-4 text-foreground/40" />
-                      <span className="font-mono text-[10px] text-foreground/40">SÉRIE EN COURS</span>
+                  <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                      <Clock className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
+                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SÉRIE</span>
                     </div>
-                    <p className="font-mono text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-sm text-foreground/40">Jours</span></p>
+                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-xs md:text-sm text-foreground/40">J</span></p>
                   </div>
                   {/* Total Patches */}
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Activity className="h-4 w-4 text-foreground/40" />
-                      <span className="font-mono text-[10px] text-foreground/40">ROUTINES COMPLÉTÉES</span>
+                  <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                      <Activity className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
+                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">ROUTINES</span>
                     </div>
-                    <p className="font-mono text-2xl font-bold text-foreground">{stats?.totalPatches || 0}</p>
+                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.totalPatches || 0}</p>
                   </div>
                 </div>
               </div>
@@ -244,7 +231,7 @@ export default function Dashboard() {
         </section>
 
         {/* Grid Layout */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Left Column - Next Action */}
           <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="bg-black/60 rounded-2xl border border-primary/20 p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">

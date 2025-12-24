@@ -170,7 +170,7 @@ export default function Landing() {
 
       {/* Navbar - Glass Premium */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/10">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-glow-primary">
               <span className="font-sans text-primary-foreground font-bold text-lg">N</span>
@@ -178,15 +178,16 @@ export default function Landing() {
             <span className="font-sans text-xl font-bold tracking-tight text-foreground">NIVO</span>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Link to="/login">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link to="/login" className="hidden sm:block">
               <Button variant="ghost" className="text-muted-foreground hover:text-foreground font-mono text-xs transition-all duration-500 ease-apple">
                 Mon Espace
               </Button>
             </Link>
             <Link to="/diagnostic">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-medium shadow-glow-primary transition-all duration-500 ease-apple">
-                Faire mon Bilan
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-medium shadow-glow-primary transition-all duration-500 ease-apple text-sm px-3 md:px-4">
+                <span className="hidden sm:inline">Faire mon Bilan</span>
+                <span className="sm:hidden">Bilan</span>
               </Button>
             </Link>
           </div>
@@ -194,7 +195,7 @@ export default function Landing() {
       </nav>
 
       {/* 1. HERO SECTION - Staggered Animations with Framer Motion */}
-      <section className="pt-32 pb-24 px-6 relative z-10">
+      <section className="pt-20 md:pt-32 pb-12 md:pb-24 px-4 md:px-6 relative z-10">
         <div className="container mx-auto text-center max-w-4xl">
           <motion.div
             variants={containerVariants}
@@ -204,19 +205,19 @@ export default function Landing() {
             {/* Badge - Glass Premium */}
             <motion.div 
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-8"
+              className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-6 md:mb-8"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/80">
-                V2.0 • Méthode Validée Scientifiquement
+              <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-foreground/80">
+                V2.0 • Méthode Validée
               </span>
             </motion.div>
 
             {/* Title - Sentence case for readability */}
-            <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
+            <motion.h1 className="font-sans text-3xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-[1.1]">
               <motion.span variants={itemVariants} className="inline-block text-foreground">Reprenez le </motion.span>
               <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic pr-2">contrôle </motion.span>
               <br />
@@ -231,7 +232,7 @@ export default function Landing() {
             {/* Description - Argument d'autorité avec sources */}
             <motion.p 
               variants={itemVariants}
-              className="text-lg md:text-xl text-white/60 font-light mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-base md:text-lg lg:text-xl text-white/60 font-light mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2"
             >
               Une méthode basée sur les protocoles McKenzie & McGill pour éliminer les tensions et optimiser votre énergie. Simple, précise et conçue pour s'intégrer à votre rythme de vie.
             </motion.p>
@@ -239,16 +240,16 @@ export default function Landing() {
             {/* CTA - With Shimmer Effect & Orange Glow */}
             <motion.div 
               variants={itemVariants}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              className="flex flex-col items-center justify-center gap-3 md:gap-4"
             >
-              <Link to="/diagnostic">
-                <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-primary h-14 min-h-[48px] px-8 text-lg rounded-full font-sans font-semibold transition-all duration-500 ease-apple hover:scale-105">
+              <Link to="/diagnostic" className="w-full sm:w-auto">
+                <Button size="lg" className="shimmer-btn w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-primary h-12 md:h-14 min-h-[48px] px-6 md:px-8 text-base md:text-lg rounded-full font-sans font-semibold transition-all duration-500 ease-apple hover:scale-105">
                   DÉCOUVRIR LA MÉTHODE
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button variant="hero-outline" size="lg" className="h-14 min-h-[48px] px-8 rounded-full font-sans transition-all duration-500 ease-apple">
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button variant="hero-outline" size="lg" className="w-full sm:w-auto h-12 md:h-14 min-h-[48px] px-6 md:px-8 rounded-full font-sans transition-all duration-500 ease-apple">
                   <ChevronRight className="mr-2 h-4 w-4" />
                   Mon Espace
                 </Button>
@@ -259,20 +260,21 @@ export default function Landing() {
       </section>
 
       {/* 2. PRODUCT SHOWCASE - 3D Floating Dashboard with Scroll Animation */}
-      <section className="py-20 px-6 relative z-10" ref={heroRef}>
+      <section className="py-12 md:py-20 px-4 md:px-6 relative z-10 overflow-hidden" ref={heroRef}>
         <div className="container mx-auto max-w-6xl">
           {/* Section Label */}
-          <div className="text-center mb-12">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-3">Aperçu de Votre Espace</span>
-            <p className="text-white/30 text-sm">Découvrez votre futur tableau de bord personnalisé</p>
+          <div className="text-center mb-8 md:mb-12">
+            <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-white/40 block mb-2 md:mb-3">Aperçu de Votre Espace</span>
+            <p className="text-white/30 text-xs md:text-sm">Découvrez votre futur tableau de bord personnalisé</p>
           </div>
 
           {/* Floating App Window Container */}
           <motion.div 
             className="relative"
             style={{ 
-              perspective: '2000px',
-              opacity: isMobile ? 1 : dashboardOpacity 
+              perspective: isMobile ? 'none' : '2000px',
+              opacity: isMobile ? 1 : dashboardOpacity,
+              transform: isMobile ? 'none' : undefined,
             }}
           >
             {/* MASSIVE Orange/Red Glow Effect Behind Dashboard - Radioactive Shadow */}
@@ -302,16 +304,14 @@ export default function Landing() {
             
             {/* The Main Window - With 3D Transform Animation */}
             <motion.div 
-              className="relative rounded-[24px] border border-white/[0.06] bg-[#0A0A12] overflow-hidden glass-border"
+              className="relative rounded-[16px] md:rounded-[24px] border border-white/[0.06] bg-[#0A0A12] overflow-hidden glass-border"
               style={{
                 rotateX: isMobile ? 0 : smoothRotateX,
                 y: isMobile ? 0 : smoothY,
-                transformStyle: 'preserve-3d',
-                boxShadow: `
-                  0 80px 160px -40px rgba(0,0,0,0.9), 
-                  0 40px 80px -30px rgba(255,107,74,0.12), 
-                  0 0 120px -20px rgba(255,107,74,0.15)
-                `
+                transformStyle: isMobile ? 'flat' : 'preserve-3d',
+                boxShadow: isMobile 
+                  ? '0 20px 40px -20px rgba(0,0,0,0.9)' 
+                  : `0 80px 160px -40px rgba(0,0,0,0.9), 0 40px 80px -30px rgba(255,107,74,0.12), 0 0 120px -20px rgba(255,107,74,0.15)`
               }}
             >
               {/* Glass Reflection Effect - Diagonal gradient on top */}
@@ -331,8 +331,8 @@ export default function Landing() {
               
               {/* Window Structure: Sidebar + Main */}
               <div className="flex">
-                {/* Sidebar Navigation */}
-                <div className="w-16 md:w-20 bg-white/[0.02] border-r border-white/[0.04] flex flex-col items-center py-6 gap-6">
+                {/* Sidebar Navigation - Hidden on mobile */}
+                <div className="hidden md:flex w-16 md:w-20 bg-white/[0.02] border-r border-white/[0.04] flex-col items-center py-6 gap-6">
                   {/* Logo */}
                   <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)]">
                     <span className="text-[#030307] font-bold text-lg">N</span>
@@ -509,19 +509,19 @@ export default function Landing() {
       </section>
 
       {/* 3. PROBLEM SECTION - Signaux d'Alerte with Parallax */}
-      <section className="py-24 px-6 relative z-10" ref={problemRef}>
+      <section className="py-16 md:py-24 px-4 md:px-6 relative z-10" ref={problemRef}>
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <span className="text-red-500 font-mono text-xs tracking-widest uppercase mb-4 block">⚠ Signaux d'Alerte</span>
-            <h2 className="font-display text-4xl md:text-5xl text-white font-bold">
+          <div className="text-center mb-10 md:mb-16">
+            <span className="text-red-500 font-mono text-[10px] md:text-xs tracking-widest uppercase mb-3 md:mb-4 block">⚠ Signaux d'Alerte</span>
+            <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white font-bold">
               Votre Corps Vous Parle
             </h2>
-            <p className="text-white/40 mt-4 max-w-xl mx-auto">
+            <p className="text-white/40 mt-3 md:mt-4 max-w-xl mx-auto text-sm md:text-base px-2">
               Apprenez à décoder les tensions et déséquilibres avant qu'ils ne deviennent chroniques.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {/* Card 1 - Glass Premium Style */}
             <div className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-red-500/30 transition-all duration-500 ease-apple overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50"></div>
@@ -613,11 +613,11 @@ export default function Landing() {
       </section>
 
       {/* 4. ARCHITECTURE SECTION - Bento Grid with Border Beam */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">Fondations Scientifiques</span>
-            <h2 className="font-display text-4xl md:text-5xl text-white font-bold">
+          <div className="text-center mb-10 md:mb-16">
+            <span className="text-primary font-mono text-[10px] md:text-xs tracking-widest uppercase mb-3 md:mb-4 block">Fondations Scientifiques</span>
+            <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-white font-bold">
               La Méthode NIVO
             </h2>
             <p className="text-white/40 mt-4 max-w-2xl mx-auto">
@@ -970,75 +970,77 @@ export default function Landing() {
       </section>
 
       {/* 6. BENCHMARK SECTION with Spotlight */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
-            <span className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 block">Analyse Comparative</span>
-            <h2 className="font-heading text-3xl md:text-4xl text-white font-medium tracking-tight max-w-3xl mx-auto leading-tight">
+          <div className="text-center mb-10 md:mb-16">
+            <span className="text-white/40 font-mono text-[10px] md:text-xs tracking-widest uppercase mb-3 md:mb-4 block">Analyse Comparative</span>
+            <h2 className="font-heading text-xl md:text-3xl lg:text-4xl text-white font-medium tracking-tight max-w-3xl mx-auto leading-tight px-2">
               Pourquoi le modèle classique échoue pour les pros du digital
             </h2>
           </div>
 
-          {/* Ultra-Clean Comparison Table with Spotlight */}
-          <SpotlightCard className="rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm">
-            {/* Header */}
-            <div className="grid grid-cols-3">
-              <div className="p-6 border-r border-white/5 bg-transparent"></div>
-              <div className="p-6 border-r border-white/5 text-center bg-transparent">
-                <span className="font-mono text-[10px] text-white/30 uppercase tracking-wider">Médecine Classique</span>
-                <p className="text-white/40 text-xs mt-1">Réactif</p>
+          {/* Ultra-Clean Comparison Table with Spotlight - Scrollable on mobile */}
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <SpotlightCard className="rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm min-w-[600px] md:min-w-0">
+              {/* Header */}
+              <div className="grid grid-cols-3">
+                <div className="p-3 md:p-6 border-r border-white/5 bg-transparent"></div>
+                <div className="p-3 md:p-6 border-r border-white/5 text-center bg-transparent">
+                  <span className="font-mono text-[8px] md:text-[10px] text-white/30 uppercase tracking-wider">Médecine Classique</span>
+                  <p className="text-white/40 text-[10px] md:text-xs mt-1">Réactif</p>
+                </div>
+                <div className="p-3 md:p-6 text-center bg-white/[0.02] relative">
+                  {/* Top Spotlight Glow */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 bg-gradient-to-b from-emerald-500/15 to-transparent blur-2xl pointer-events-none"></div>
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
+                  <span className="font-mono text-[8px] md:text-[10px] text-emerald-400 uppercase tracking-wider relative z-10">NIVO</span>
+                  <p className="text-emerald-400/80 text-[10px] md:text-xs mt-1 font-medium relative z-10">Proactif</p>
+                </div>
               </div>
-              <div className="p-6 text-center bg-white/[0.02] relative">
-                {/* Top Spotlight Glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 bg-gradient-to-b from-emerald-500/15 to-transparent blur-2xl pointer-events-none"></div>
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
-                <span className="font-mono text-[10px] text-emerald-400 uppercase tracking-wider relative z-10">NIVO System Patch</span>
-                <p className="text-emerald-400/80 text-xs mt-1 font-medium relative z-10">Proactif</p>
-              </div>
-            </div>
 
-            {/* Table Rows */}
-            {[
-              { label: "Approche", old: "Réparer la casse", new: "Routine de performance quotidienne" },
-              { label: "Lieu", old: "Cabinet (+30min trajet)", new: "Chez vous (0 trajet)" },
-              { label: "Durée", old: "1h x 10 séances", new: "15 min/jour" },
-              { label: "Délai", old: "Attente de 3 semaines", new: "Accès immédiat" },
-              { label: "Coût", old: "300-800€ / cycle", new: "99€ une fois" },
-              { label: "Résultat", old: "Dépendance au praticien", new: "Autonomie & Anti-fragilité durables" },
-            ].map((row, idx) => (
-              <div key={idx} className="grid grid-cols-3 border-t border-white/5">
-                <div className="p-5 border-r border-white/5">
-                  <span className="font-mono text-[10px] text-white/30 uppercase tracking-wider">{row.label}</span>
-                </div>
-                <div className="p-5 border-r border-white/5 flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-                    <X className="w-3 h-3 text-white/30" />
+              {/* Table Rows */}
+              {[
+                { label: "Approche", old: "Réparer la casse", new: "Routine quotidienne" },
+                { label: "Lieu", old: "Cabinet (+30min)", new: "Chez vous" },
+                { label: "Durée", old: "1h x 10 séances", new: "15 min/jour" },
+                { label: "Délai", old: "Attente 3 sem.", new: "Accès immédiat" },
+                { label: "Coût", old: "300-800€", new: "99€ une fois" },
+                { label: "Résultat", old: "Dépendance", new: "Autonomie" },
+              ].map((row, idx) => (
+                <div key={idx} className="grid grid-cols-3 border-t border-white/5">
+                  <div className="p-3 md:p-5 border-r border-white/5">
+                    <span className="font-mono text-[8px] md:text-[10px] text-white/30 uppercase tracking-wider">{row.label}</span>
                   </div>
-                  <span className="text-white/40 text-sm">{row.old}</span>
-                </div>
-                <div className="p-5 bg-white/[0.02] flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                    <Check className="w-3 h-3 text-emerald-400" />
+                  <div className="p-3 md:p-5 border-r border-white/5 flex items-center gap-2 md:gap-3">
+                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <X className="w-2 h-2 md:w-3 md:h-3 text-white/30" />
+                    </div>
+                    <span className="text-white/40 text-[10px] md:text-sm">{row.old}</span>
                   </div>
-                  <span className="text-white text-sm font-medium">{row.new}</span>
+                  <div className="p-3 md:p-5 bg-white/[0.02] flex items-center gap-2 md:gap-3">
+                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                      <Check className="w-2 h-2 md:w-3 md:h-3 text-emerald-400" />
+                    </div>
+                    <span className="text-white text-[10px] md:text-sm font-medium">{row.new}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </SpotlightCard>
+              ))}
+            </SpotlightCard>
+          </div>
         </div>
       </section>
 
       {/* 7. FAQ SECTION */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-16 md:py-24 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-3xl">
-          <div className="text-center mb-12">
-            <span className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 block">Questions Fréquentes</span>
-            <h2 className="font-heading text-3xl md:text-4xl text-white font-medium tracking-tight">
+          <div className="text-center mb-8 md:mb-12">
+            <span className="text-white/40 font-mono text-[10px] md:text-xs tracking-widest uppercase mb-3 md:mb-4 block">Questions Fréquentes</span>
+            <h2 className="font-heading text-2xl md:text-3xl lg:text-4xl text-white font-medium tracking-tight">
               Transparence Totale
             </h2>
           </div>
 
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
             <AccordionItem value="item-0" className="border border-white/5 rounded-2xl bg-[#0a0a12] px-6 data-[state=open]:border-primary/20 transition-all duration-500 ease-apple">
               <AccordionTrigger className="text-white hover:text-primary hover:no-underline py-5 text-left transition-all duration-500 ease-apple">
                 Est-ce dangereux si j'ai une hernie discale ?
