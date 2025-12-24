@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { ArrowRight, ChevronRight, Map, Brain, Zap, Activity, Check, Lock, Eye, Shield, Cpu, X } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
@@ -77,6 +78,7 @@ export default function Landing() {
   const [selectedProgram, setSelectedProgram] = useState<'RAPID_PATCH' | 'SYSTEM_REBOOT' | 'ARCHITECT_MODE'>('SYSTEM_REBOOT');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const details = PROGRAM_DETAILS[selectedProgram];
 
   // Check for mobile
@@ -120,16 +122,20 @@ export default function Landing() {
   const roadmapRef = useRef<HTMLDivElement>(null);
 
   const handleSelectProgram = (program: 'RAPID_PATCH' | 'SYSTEM_REBOOT' | 'ARCHITECT_MODE') => {
-    if (program !== selectedProgram) {
-      setIsTransitioning(true);
-      
-      // Scroll doux vers le tableau
-      roadmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      setTimeout(() => {
-        setSelectedProgram(program);
-        setIsTransitioning(false);
-      }, 150);
+    if (isMobile) {
+      // Sur mobile, ouvrir le drawer
+      setSelectedProgram(program);
+      setDrawerOpen(true);
+    } else {
+      // Sur desktop, comportement classique
+      if (program !== selectedProgram) {
+        setIsTransitioning(true);
+        roadmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          setSelectedProgram(program);
+          setIsTransitioning(false);
+        }, 150);
+      }
     }
   };
 
@@ -268,9 +274,9 @@ export default function Landing() {
             <p className="text-white/30 text-xs md:text-sm">Découvrez votre futur tableau de bord personnalisé</p>
           </div>
 
-          {/* Floating App Window Container */}
+          {/* Floating App Window Container - 2D flat on mobile with scale down */}
           <motion.div 
-            className="relative"
+            className={`relative ${isMobile ? 'scale-[0.65] origin-top -mb-32' : ''}`}
             style={{ 
               perspective: isMobile ? 'none' : '2000px',
               opacity: isMobile ? 1 : dashboardOpacity,
@@ -864,8 +870,8 @@ export default function Landing() {
             </SpotlightCard>
           </div>
 
-          {/* DYNAMIC ROADMAP DISPLAY */}
-          <div ref={roadmapRef} className={`bg-[#0a0a12] rounded-b-3xl md:rounded-3xl md:rounded-t-none border border-white/5 border-t-0 md:border-t p-8 md:p-12 relative overflow-hidden transition-all duration-500 ease-apple ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+          {/* DYNAMIC ROADMAP DISPLAY - Desktop only */}
+          <div ref={roadmapRef} className={`hidden md:block bg-[#0a0a12] rounded-b-3xl md:rounded-3xl md:rounded-t-none border border-white/5 border-t-0 md:border-t p-8 md:p-12 relative overflow-hidden transition-all duration-500 ease-apple ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
             
             <div className={`absolute top-0 left-0 right-0 h-1 transition-colors duration-500 ease-apple ${
@@ -966,6 +972,68 @@ export default function Landing() {
               </div>
             </div>
           </div>
+
+          {/* MOBILE DRAWER for Program Architecture */}
+          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <DrawerContent className="bg-[#0a0a12] border-t border-white/10 max-h-[85vh]">
+              <DrawerHeader className="border-b border-white/5 pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Map className={`w-5 h-5 ${selectedProgram === 'SYSTEM_REBOOT' ? 'text-primary' : 'text-white'}`} />
+                    <DrawerTitle className="font-heading text-xl text-white font-medium">{details.title}</DrawerTitle>
+                  </div>
+                  <span className="text-sm font-mono text-white/40">{details.duration}</span>
+                </div>
+              </DrawerHeader>
+              
+              <div className="p-4 overflow-y-auto">
+                {/* Phases */}
+                <div className="space-y-3 mb-6">
+                  {details.phases.map((phase, idx) => (
+                    <div key={idx} className={`relative flex flex-col gap-2 p-3 rounded-xl border ${phase.active ? 'bg-white/[0.03] border-white/10' : 'bg-black/40 border-white/5 opacity-50'}`}>
+                      {!phase.active && (
+                        <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/60 rounded-xl">
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-white/40" />
+                            <span className="text-[10px] text-white/40 font-mono">NON INCLUS</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-mono tracking-widest uppercase ${phase.active ? 'text-primary' : 'text-white/30'}`}>{phase.name}</span>
+                        <h4 className={`text-sm font-bold ${phase.active ? 'text-white' : 'text-white/40'}`}>{phase.label}</h4>
+                      </div>
+                      <div className={`h-1 w-full rounded-full ${phase.active ? (selectedProgram === 'SYSTEM_REBOOT' ? 'bg-primary' : selectedProgram === 'ARCHITECT_MODE' ? 'bg-white/40' : 'bg-white') : 'bg-white/10'}`}></div>
+                      <p className="text-xs text-white/40 leading-relaxed">{phase.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Features */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {details.features.map((feat, i) => (
+                    <span key={i} className="px-2 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-white/60 font-mono flex items-center gap-1">
+                      <Check className="w-3 h-3 text-primary" /> {feat}
+                    </span>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <Link to={`/checkout?plan=${selectedProgram}`} onClick={() => setDrawerOpen(false)}>
+                  <Button size="lg" className={`w-full h-12 rounded-full font-bold text-base transition-all duration-500 ease-apple ${
+                    selectedProgram === 'SYSTEM_REBOOT' 
+                      ? 'shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary' 
+                      : selectedProgram === 'ARCHITECT_MODE'
+                      ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
+                      : 'bg-white text-[#030307] hover:bg-white/90'
+                  }`}>
+                    Commencer — <span className="font-mono">{details.price}</span>
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </section>
 
@@ -979,22 +1047,22 @@ export default function Landing() {
             </h2>
           </div>
 
-          {/* Ultra-Clean Comparison Table with Spotlight - Scrollable on mobile */}
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-            <SpotlightCard className="rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm min-w-[600px] md:min-w-0">
+          {/* Desktop: Table layout / Mobile: Stacked cards */}
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            <SpotlightCard className="rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm">
               {/* Header */}
               <div className="grid grid-cols-3">
-                <div className="p-3 md:p-6 border-r border-white/5 bg-transparent"></div>
-                <div className="p-3 md:p-6 border-r border-white/5 text-center bg-transparent">
-                  <span className="font-mono text-[8px] md:text-[10px] text-white/30 uppercase tracking-wider">Médecine Classique</span>
-                  <p className="text-white/40 text-[10px] md:text-xs mt-1">Réactif</p>
+                <div className="p-6 border-r border-white/5 bg-transparent"></div>
+                <div className="p-6 border-r border-white/5 text-center bg-transparent">
+                  <span className="font-mono text-[10px] text-white/30 uppercase tracking-wider">Médecine Classique</span>
+                  <p className="text-white/40 text-xs mt-1">Réactif</p>
                 </div>
-                <div className="p-3 md:p-6 text-center bg-white/[0.02] relative">
-                  {/* Top Spotlight Glow */}
+                <div className="p-6 text-center bg-white/[0.02] relative">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 bg-gradient-to-b from-emerald-500/15 to-transparent blur-2xl pointer-events-none"></div>
                   <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
-                  <span className="font-mono text-[8px] md:text-[10px] text-emerald-400 uppercase tracking-wider relative z-10">NIVO</span>
-                  <p className="text-emerald-400/80 text-[10px] md:text-xs mt-1 font-medium relative z-10">Proactif</p>
+                  <span className="font-mono text-[10px] text-emerald-400 uppercase tracking-wider relative z-10">NIVO</span>
+                  <p className="text-emerald-400/80 text-xs mt-1 font-medium relative z-10">Proactif</p>
                 </div>
               </div>
 
@@ -1008,24 +1076,52 @@ export default function Landing() {
                 { label: "Résultat", old: "Dépendance", new: "Autonomie" },
               ].map((row, idx) => (
                 <div key={idx} className="grid grid-cols-3 border-t border-white/5">
-                  <div className="p-3 md:p-5 border-r border-white/5">
-                    <span className="font-mono text-[8px] md:text-[10px] text-white/30 uppercase tracking-wider">{row.label}</span>
+                  <div className="p-5 border-r border-white/5">
+                    <span className="font-mono text-[10px] text-white/30 uppercase tracking-wider">{row.label}</span>
                   </div>
-                  <div className="p-3 md:p-5 border-r border-white/5 flex items-center gap-2 md:gap-3">
-                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-                      <X className="w-2 h-2 md:w-3 md:h-3 text-white/30" />
+                  <div className="p-5 border-r border-white/5 flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <X className="w-3 h-3 text-white/30" />
                     </div>
-                    <span className="text-white/40 text-[10px] md:text-sm">{row.old}</span>
+                    <span className="text-white/40 text-sm">{row.old}</span>
                   </div>
-                  <div className="p-3 md:p-5 bg-white/[0.02] flex items-center gap-2 md:gap-3">
-                    <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                      <Check className="w-2 h-2 md:w-3 md:h-3 text-emerald-400" />
+                  <div className="p-5 bg-white/[0.02] flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                      <Check className="w-3 h-3 text-emerald-400" />
                     </div>
-                    <span className="text-white text-[10px] md:text-sm font-medium">{row.new}</span>
+                    <span className="text-white text-sm font-medium">{row.new}</span>
                   </div>
                 </div>
               ))}
             </SpotlightCard>
+          </div>
+
+          {/* Mobile: Stacked vertical cards */}
+          <div className="md:hidden space-y-3">
+            {[
+              { label: "Approche", old: "Réparer la casse", new: "Routine quotidienne" },
+              { label: "Lieu", old: "Cabinet (+30min)", new: "Chez vous" },
+              { label: "Durée", old: "1h x 10 séances", new: "15 min/jour" },
+              { label: "Délai", old: "Attente 3 sem.", new: "Accès immédiat" },
+              { label: "Coût", old: "300-800€", new: "99€ une fois" },
+              { label: "Résultat", old: "Dépendance", new: "Autonomie" },
+            ].map((row, idx) => (
+              <div key={idx} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="font-mono text-[10px] text-white/40 uppercase tracking-wider block mb-3">{row.label}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <X className="w-2 h-2 text-white/30" />
+                  </div>
+                  <span className="text-white/40 text-xs line-through">{row.old}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                    <Check className="w-2 h-2 text-emerald-400" />
+                  </div>
+                  <span className="text-emerald-400 text-sm font-medium">{row.new}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1090,9 +1186,9 @@ export default function Landing() {
       </section>
 
       {/* 8. MANIFESTE SECTION - Text Reveal on Scroll */}
-      <section className="py-24 px-6 relative z-10" ref={manifesteRef}>
+      <section className="py-12 md:py-24 px-4 md:px-6 relative z-10" ref={manifesteRef}>
         <div className="container mx-auto max-w-4xl">
-          <div className="relative p-12 md:p-16 rounded-3xl bg-gradient-to-b from-primary/8 to-transparent border border-primary/15 overflow-hidden">
+          <div className="relative p-6 md:p-16 rounded-3xl bg-gradient-to-b from-primary/8 to-transparent border border-primary/15 overflow-hidden">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,107,74,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,107,74,0.02)_1px,transparent_1px)] bg-[size:32px_32px] opacity-50"></div>
             
@@ -1100,10 +1196,10 @@ export default function Landing() {
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/15 rounded-full blur-[100px] pointer-events-none"></div>
             
             <div className="relative z-10 text-center">
-              <span className="font-mono text-[10px] text-primary uppercase tracking-widest mb-6 block">Le Manifeste</span>
+              <span className="font-mono text-[10px] text-primary uppercase tracking-widest mb-4 md:mb-6 block">Le Manifeste</span>
               
               {/* Text Reveal Animation */}
-              <h2 className="font-heading text-3xl md:text-5xl text-white font-medium tracking-tight mb-6 leading-[1.1]">
+              <h2 className="font-heading text-2xl md:text-5xl text-white font-medium tracking-tight mb-4 md:mb-6 leading-[1.1]">
                 <motion.span 
                   style={{ opacity: useTransform(manifesteScrollProgress, [0, 0.3], [0.2, 1]) }}
                 >
@@ -1119,12 +1215,12 @@ export default function Landing() {
               </h2>
               
               <motion.p 
-                className="text-lg text-white/50 mb-10 max-w-2xl mx-auto leading-relaxed"
+                className="text-sm md:text-lg text-white/50 mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed"
                 style={{ opacity: useTransform(manifesteScrollProgress, [0.3, 0.6], [0.2, 1]) }}
               >
                 Vous investissez dans les meilleurs outils, formations et stratégies pour faire croître votre activité. 
-                Mais votre actif le plus précieux, c'est votre capacité à rester assis, concentré et productif sur la durée.
-                <br /><br />
+                Mais votre actif le plus précieux, c'est votre capacité à rester concentré et productif sur la durée.
+                <br className="hidden md:block" /><span className="md:hidden"> </span>
                 <span className="text-white font-medium">NIVO est l'assurance-vie de votre productivité.</span>
               </motion.p>
               
@@ -1132,14 +1228,14 @@ export default function Landing() {
                 style={{ opacity: useTransform(manifesteScrollProgress, [0.5, 0.8], [0.2, 1]) }}
               >
                 <Link to="/diagnostic">
-                  <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary h-16 px-12 text-lg rounded-full font-bold transition-all duration-500 ease-apple hover:scale-105">
+                  <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary h-12 md:h-16 px-6 md:px-12 text-sm md:text-lg rounded-full font-bold transition-all duration-500 ease-apple hover:scale-105">
                     Sécuriser mon Actif Principal
-                    <ArrowRight className="ml-3 h-6 w-6" />
+                    <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6" />
                   </Button>
                 </Link>
               </motion.div>
               
-              <p className="text-xs text-white/30 mt-6 font-mono">
+              <p className="text-[10px] md:text-xs text-white/30 mt-4 md:mt-6 font-mono">
                 30 jours satisfait ou remboursé • Paiement unique • Accès à vie
               </p>
             </div>
