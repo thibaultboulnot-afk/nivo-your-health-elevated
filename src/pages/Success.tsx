@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 
 const initializationSteps = [
   'Validation du paiement...',
-  'Activation de la licence...',
-  'Déblocage des modules...',
-  'Synchronisation des accès...',
+  'Activation de votre accès...',
+  'Préparation de votre espace...',
+  'Synchronisation des données...',
   'Configuration terminée !',
 ];
 
@@ -21,7 +21,7 @@ export default function Success() {
   const [isComplete, setIsComplete] = useState(false);
   const [typewriterText, setTypewriterText] = useState('');
 
-  const fullText = '> Mise à jour des droits d\'accès base de données...';
+  const fullText = '> Configuration de votre espace personnel en cours...';
 
   // Typewriter effect
   useEffect(() => {
@@ -113,11 +113,10 @@ export default function Success() {
               transition={{ delay: 0.4 }}
               className="font-heading font-bold text-2xl md:text-3xl tracking-tight mb-3 text-emerald-400"
             >
-              PAIEMENT VALIDÉ. LICENCE ACTIVÉE.
+              COMMANDE CONFIRMÉE.
             </motion.h1>
-            <p className="text-emerald-500/80 font-mono text-sm h-6">
-              {typewriterText}
-              <span className="animate-pulse">_</span>
+            <p className="text-emerald-500/80 font-mono text-sm leading-relaxed">
+              Votre accès a été débloqué avec succès. Nous allons maintenant configurer votre espace personnel pour l'adapter à vos besoins.
             </p>
           </div>
 
@@ -178,7 +177,7 @@ export default function Success() {
               animate={{ opacity: 1 }}
               className="text-center font-mono text-xs text-emerald-500/60 mb-4"
             >
-              Redirection automatique vers le cockpit...
+              Redirection automatique...
             </motion.p>
           )}
 
@@ -193,12 +192,12 @@ export default function Success() {
               className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowRight className="w-5 h-5 mr-2" />
-              CONFIGURER MON PROFIL
+              COMMENCER LA CONFIGURATION
             </Button>
           </motion.div>
 
           <p className="text-center font-mono text-[10px] text-emerald-600/50 mt-4">
-            {'>'} system_status: {isComplete ? 'READY' : 'PROCESSING'}
+            {'>'} statut: {isComplete ? 'PRÊT' : 'EN COURS'}
           </p>
         </div>
       </motion.div>
