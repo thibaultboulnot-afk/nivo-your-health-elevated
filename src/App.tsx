@@ -16,6 +16,9 @@ import Settings from "./pages/Settings";
 import Success from "./pages/Success";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
+import MentionsLegales from "./pages/MentionsLegales";
+import CGV from "./pages/CGV";
+import Confidentialite from "./pages/Confidentialite";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +41,9 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session/:programId" element={<Session />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/mentions-legales" element={<MentionsLegales />} />
+            <Route path="/cgv" element={<CGV />} />
+            <Route path="/confidentialite" element={<Confidentialite />} />
             {/* AJOUTER TOUTES LES ROUTES PERSONNALISÉES AU-DESSUS DE LA ROUTE CATCH-ALL "*" */}
             <Route path="*" element={<NotFound />} />
           </Routes>
