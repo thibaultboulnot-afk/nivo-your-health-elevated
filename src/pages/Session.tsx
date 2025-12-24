@@ -338,8 +338,8 @@ export default function Session() {
         </div>
       </main>
 
-      {/* Volume Slider - Right Side */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-3">
+      {/* Volume Slider - Right Side (hidden on mobile) */}
+      <div className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3">
         <Volume2 className="w-4 h-4 text-white/30" />
         <input
           type="range"
@@ -359,10 +359,10 @@ export default function Session() {
         </span>
       </div>
 
-      {/* Blackout Mode Button */}
+      {/* Blackout Mode Button (hidden on mobile) */}
       <button
         onClick={() => setIsBlackoutMode(true)}
-        className="fixed left-6 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors group"
+        className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors group"
       >
         <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
           <Moon className="w-4 h-4" />
@@ -400,29 +400,29 @@ export default function Session() {
         </div>
 
         {/* Control Buttons */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center gap-4 md:gap-6">
           <Button
             variant="ghost"
             size="icon"
             onClick={handlePrevious}
             disabled={currentExercise <= 1}
-            className="w-12 h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
+            className="w-11 h-11 md:w-12 md:h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
           >
             <SkipBack className="h-5 w-5" />
           </Button>
 
           <Button
             onClick={togglePlayPause}
-            className={`w-16 h-16 rounded-full transition-all duration-300 ${
+            className={`w-14 h-14 md:w-16 md:h-16 rounded-full transition-all duration-300 ${
               isPlaying 
                 ? 'bg-white/10 hover:bg-white/20 text-white' 
                 : 'bg-primary hover:bg-primary/90 text-black shadow-[0_0_30px_rgba(255,107,74,0.4)]'
             }`}
           >
             {isPlaying ? (
-              <Pause className="h-7 w-7" />
+              <Pause className="h-6 w-6 md:h-7 md:w-7" />
             ) : (
-              <Play className="h-7 w-7 ml-0.5" />
+              <Play className="h-6 w-6 md:h-7 md:w-7 ml-0.5" />
             )}
           </Button>
 
@@ -431,7 +431,7 @@ export default function Session() {
             size="icon"
             onClick={handleNext}
             disabled={currentExercise >= totalExercises}
-            className="w-12 h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
+            className="w-11 h-11 md:w-12 md:h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
           >
             <SkipForward className="h-5 w-5" />
           </Button>
