@@ -8,33 +8,33 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 // --- CONFIGURATION DU CONTENU DYNAMIQUE ---
 const PROGRAM_DETAILS = {
   RAPID_PATCH: {
-    title: "Rapid Patch Protocol",
+    title: "Protocole Soulagement Express",
     duration: "14 Jours",
     phases: [
-      { name: "SEMAINE 1", label: "SOULAGER", active: true, desc: "Décompression d'urgence & baisse de l'inflammation." },
+      { name: "SEMAINE 1", label: "SOULAGER", active: true, desc: "Décompression d'urgence & réduction des tensions." },
       { name: "SEMAINE 2", label: "MOBILISER", active: true, desc: "Récupération des amplitudes articulaires clés." },
       { name: "SEMAINE 3", label: "RENFORCER", active: false, desc: "Non inclus : Stabilisation durable." },
-      { name: "SEMAINE 4", label: "PERFORMER", active: false, desc: "Non inclus : Optimisation neurale." }
+      { name: "SEMAINE 4", label: "PERFORMER", active: false, desc: "Non inclus : Optimisation avancée." }
     ],
     features: ["Décompression Lombaire", "Protocole Tech-Neck", "Audio-Guide Basique"],
     price: "49€",
     color: "slate"
   },
   SYSTEM_REBOOT: {
-    title: "System Reboot Protocol",
+    title: "Reset Fondamental",
     duration: "21 Jours",
     phases: [
-      { name: "SEMAINE 1", label: "SOULAGER", active: true, desc: "Décompression & Reset du système nerveux." },
+      { name: "SEMAINE 1", label: "SOULAGER", active: true, desc: "Décompression & Reset métabolique complet." },
       { name: "SEMAINE 2", label: "ALIGNER", active: true, desc: "Reprogrammation de la posture neutre." },
       { name: "SEMAINE 3", label: "RENFORCER", active: true, desc: "Verrouillage musculaire de la nouvelle posture." },
       { name: "SEMAINE 4", label: "PERFORMER", active: false, desc: "Non inclus : Optimisation avancée." }
     ],
-    features: ["Tout le Rapid Patch", "Reprogrammation Neurale", "Neuroplasticité", "Scientific Rationale"],
+    features: ["Tout le Soulagement Express", "Reprogrammation Posturale", "Neuroplasticité", "Scientific Rationale"],
     price: "99€",
     color: "#ff6b4a"
   },
   ARCHITECT_MODE: {
-    title: "Architect Mode Protocol",
+    title: "Architecte de Performance",
     duration: "30 Jours",
     phases: [
       { name: "SEMAINE 1", label: "SOULAGER", active: true, desc: "Décompression & Reset complet." },
@@ -42,7 +42,7 @@ const PROGRAM_DETAILS = {
       { name: "SEMAINE 3", label: "RENFORCER", active: true, desc: "Construction de l'armure posturale." },
       { name: "SEMAINE 4+", label: "PERFORMER", active: true, desc: "Focus Visuel, Vestibulaire & Deep Work." }
     ],
-    features: ["Programme Complet (30j)", "Protocoles Vision (Focus)", "Routine Deep Work", "Support Prioritaire"],
+    features: ["Programme Complet (30j)", "Protocoles Vision (Focus)", "Routine de Performance", "Support Prioritaire"],
     price: "149€",
     color: "white"
   }
@@ -181,12 +181,12 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <Link to="/login">
               <Button variant="ghost" className="text-muted-foreground hover:text-foreground font-mono text-xs transition-all duration-500 ease-apple">
-                Connexion Système
+                Mon Espace
               </Button>
             </Link>
             <Link to="/diagnostic">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-medium shadow-glow-primary transition-all duration-500 ease-apple">
-                Lancer le Scan
+                Faire mon Bilan
               </Button>
             </Link>
           </div>
@@ -211,21 +211,20 @@ export default function Landing() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
               </span>
               <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/80">
-                V2.0 • Protocole Clinique Validé
+                V2.0 • Méthode Validée Scientifiquement
               </span>
             </motion.div>
 
             {/* Title - Word by word animation with gradient */}
             <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1] tracking-tight">
-              <motion.span variants={itemVariants} className="inline-block text-foreground">La </motion.span>
-              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">Maintenance </motion.span>
-              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">Système</motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-foreground">REPRENEZ LE </motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">CONTRÔLE </motion.span>
               <br />
               <motion.span 
                 variants={itemVariants} 
                 className="inline-block text-foreground"
               >
-                pour le Corps Humain.
+                DE VOTRE CAPITAL PHYSIQUE.
               </motion.span>
             </motion.h1>
 
@@ -234,8 +233,8 @@ export default function Landing() {
               variants={itemVariants}
               className="text-lg md:text-xl text-white/50 font-light mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Pour les entrepreneurs et créateurs qui passent leur vie assis.<br />
-              <span className="text-white/30">Basé sur les standards cliniques de décompression (Méthodes McKenzie & McGill).</span>
+              Fini le bricolage. Accédez à une méthode basée sur la science pour éliminer les douleurs et optimiser votre énergie quotidienne.<br />
+              <span className="text-white/30">Basé sur les méthodes McKenzie & McGill, utilisées par les athlètes de haut niveau.</span>
             </motion.p>
 
             {/* CTA - With Shimmer Effect & Orange Glow */}
@@ -245,14 +244,14 @@ export default function Landing() {
             >
               <Link to="/diagnostic">
                 <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-primary h-14 min-h-[48px] px-8 text-lg rounded-full font-sans font-semibold transition-all duration-500 ease-apple hover:scale-105">
-                  Lancer le Scan
+                  DÉCOUVRIR LA MÉTHODE
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/login">
                 <Button variant="hero-outline" size="lg" className="h-14 min-h-[48px] px-8 rounded-full font-sans transition-all duration-500 ease-apple">
                   <ChevronRight className="mr-2 h-4 w-4" />
-                  Connexion Système
+                  Mon Espace
                 </Button>
               </Link>
             </motion.div>
@@ -265,8 +264,8 @@ export default function Landing() {
         <div className="container mx-auto max-w-6xl">
           {/* Section Label */}
           <div className="text-center mb-12">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-3">Aperçu de l'Interface</span>
-            <p className="text-white/30 text-sm">Découvrez votre futur espace de travail</p>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-3">Aperçu de Votre Espace</span>
+            <p className="text-white/30 text-sm">Découvrez votre futur tableau de bord personnalisé</p>
           </div>
 
           {/* Floating App Window Container */}
@@ -510,16 +509,16 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 3. PROBLEM SECTION - Latence Matérielle with Parallax */}
+      {/* 3. PROBLEM SECTION - Signaux d'Alerte with Parallax */}
       <section className="py-24 px-6 relative z-10" ref={problemRef}>
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <span className="text-red-500 font-mono text-xs tracking-widest uppercase mb-4 block">⚠ Alerte Système</span>
+            <span className="text-red-500 font-mono text-xs tracking-widest uppercase mb-4 block">⚠ Signaux d'Alerte</span>
             <h2 className="font-display text-4xl md:text-5xl text-white font-bold">
-              Latence Matérielle
+              Votre Corps Vous Parle
             </h2>
             <p className="text-white/40 mt-4 max-w-xl mx-auto">
-              Les signaux d'alerte que votre corps envoie quand votre productivité est menacée.
+              Apprenez à décoder les tensions et déséquilibres avant qu'ils ne deviennent chroniques.
             </p>
           </div>
 
@@ -620,7 +619,7 @@ export default function Landing() {
           <div className="text-center mb-16">
             <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">Fondations Scientifiques</span>
             <h2 className="font-display text-4xl md:text-5xl text-white font-bold">
-              Architecture du Protocole
+              La Méthode NIVO
             </h2>
             <p className="text-white/40 mt-4 max-w-2xl mx-auto">
               Basé sur les protocoles cliniques les plus éprouvés au monde.
@@ -734,12 +733,12 @@ export default function Landing() {
       <section className="py-24 px-6 relative z-10 overflow-hidden">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">Choisissez votre Protocole</span>
+            <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">Accédez au Savoir</span>
             <h2 className="font-heading text-4xl md:text-5xl text-white font-medium tracking-tight">
-              Architecture des Programmes
+              Choisissez Votre Niveau de Forme
             </h2>
             <p className="text-white/40 mt-4 max-w-xl mx-auto">
-              Cliquez sur une carte pour révéler l'architecture du programme.
+              Cliquez sur une carte pour découvrir le détail du programme.
             </p>
           </div>
 
@@ -750,13 +749,13 @@ export default function Landing() {
               className={`group flex flex-col p-6 rounded-t-3xl md:rounded-3xl md:rounded-b-none border transition-all duration-500 ease-apple relative ${selectedProgram === 'RAPID_PATCH' ? 'bg-[#0a0a12] border-white/30 border-b-0 md:border-b shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'bg-[#0a0a12] border-white/5 hover:border-white/15'}`}
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-0.5 rounded bg-white/5 text-[10px] font-mono uppercase tracking-wider text-white/50">Urgence & Douleur</span>
+                <span className="px-2 py-0.5 rounded bg-white/5 text-[10px] font-mono uppercase tracking-wider text-white/50">Soulagement Express</span>
               </div>
-              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Rapid Patch</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Soulagement Express</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">14 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">49€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
-              <p className="text-sm text-white/40 mb-6 leading-relaxed">Éteindre l'inflammation et stopper la douleur en 2 semaines.</p>
+              <p className="text-sm text-white/40 mb-6 leading-relaxed">Comprenez l'origine de vos tensions et apprenez à les relâcher en 2 semaines.</p>
               <div className="space-y-2 mb-6 flex-grow">
                 {PROGRAM_DETAILS.RAPID_PATCH.features.map((f, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3 h-3 text-primary" /> {f}</div>
@@ -765,7 +764,7 @@ export default function Landing() {
               <div className="flex flex-col gap-2 mt-auto">
                 <Link to="/checkout?plan=RAPID_PATCH" className="w-full">
                   <Button className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-all duration-500 ease-apple">
-                    Commencer ce programme
+                    Accéder à ce programme
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -794,13 +793,13 @@ export default function Landing() {
                 </span>
               </div>
               <div className="flex items-center gap-2 mb-3 mt-2">
-                <span className="px-2 py-0.5 rounded bg-primary/15 text-[10px] font-mono uppercase tracking-wider text-primary">Réalignement</span>
+                <span className="px-2 py-0.5 rounded bg-primary/15 text-[10px] font-mono uppercase tracking-wider text-primary">Reset Fondamental</span>
               </div>
-              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">System Reboot</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Reset Fondamental</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">21 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">99€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
-              <p className="text-sm text-white/40 mb-6 leading-relaxed">Le protocole complet pour reprogrammer votre posture durablement.</p>
+              <p className="text-sm text-white/40 mb-6 leading-relaxed">Le protocole complet pour reconstruire votre posture et retrouver votre énergie.</p>
               <div className="space-y-2 mb-6 flex-grow">
                 {PROGRAM_DETAILS.SYSTEM_REBOOT.features.map((f, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3 h-3 text-primary" /> {f}</div>
@@ -809,7 +808,7 @@ export default function Landing() {
               <div className="flex flex-col gap-2 mt-auto">
                 <Link to="/checkout?plan=SYSTEM_REBOOT" className="w-full">
                   <Button className="shimmer-btn w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium glow-primary-sm transition-all duration-500 ease-apple">
-                    Commencer ce programme
+                    Accéder à ce programme
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -832,13 +831,13 @@ export default function Landing() {
               className={`group flex flex-col p-6 rounded-t-3xl md:rounded-3xl md:rounded-b-none border transition-all duration-500 ease-apple relative ${selectedProgram === 'ARCHITECT_MODE' ? 'bg-[#0a0a12] border-white/40 border-b-0 md:border-b shadow-[0_0_40px_-10px_rgba(148,163,184,0.2)]' : 'bg-[#0a0a12] border-white/5 hover:border-white/30'}`}
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono uppercase tracking-wider text-white/70">Performance & Pro</span>
+                <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono uppercase tracking-wider text-white/70">Performance Pro</span>
               </div>
-              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Architect Mode</h3>
+              <h3 className="font-heading text-2xl font-medium text-white mb-1 tracking-tight">Architecte de Performance</h3>
               <p className="text-xs text-white/40 mb-2 font-mono">30 Jours</p>
               <p className="text-3xl font-bold text-white mb-2 font-mono">149€</p>
               <p className="text-xs text-white/40 mb-4">Paiement unique</p>
-              <p className="text-sm text-white/40 mb-6 leading-relaxed">Devenez Anti-Fragile. Pour ceux qui veulent optimiser leur focus.</p>
+              <p className="text-sm text-white/40 mb-6 leading-relaxed">Devenez Anti-Fragile. Pour ceux qui veulent optimiser leur énergie et leur focus au quotidien.</p>
               <div className="space-y-2 mb-6 flex-grow">
                 {PROGRAM_DETAILS.ARCHITECT_MODE.features.map((f, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3 h-3 text-primary" /> {f}</div>
@@ -847,7 +846,7 @@ export default function Landing() {
               <div className="flex flex-col gap-2 mt-auto">
                 <Link to="/checkout?plan=ARCHITECT_MODE" className="w-full">
                   <Button className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/20 transition-all duration-500 ease-apple">
-                    Commencer ce programme
+                    Accéder à ce programme
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -918,14 +917,14 @@ export default function Landing() {
               {selectedProgram === 'RAPID_PATCH' && (
                 <div className="mb-8 p-4 rounded-xl border border-primary/15 bg-primary/5 flex items-center justify-between">
                   <p className="text-sm text-white/60">
-                    <span className="text-primary font-medium">Débloquez tout le parcours</span> — Passez au System Reboot pour un réalignement complet.
+                    <span className="text-primary font-medium">Accédez au savoir complet</span> — Passez au Reset Fondamental pour un réalignement durable.
                   </p>
                   <Button 
                     variant="ghost" 
                     onClick={() => handleSelectProgram('SYSTEM_REBOOT')}
                     className="text-primary hover:text-primary hover:bg-primary/10 text-xs transition-all duration-500 ease-apple"
                   >
-                    Voir System Reboot →
+                    Voir Reset Fondamental →
                   </Button>
                 </div>
               )}
@@ -933,14 +932,14 @@ export default function Landing() {
               {selectedProgram === 'SYSTEM_REBOOT' && (
                 <div className="mb-8 p-4 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-between">
                   <p className="text-sm text-white/60">
-                    <span className="text-white/80 font-medium">Ajoutez la phase Performance</span> — Passez à Architect Mode pour les protocoles Focus & Deep Work.
+                    <span className="text-white/80 font-medium">Ajoutez la Routine de Performance</span> — Passez au niveau Architecte pour les protocoles Focus & Deep Work.
                   </p>
                   <Button 
                     variant="ghost" 
                     onClick={() => handleSelectProgram('ARCHITECT_MODE')}
                     className="text-white/70 hover:text-white hover:bg-white/5 text-xs transition-all duration-500 ease-apple"
                   >
-                    Voir Architect Mode →
+                    Voir Architecte de Performance →
                   </Button>
                 </div>
               )}
@@ -1001,7 +1000,7 @@ export default function Landing() {
 
             {/* Table Rows */}
             {[
-              { label: "Approche", old: "Réparer la casse", new: "Maintenance quotidienne" },
+              { label: "Approche", old: "Réparer la casse", new: "Routine de performance quotidienne" },
               { label: "Lieu", old: "Cabinet (+30min trajet)", new: "Chez vous (0 trajet)" },
               { label: "Durée", old: "1h x 10 séances", new: "15 min/jour" },
               { label: "Délai", old: "Attente de 3 semaines", new: "Accès immédiat" },
@@ -1151,7 +1150,7 @@ export default function Landing() {
       <footer className="py-10 px-6 border-t border-white/5 bg-[#030307] relative z-10">
         <div className="container mx-auto text-center">
           <p className="font-mono text-xs text-white/30">
-            &copy; {new Date().getFullYear()} NIVO • System Patch for Builders
+            &copy; {new Date().getFullYear()} NIVO • Biologie de Précision pour Créateurs
           </p>
         </div>
       </footer>

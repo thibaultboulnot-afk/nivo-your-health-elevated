@@ -49,21 +49,21 @@ export default function Dashboard() {
     }
     if (stats.healthScore < 50) {
       return {
-        text: 'INTÉGRITÉ SYSTÈME CRITIQUE. MAINTENANCE REQUISE.',
+        text: 'NIVEAU DE FORME CRITIQUE. ROUTINE RECOMMANDÉE.',
         color: 'text-primary',
         bgColor: 'bg-primary/10',
         borderColor: 'border-primary/30',
       };
     } else if (stats.healthScore >= 80) {
       return {
-        text: 'SYSTÈME OPTIMISÉ. MODE PERFORMANCE ACTIF.',
+        text: 'NIVEAU DE FORME OPTIMAL. CONTINUEZ AINSI !',
         color: 'text-emerald-400',
         bgColor: 'bg-emerald-500/10',
         borderColor: 'border-emerald-500/30',
       };
     }
     return {
-      text: 'SYSTÈME EN COURS D\'OPTIMISATION.',
+      text: 'NIVEAU DE FORME EN PROGRESSION.',
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/30',
@@ -82,12 +82,12 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
-          <div className="font-mono text-primary animate-pulse mb-4">
-            <div className="text-sm mb-2">&gt; CHARGEMENT_SYSTÈME...</div>
+        <div className="font-mono text-primary animate-pulse mb-4">
+            <div className="text-sm mb-2">&gt; CHARGEMENT EN COURS...</div>
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           </div>
           <div className="font-mono text-xs text-foreground/30">
-            Initialisation du cockpit...
+            Préparation de votre espace...
           </div>
         </div>
       </div>
@@ -122,7 +122,7 @@ export default function Dashboard() {
               </div>
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                <span className="font-mono text-xs text-emerald-400">SYSTEM_STATUS: ONLINE</span>
+                <span className="font-mono text-xs text-emerald-400">NIVEAU_FORME: ACTIF</span>
               </div>
             </div>
 
@@ -196,13 +196,13 @@ export default function Dashboard() {
                   <span className="font-mono text-5xl font-bold text-foreground">
                     {stats?.healthScore ? `${stats.healthScore}%` : 'N/A'}
                   </span>
-                  <span className="font-mono text-xs text-foreground/40 mt-1">SCORE SANTÉ</span>
+                  <span className="font-mono text-xs text-foreground/40 mt-1">NIVEAU DE FORME</span>
                 </div>
               </div>
 
               {/* Status & Stats */}
               <div className="flex-1 text-center lg:text-left">
-                <p className="font-mono text-xs text-foreground/40 mb-2">&gt; diagnostic.status()</p>
+                <p className="font-mono text-xs text-foreground/40 mb-2">&gt; bilan.status()</p>
                 <div className={`inline-block px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor} mb-6`}>
                   <p className={`font-mono text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
                 </div>
@@ -213,7 +213,7 @@ export default function Dashboard() {
                     <Link to="/diagnostic">
                       <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                         <AlertTriangle className="h-4 w-4 mr-2" />
-                        LANCER LE DIAGNOSTIC
+                        FAIRE MON BILAN
                       </Button>
                     </Link>
                   </div>
@@ -225,7 +225,7 @@ export default function Dashboard() {
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-foreground/40" />
-                      <span className="font-mono text-[10px] text-foreground/40">SYSTEM UPTIME</span>
+                      <span className="font-mono text-[10px] text-foreground/40">SÉRIE EN COURS</span>
                     </div>
                     <p className="font-mono text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-sm text-foreground/40">Jours</span></p>
                   </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-colors">
                     <div className="flex items-center gap-2 mb-2">
                       <Activity className="h-4 w-4 text-foreground/40" />
-                      <span className="font-mono text-[10px] text-foreground/40">TOTAL PATCHES</span>
+                      <span className="font-mono text-[10px] text-foreground/40">ROUTINES COMPLÉTÉES</span>
                     </div>
                     <p className="font-mono text-2xl font-bold text-foreground">{stats?.totalPatches || 0}</p>
                   </div>
@@ -256,7 +256,7 @@ export default function Dashboard() {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
                   <Headphones className="h-5 w-5 text-primary" />
-                  <span className="font-mono text-xs text-primary">PROTOCOLE DU JOUR</span>
+                  <span className="font-mono text-xs text-primary">ROUTINE DU JOUR</span>
                 </div>
 
                 <h2 className="font-heading text-3xl font-bold text-foreground mb-2">
@@ -284,7 +284,7 @@ export default function Dashboard() {
                   <Link to="/checkout" className="block">
                     <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
                       <Lock className="h-6 w-6 mr-2" />
-                      DÉVERROUILLER L'ACCÈS (49€)
+                      ACCÉDER AU SAVOIR (49€)
                     </Button>
                   </Link>
                 )}
@@ -304,9 +304,9 @@ export default function Dashboard() {
                 <div className="relative z-10">
                   <div className="flex items-center justify-between gap-4 mb-3">
                     <div>
-                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">UPGRADE SYSTEM</p>
+                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">NIVEAU SUPÉRIEUR</p>
                       <p className="font-heading text-lg font-semibold text-foreground mt-1">
-                        Débloquez le module complet System Reboot (-20%)
+                        Accédez au Reset Fondamental complet (-20%)
                       </p>
                     </div>
                     <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center">
@@ -317,7 +317,7 @@ export default function Dashboard() {
                   <Link to="/checkout?plan=SYSTEM_REBOOT" className="block">
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                       <ArrowRight className="h-4 w-4 mr-2" />
-                      UPGRADE VERS SYSTEM REBOOT
+                      ACCÉDER AU RESET FONDAMENTAL
                     </Button>
                   </Link>
                 </div>
@@ -328,7 +328,7 @@ export default function Dashboard() {
             <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-center gap-2 mb-3">
                 <Battery className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">ÉNERGIE SYSTÈME</span>
+                <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ÉNERGIE</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
@@ -345,7 +345,7 @@ export default function Dashboard() {
             <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">MODULE ACTIF</span>
+                <span className="font-mono text-[10px] text-foreground/40">PROGRAMME ACTIF</span>
               </div>
               <p className="font-mono text-lg font-semibold text-foreground">{currentProgram.name.replace('NIVO ', '')}</p>
               <p className="font-mono text-xs text-foreground/40">Jour {stats?.currentDay || 1} / {currentProgram.totalDays}</p>

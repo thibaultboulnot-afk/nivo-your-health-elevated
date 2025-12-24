@@ -28,7 +28,7 @@ export interface Program {
 export const PROGRAMS: Record<ProgramTier, Program> = {
   RAPID_PATCH: {
     id: 'RAPID_PATCH',
-    name: 'NIVO RAPID_PATCH',
+    name: 'NIVO Soulagement Express',
     description: 'Protocole de récupération rapide - 7 jours',
     totalDays: 7,
     phases: [
@@ -60,8 +60,8 @@ export const PROGRAMS: Record<ProgramTier, Program> = {
   },
   SYSTEM_REBOOT: {
     id: 'SYSTEM_REBOOT',
-    name: 'NIVO SYSTEM_REBOOT',
-    description: 'Reprogrammation complète du système - 21 jours',
+    name: 'NIVO Reset Fondamental',
+    description: 'Reset complet de votre posture - 21 jours',
     totalDays: 21,
     phases: [
       { name: 'Éveil', days: [1, 7] },
@@ -93,8 +93,8 @@ export const PROGRAMS: Record<ProgramTier, Program> = {
   },
   ARCHITECT_MODE: {
     id: 'ARCHITECT_MODE',
-    name: 'NIVO ARCHITECT_MODE',
-    description: 'Maintenance préventive à vie - 90 jours',
+    name: 'NIVO Architecte de Performance',
+    description: 'Routine de performance à vie - 90 jours',
     totalDays: 90,
     phases: [
       { name: 'Fondations', days: [1, 30] },

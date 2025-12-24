@@ -15,52 +15,52 @@ interface Answer {
 }
 
 const scanningTexts = [
-  'Initialisation du système...',
+  'Initialisation du bilan...',
   'Connexion aux capteurs biomécaniques...',
-  'Check vertèbres cervicales...',
+  'Analyse vertèbres cervicales...',
   'Analyse posture lombaire...',
   'Détection des tensions musculaires...',
-  'Évaluation du système nerveux...',
+  'Évaluation du niveau de forme...',
   'Compilation des données...',
 ];
 
 const questions = {
   Q1: {
-    label: 'ERROR LOG DETECTED',
-    title: 'Où se situe la défaillance principale ?',
+    label: 'TENSION DÉTECTÉE',
+    title: 'Où ressentez-vous le plus de tensions ?',
     choices: [
-      { id: 'cervicales', label: 'Cervicales', subtitle: 'Tech Neck' },
-      { id: 'lombaires', label: 'Lombaires', subtitle: 'Core Failure' },
-      { id: 'fatigue', label: 'Fatigue', subtitle: 'System Crash' },
+      { id: 'cervicales', label: 'Cervicales', subtitle: 'Nuque & épaules' },
+      { id: 'lombaires', label: 'Lombaires', subtitle: 'Bas du dos' },
+      { id: 'fatigue', label: 'Fatigue générale', subtitle: 'Manque d\'énergie' },
     ],
   },
   Q2: {
-    label: 'ALERT FREQUENCY',
-    title: 'À quelle fréquence le système envoie-t-il des signaux ?',
+    label: 'FRÉQUENCE',
+    title: 'À quelle fréquence ressentez-vous ces tensions ?',
     choices: [
-      { id: 'constante', label: 'Constante', subtitle: 'Alerte permanente' },
-      { id: 'fin-journee', label: 'Fin de journée', subtitle: 'Accumulation' },
-      { id: 'reveil', label: 'Au réveil', subtitle: 'Post-repos' },
+      { id: 'constante', label: 'Constante', subtitle: 'Toute la journée' },
+      { id: 'fin-journee', label: 'Fin de journée', subtitle: 'Après le travail' },
+      { id: 'reveil', label: 'Au réveil', subtitle: 'Dès le matin' },
     ],
   },
   Q3: {
-    label: 'PERFORMANCE IMPACT',
-    title: 'Quel est l\'impact sur votre bande passante ?',
+    label: 'IMPACT QUOTIDIEN',
+    title: 'Quel impact sur votre énergie quotidienne ?',
     choices: [
-      { id: 'nul', label: 'Nul', subtitle: 'Maintenance préventive' },
-      { id: 'genant', label: 'Gênant', subtitle: 'Latence détectée' },
-      { id: 'critique', label: 'Critique', subtitle: 'Shutdown imminent' },
+      { id: 'nul', label: 'Léger', subtitle: 'Routine préventive' },
+      { id: 'genant', label: 'Modéré', subtitle: 'Gêne au quotidien' },
+      { id: 'critique', label: 'Important', subtitle: 'Fatigue chronique' },
     ],
   },
 };
 
 const computingLines = [
-  '> Analysing crash_log.dat...',
-  '> Mapping tension_points[]...',
-  '> Calculating recovery_index...',
-  '> Generating patch_recommendation...',
-  '> Compiling final_report.json...',
-  '> System analysis complete.',
+  '> Analyse des données en cours...',
+  '> Cartographie des zones de tension...',
+  '> Calcul du niveau de forme...',
+  '> Génération des recommandations...',
+  '> Préparation du rapport final...',
+  '> Bilan terminé.',
 ];
 
 export default function Diagnostic() {
@@ -179,13 +179,13 @@ export default function Diagnostic() {
 
   const getRecommendation = () => {
     if (answers.crashSource === 'cervicales') {
-      return { name: 'Rapid Patch (Neck)', price: '49€', plan: 'RAPID_PATCH' };
+      return { name: 'Soulagement Express (Nuque)', price: '49€', plan: 'RAPID_PATCH' };
     } else if (answers.crashSource === 'lombaires') {
-      return { name: 'Rapid Patch (Back)', price: '49€', plan: 'RAPID_PATCH' };
+      return { name: 'Soulagement Express (Dos)', price: '49€', plan: 'RAPID_PATCH' };
     } else if (answers.performanceImpact === 'critique' || answers.crashSource === 'fatigue') {
-      return { name: 'System Reboot (Full)', price: '99€', plan: 'SYSTEM_REBOOT' };
+      return { name: 'Reset Fondamental (Complet)', price: '99€', plan: 'SYSTEM_REBOOT' };
     } else {
-      return { name: 'Rapid Patch', price: '49€', plan: 'RAPID_PATCH' };
+      return { name: 'Soulagement Express', price: '49€', plan: 'RAPID_PATCH' };
     }
   };
 
@@ -238,13 +238,13 @@ export default function Diagnostic() {
             >
               <div className="mb-8">
                 <span className="text-primary font-mono text-xs tracking-widest uppercase mb-4 block">
-                  Bio-System Diagnostic v3.0
+                  Bilan Bio-Mécanique v3.0
                 </span>
                 <h1 className="font-heading font-medium text-4xl md:text-5xl tracking-tight leading-[1.1] mb-4">
-                  Analysez votre <span className="text-primary">système</span>
+                  Évaluez votre <span className="text-primary">niveau de forme</span>
                 </h1>
                 <p className="text-slate-400 font-body leading-relaxed">
-                  Lancez un diagnostic complet pour identifier les défaillances posturales et recevoir un protocole de récupération personnalisé.
+                  Répondez à quelques questions pour recevoir un programme personnalisé adapté à vos besoins.
                 </p>
               </div>
 
@@ -268,7 +268,7 @@ export default function Diagnostic() {
                 className="bg-primary hover:bg-primary/90 text-background font-medium shadow-radioactive shimmer-btn group"
               >
                 <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Lancer l'analyse système
+                Commencer mon bilan
               </Button>
             </motion.div>
           )}
@@ -507,7 +507,7 @@ export default function Diagnostic() {
                           {healthScore}%
                         </motion.span>
                         <span className="font-mono text-[10px] text-slate-500 uppercase">
-                          Santé Système
+                          Niveau de Forme
                         </span>
                       </div>
                       <div className="absolute inset-0 rounded-full shadow-[0_0_60px_rgba(255,107,74,0.3)]" />
@@ -519,7 +519,7 @@ export default function Diagnostic() {
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="w-5 h-5 text-primary mt-0.5" />
                       <div>
-                        <h4 className="font-heading font-medium text-lg tracking-tight">Latence Sévère Détectée</h4>
+                        <h4 className="font-heading font-medium text-lg tracking-tight">Déséquilibre Détecté</h4>
                         <p className="text-sm text-slate-400">
                           au niveau de la <span className="text-primary">{getZoneLabel()}</span>
                         </p>
@@ -532,14 +532,14 @@ export default function Diagnostic() {
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-5 h-5 text-primary" />
                       <span className="font-mono text-xs text-primary uppercase tracking-wider">
-                        Patch Recommandé
+                        Programme Recommandé
                       </span>
                     </div>
                     <h3 className="font-heading font-medium text-2xl tracking-tight mb-2">
                       {getRecommendation().name}
                     </h3>
                     <p className="text-slate-400 text-sm mb-4">
-                      Protocole ciblé pour corriger les défaillances identifiées.
+                      Programme ciblé pour corriger les déséquilibres identifiés.
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-2xl font-bold text-primary">
@@ -559,7 +559,7 @@ export default function Diagnostic() {
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-background font-medium shadow-radioactive shimmer-btn group animate-pulse"
                 >
-                  Installer le Patch
+                  Accéder au Programme
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
