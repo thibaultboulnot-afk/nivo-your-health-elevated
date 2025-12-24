@@ -11,10 +11,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
 const OBJECTIVES = [
-  { value: 'acute_pain', label: 'Douleur Aiguë' },
-  { value: 'daily_maintenance', label: 'Maintenance Quotidienne' },
-  { value: 'max_productivity', label: 'Productivité Max' },
-  { value: 'total_disconnect', label: 'Déconnexion Totale' },
+  { value: 'acute_pain', label: 'Soulager une douleur immédiate' },
+  { value: 'daily_maintenance', label: 'Instaurer une routine quotidienne' },
+  { value: 'max_productivity', label: 'Booster ma productivité physique' },
+  { value: 'total_disconnect', label: 'Récupération & Détente' },
 ];
 
 type Step = 'signup' | 'profile' | 'welcome';
@@ -146,8 +146,8 @@ export default function Onboarding() {
   }
 
   const stepIndicators = [
-    { key: 'signup', label: 'ACTIVATION', icon: Lock, completed: currentStep !== 'signup' },
-    { key: 'profile', label: 'CALIBRAGE', icon: User, completed: showWelcome },
+    { key: 'signup', label: 'COMPTE', icon: Lock, completed: currentStep !== 'signup' },
+    { key: 'profile', label: 'PROFIL', icon: User, completed: showWelcome },
   ];
 
   return (
@@ -174,7 +174,7 @@ export default function Onboarding() {
             <div className="flex items-center gap-3 mb-4">
               <Terminal className="w-5 h-5 text-primary" />
               <span className="font-mono text-xs text-primary uppercase tracking-widest">
-                Configuration Système
+                Finalisation de votre profil
               </span>
             </div>
             
@@ -206,12 +206,12 @@ export default function Onboarding() {
             </div>
 
             <h1 className="font-heading font-bold text-2xl text-foreground">
-              {currentStep === 'signup' ? 'Activation du Compte' : 'Configuration du Profil'}
+              {currentStep === 'signup' ? 'Sécurisez votre espace membre' : 'Personnalisation du programme'}
             </h1>
             <p className="font-mono text-xs text-foreground/40 mt-2">
               {currentStep === 'signup' 
-                ? '> auth.activate() // secure access' 
-                : '> profile.calibrate() // personalization'}
+                ? '> Créez vos identifiants de connexion' 
+                : '> Adaptez votre programme à vos besoins'}
             </p>
           </div>
 
@@ -229,7 +229,7 @@ export default function Onboarding() {
                 <div className="flex items-center gap-2 mb-4">
                   <Lock className="w-4 h-4 text-foreground/40" />
                   <span className="font-mono text-[10px] text-foreground/40 uppercase tracking-widest">
-                    1. Activez Votre Accès Sécurisé
+                    1. Vos identifiants
                   </span>
                 </div>
 
@@ -309,7 +309,7 @@ export default function Onboarding() {
                   <div className="flex items-center gap-2 mb-4">
                     <User className="w-4 h-4 text-foreground/40" />
                     <span className="font-mono text-[10px] text-foreground/40 uppercase tracking-widest">
-                      2. Configuration du Système
+                      2. Vos informations
                     </span>
                   </div>
                   
@@ -347,7 +347,7 @@ export default function Onboarding() {
                   <div className="flex items-center gap-2 mb-4">
                     <Target className="w-4 h-4 text-foreground/40" />
                     <span className="font-mono text-[10px] text-foreground/40 uppercase tracking-widest">
-                      Objectif du Patch
+                      Quel est votre objectif principal ?
                     </span>
                   </div>
                   
@@ -378,12 +378,12 @@ export default function Onboarding() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      ENREGISTREMENT...
+                      FINALISATION...
                     </>
                   ) : (
                     <>
                       <ArrowRight className="w-5 h-5 mr-2" />
-                      FINALISER LA CONFIGURATION
+                      ACCÉDER À MA MÉTHODE
                     </>
                   )}
                 </Button>
@@ -416,16 +416,16 @@ export default function Onboarding() {
 
               <div className="space-y-2">
                 <h2 className="font-heading font-bold text-2xl text-foreground">
-                  BIENVENUE À BORD, {firstName.toUpperCase() || 'PILOTE'}
+                  BIENVENUE CHEZ NIVO.
                 </h2>
                 <p className="font-mono text-sm text-foreground/60 leading-relaxed">
-                  Félicitations pour votre investissement. Nous avons hâte de vous aider à booster votre productivité et éliminer vos douleurs.
+                  Félicitations pour votre engagement. Votre programme personnalisé est généré et prêt à l'emploi. Vous pouvez lancer votre première session dès maintenant.
                 </p>
               </div>
 
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                 <p className="font-mono text-xs text-primary uppercase tracking-wider">
-                  Votre protocole est prêt
+                  Votre programme est prêt
                 </p>
               </div>
 
@@ -434,7 +434,7 @@ export default function Onboarding() {
                 className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold text-sm shadow-[0_0_30px_rgba(255,107,74,0.4)] transition-all hover:scale-[1.02]"
               >
                 <ArrowRight className="w-5 h-5 mr-2" />
-                ACCÉDER AU COCKPIT
+                ACCÉDER À MON ESPACE
               </Button>
 
               <p className="font-mono text-[10px] text-foreground/30">

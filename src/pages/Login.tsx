@@ -148,11 +148,11 @@ const Login = () => {
                 </motion.div>
                 <div>
                   <h1 className="font-mono text-sm font-semibold text-white">
-                    ACCÈS_SYSTÈME <span className="text-primary">//</span> NIVO_OS
+                    ACCÈS MEMBRE <span className="text-primary">//</span> NIVO
                   </h1>
                   <div className="flex items-center gap-2 mt-0.5">
                     <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                    <span className="font-mono text-xs text-emerald-500/80">Connexion sécurisée chiffrée</span>
+                    <span className="font-mono text-xs text-emerald-500/80">Retrouvez votre progression et vos protocoles</span>
                   </div>
                 </div>
               </div>
@@ -231,10 +231,10 @@ const Login = () => {
                             animate={{ opacity: [1, 0.5, 1] }}
                             transition={{ duration: 1, repeat: Infinity }}
                           >
-                            INITIALISATION...
+                            CONNEXION...
                           </motion.span>
                         ) : (
-                          "INITIALISER LA SESSION"
+                          "SE CONNECTER"
                         )}
                       </Button>
                     </form>
@@ -255,7 +255,7 @@ const Login = () => {
                         className="group flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 bg-white/[0.02] hover:bg-primary/5 transition-all"
                       >
                         <span className="font-mono text-xs text-white/60 group-hover:text-primary transition-colors">
-                          [ DÉPLOYER UNE NOUVELLE LICENCE ]
+                          [ CRÉER UN COMPTE ]
                         </span>
                       </Link>
                     </div>
@@ -324,7 +324,7 @@ const Login = () => {
                       <ShieldCheck className="w-8 h-8 text-emerald-500" />
                     </motion.div>
                     <p className="font-mono text-emerald-500 text-lg">ACCÈS AUTORISÉ</p>
-                    <p className="font-mono text-white/40 text-sm mt-2">Redirection vers le cockpit...</p>
+                    <p className="font-mono text-white/40 text-sm mt-2">Redirection vers votre espace...</p>
                   </motion.div>
                 )}
 
