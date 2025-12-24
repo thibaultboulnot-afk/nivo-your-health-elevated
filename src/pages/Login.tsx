@@ -243,10 +243,10 @@ const Login = () => {
                     <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
                       {/* Forgot Password */}
                       <Link 
-                        to="#" 
+                        to="/forgot-password" 
                         className="block font-mono text-xs text-white/40 hover:text-primary transition-colors"
                       >
-                        &gt; réinitialiser_identifiants --force
+                        &gt; Mot de passe oublié ?
                       </Link>
 
                       {/* Checkout CTA */}
