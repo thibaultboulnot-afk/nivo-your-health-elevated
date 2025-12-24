@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Settings,
   Activity,
   Zap,
@@ -13,7 +13,8 @@ import {
   Play,
   User,
   Battery,
-  AlertTriangle
+  AlertTriangle,
+  ArrowRight,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
@@ -26,15 +27,21 @@ export default function Dashboard() {
   // Get current session data
   const currentProgram = stats ? PROGRAMS[stats.currentProgram] : PROGRAMS['SYSTEM_REBOOT'];
   const currentSession = stats ? getCurrentSession(stats.currentDay, stats.currentProgram) : null;
-  
+
   // Check if current program is unlocked
   const isProgramUnlocked = stats?.unlockedPrograms.includes(stats?.currentProgram || 'SYSTEM_REBOOT') || false;
+
+  // Upsell: Basic (Rapid Patch) -> Upgrade
+  const showUpgradeSystem =
+    !!stats &&
+    stats.unlockedPrograms.includes('RAPID_PATCH') &&
+    !stats.unlockedPrograms.includes('SYSTEM_REBOOT') &&
+    !stats.unlockedPrograms.includes('ARCHITECT_MODE');
 
   // Determine status based on health score
   const getStatusConfig = () => {
     if (!stats?.healthScore) {
       return {
-        text: 'AUCUN DIAGNOSTIC. ANALYSE REQUISE.',
         color: 'text-foreground/50',
         bgColor: 'bg-white/5',
         borderColor: 'border-white/10',
@@ -287,6 +294,36 @@ export default function Dashboard() {
 
           {/* Right Column - System Stats */}
           <section className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            {/* Upgrade System (Rapid Patch owners) */}
+            {showUpgradeSystem && (
+              <div className="bg-black/60 rounded-xl border border-primary/30 p-6 relative overflow-hidden hover:border-primary/50 transition-colors">
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute -top-16 -right-16 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+                </div>
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <div>
+                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">UPGRADE SYSTEM</p>
+                      <p className="font-heading text-lg font-semibold text-foreground mt-1">
+                        Débloquez le module complet System Reboot (-20%)
+                      </p>
+                    </div>
+                    <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+
+                  <Link to="/checkout?plan=SYSTEM_REBOOT" className="block">
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                      UPGRADE VERS SYSTEM REBOOT
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Battery Status */}
             <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-center gap-2 mb-3">
@@ -295,7 +332,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all"
                     style={{ width: `${displayScore}%` }}
                   />

@@ -58,23 +58,32 @@ export function useUserStats() {
 
         if (progressionError) throw progressionError;
 
-        // Find active program (the one with most recent activity or first unlocked)
-        const activeProgression = progressions?.find(p => p.unlocked) || progressions?.[0];
-        
+        // Normalize DB program ids to match ProgramTier enum (handles "rapid_patch" vs "RAPID_PATCH")
+        const normalizeProgramId = (value: string | null | undefined): ProgramTier | null => {
+          if (!value) return null;
+          return value
+            .toString()
+            .trim()
+            .replace(/-/g, '_')
+            .toUpperCase() as ProgramTier;
+        };
+
+        // Find active program (the one with most recent activity or first row)
+        const activeProgression = progressions?.find((p) => p.unlocked) || progressions?.[0];
+
         // Get unlocked programs
-        const unlockedPrograms = progressions
-          ?.filter(p => p.unlocked)
-          .map(p => p.program_id as ProgramTier) || [];
+        const unlockedPrograms =
+          progressions?.filter((p) => p.unlocked).map((p) => normalizeProgramId(p.program_id)!).filter(Boolean) || [];
 
         setStats({
           firstName: profile?.first_name || user.user_metadata?.first_name || null,
           lastName: profile?.last_name || null,
           healthScore: diagnostic?.health_score || null,
-          currentProgram: (activeProgression?.program_id as ProgramTier) || 'SYSTEM_REBOOT',
+          currentProgram: normalizeProgramId(activeProgression?.program_id) || 'SYSTEM_REBOOT',
           currentDay: activeProgression?.current_day || 1,
           streak: activeProgression?.streak_count || 0,
           totalPatches: progressions?.reduce((acc, p) => acc + (p.current_day || 0), 0) || 0,
-          unlockedPrograms: unlockedPrograms.length > 0 ? unlockedPrograms : ['SYSTEM_REBOOT'],
+          unlockedPrograms,
         });
       } catch (e) {
         setError(e as Error);
