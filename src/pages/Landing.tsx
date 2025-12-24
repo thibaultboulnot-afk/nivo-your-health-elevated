@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { ArrowRight, ChevronRight, ChevronUp, Map, Brain, Zap, Activity, Check, Lock, Eye, Shield, Cpu, X } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import heroMobileIllustration from '@/assets/hero-mobile-illustration.png';
 
 // --- CONFIGURATION DU CONTENU DYNAMIQUE ---
 const PROGRAM_DETAILS = {
@@ -275,6 +276,26 @@ export default function Landing() {
                 </Button>
               </Link>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Mobile Hero Illustration */}
+      <section className="md:hidden py-8 px-4 relative z-10">
+        <div className="container mx-auto max-w-xs">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative"
+          >
+            {/* Glow effect behind image */}
+            <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full" />
+            <img 
+              src={heroMobileIllustration} 
+              alt="Illustration posture optimale" 
+              className="relative z-10 w-full h-auto max-h-[280px] object-contain mx-auto"
+            />
           </motion.div>
         </div>
       </section>
