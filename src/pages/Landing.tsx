@@ -218,7 +218,7 @@ export default function Landing() {
             {/* Title - Sentence case for readability */}
             <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
               <motion.span variants={itemVariants} className="inline-block text-foreground">Reprenez le </motion.span>
-              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">contrôle </motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic pr-2">contrôle </motion.span>
               <br />
               <motion.span 
                 variants={itemVariants} 
@@ -783,7 +783,7 @@ export default function Landing() {
 
             {/* CARD 2: SYSTEM REBOOT */}
             <SpotlightCard 
-              className={`group flex flex-col p-6 rounded-t-3xl md:rounded-3xl md:rounded-b-none border transition-all duration-500 ease-apple relative transform md:-translate-y-4 ${selectedProgram === 'SYSTEM_REBOOT' ? 'bg-[#0a0a12] border-primary border-b-0 md:border-b shadow-[0_0_60px_-10px_rgba(255,107,74,0.3)]' : 'bg-[#0a0a12] border-white/5 hover:border-primary/40'}`}
+              className={`group flex flex-col p-6 rounded-t-3xl md:rounded-3xl md:rounded-b-none border transition-all duration-500 ease-apple relative transform md:-translate-y-4 overflow-visible ${selectedProgram === 'SYSTEM_REBOOT' ? 'bg-[#0a0a12] border-primary border-b-0 md:border-b shadow-[0_0_60px_-10px_rgba(255,107,74,0.3)]' : 'bg-[#0a0a12] border-white/5 hover:border-primary/40'}`}
             >
               {/* Recommended Badge */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
