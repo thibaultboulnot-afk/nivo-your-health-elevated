@@ -1276,10 +1276,17 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="py-10 px-6 border-t border-white/5 bg-[#030307] relative z-10">
-        <div className="container mx-auto text-center">
+        <div className="container mx-auto text-center space-y-4">
           <p className="font-mono text-xs text-white/30">
             &copy; {new Date().getFullYear()} NIVO • Biologie de Précision pour Créateurs
           </p>
+          <div className="flex items-center justify-center gap-2 md:gap-4 text-white/30 text-[10px] md:text-xs font-mono">
+            <Link to="/mentions-legales" className="hover:text-white/60 transition-colors">Mentions Légales</Link>
+            <span className="text-white/20">|</span>
+            <Link to="/cgv" className="hover:text-white/60 transition-colors">CGV</Link>
+            <span className="text-white/20">|</span>
+            <Link to="/confidentialite" className="hover:text-white/60 transition-colors">Confidentialité</Link>
+          </div>
         </div>
       </footer>
     </div>
