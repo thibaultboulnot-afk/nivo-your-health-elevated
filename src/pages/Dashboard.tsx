@@ -260,44 +260,45 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Left Column - Next Action */}
           <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="bg-black/60 rounded-2xl border border-primary/20 p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
+            <div className="bg-black/60 rounded-xl md:rounded-2xl border border-primary/20 p-5 md:p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
               {/* Glow effect */}
               <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
               </div>
 
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <Headphones className="h-5 w-5 text-primary" />
-                  <span className="font-mono text-xs text-primary">ROUTINE DU JOUR</span>
+                <div className="flex items-center gap-2 mb-3 md:mb-4">
+                  <Headphones className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                  <span className="font-mono text-[11px] md:text-xs text-primary">ROUTINE DU JOUR</span>
                 </div>
 
-                <h2 className="font-heading text-3xl font-bold text-foreground mb-2">
+                <h2 className="font-heading text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">
                   {currentSession?.title || 'Session du jour'}
                 </h2>
-                <p className="font-mono text-sm text-foreground/50 mb-6">
+                <p className="font-mono text-xs md:text-sm text-foreground/50 mb-4 md:mb-6">
                   J-{stats?.currentDay || 1} :: {currentProgram.name} // {currentSession?.duration}
                 </p>
 
                 {/* Objective */}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
-                  <p className="font-mono text-xs text-foreground/40 mb-1">OBJECTIF</p>
-                  <p className="text-foreground/80">{currentSession?.clinicalGoal}</p>
+                <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6">
+                  <p className="font-mono text-[10px] md:text-xs text-foreground/40 mb-1">OBJECTIF</p>
+                  <p className="text-sm md:text-base text-foreground/80">{currentSession?.clinicalGoal}</p>
                 </div>
 
                 {/* Launch Button - Show based on unlock status */}
                 {isProgramUnlocked ? (
                   <Link to={`/session/${(stats?.currentProgram || 'system-reboot').toLowerCase().replace('_', '-')}`} className="block">
-                    <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                      <Play className="h-6 w-6 mr-2" />
+                    <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                      <Play className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                       LANCER LA SESSION
                     </Button>
                   </Link>
                 ) : (
                   <Link to="/checkout" className="block">
-                    <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                      <Lock className="h-6 w-6 mr-2" />
-                      ACCÉDER AU SAVOIR (49€)
+                    <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                      <Lock className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                      <span className="hidden sm:inline">ACCÉDER AU SAVOIR (49€)</span>
+                      <span className="sm:hidden">DÉBLOQUER (49€)</span>
                     </Button>
                   </Link>
                 )}

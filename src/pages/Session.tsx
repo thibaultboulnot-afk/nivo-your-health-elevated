@@ -239,36 +239,38 @@ export default function Session() {
       </AnimatePresence>
 
       {/* Header HUD */}
-      <header className="relative z-20 flex items-center justify-between px-6 py-4">
-        {/* Exit Button */}
-        <button
-          onClick={handleExit}
-          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group"
-        >
-          <X className="h-5 w-5" />
-          <span className="font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-            QUITTER
-          </span>
-        </button>
+      <header className="relative z-20 px-4 md:px-6 py-3 md:py-4">
+        <div className="flex items-center justify-between">
+          {/* Exit Button */}
+          <button
+            onClick={handleExit}
+            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group p-2 -ml-2"
+          >
+            <X className="h-5 w-5" />
+            <span className="font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline">
+              QUITTER
+            </span>
+          </button>
 
-        {/* Session Title */}
-        <div className="absolute left-1/2 -translate-x-1/2 text-center">
-          <h1 className="font-mono text-sm text-white/80">
+          {/* Timer - Always visible */}
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="font-mono text-xl md:text-2xl text-primary tabular-nums">
+              {formatTime(currentTime)}
+            </div>
+            {isPlaying && (
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            )}
+          </div>
+        </div>
+        
+        {/* Session Title - Below on mobile */}
+        <div className="text-center mt-2 md:absolute md:left-1/2 md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:mt-0">
+          <h1 className="font-mono text-xs md:text-sm text-white/80 truncate max-w-[200px] md:max-w-none mx-auto">
             {session.title}
           </h1>
-          <p className="font-mono text-xs text-white/30">
+          <p className="font-mono text-[10px] md:text-xs text-white/30">
             Jour {currentDay} • {session.subtitle}
           </p>
-        </div>
-
-        {/* Timer */}
-        <div className="flex items-center gap-3">
-          <div className="font-mono text-2xl text-primary tabular-nums">
-            {formatTime(currentTime)}
-          </div>
-          {isPlaying && (
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          )}
         </div>
       </header>
 
@@ -382,7 +384,7 @@ export default function Session() {
         </span>
       </div>
 
-      {/* Blackout Mode Button (hidden on mobile) */}
+      {/* Blackout Mode Button - Desktop: left side, Mobile: in footer area */}
       <button
         onClick={() => setIsBlackoutMode(true)}
         className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors group"
@@ -460,21 +462,31 @@ export default function Session() {
           </Button>
         </div>
 
-        {/* Exercise Steps Indicator */}
-        <div className="flex justify-center gap-2 mt-4">
-          {session.steps.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentExercise(index + 1)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index + 1 === currentExercise
-                  ? 'bg-primary w-6 shadow-[0_0_10px_rgba(255,107,74,0.6)]'
-                  : index + 1 < currentExercise
-                  ? 'bg-emerald-500'
-                  : 'bg-white/20 hover:bg-white/40'
-              }`}
-            />
-          ))}
+        {/* Exercise Steps Indicator + Mobile Blackout Button */}
+        <div className="flex items-center justify-center gap-3 mt-4">
+          {/* Mobile Blackout Button */}
+          <button
+            onClick={() => setIsBlackoutMode(true)}
+            className="md:hidden w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white/60 hover:border-primary/30 transition-all"
+          >
+            <Moon className="w-4 h-4" />
+          </button>
+          
+          <div className="flex gap-2">
+            {session.steps.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentExercise(index + 1)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index + 1 === currentExercise
+                    ? 'bg-primary w-6 shadow-[0_0_10px_rgba(255,107,74,0.6)]'
+                    : index + 1 < currentExercise
+                    ? 'bg-emerald-500'
+                    : 'bg-white/20 hover:bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </footer>
 

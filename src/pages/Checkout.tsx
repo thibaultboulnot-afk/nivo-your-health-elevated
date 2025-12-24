@@ -130,23 +130,23 @@ export default function Checkout() {
         </div>
       </nav>
 
-      <main className="pt-24 pb-12 px-6 min-h-screen flex items-center justify-center">
+      <main className="pt-20 md:pt-24 pb-8 md:pb-12 px-4 md:px-6 min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-2xl"
         >
           {/* Header */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
-              <Terminal className="w-4 h-4 text-primary" />
-              <span className="font-mono text-sm text-primary">PASSERELLE DE PAIEMENT SÉCURISÉE</span>
+          <div className="text-center mb-6 md:mb-10">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-primary/10 border border-primary/30 mb-4 md:mb-6">
+              <Terminal className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+              <span className="font-mono text-xs md:text-sm text-primary">PAIEMENT SÉCURISÉ</span>
             </div>
 
-            <h1 className="font-heading font-medium text-3xl md:text-4xl tracking-tight mb-2">
+            <h1 className="font-heading font-medium text-2xl md:text-4xl tracking-tight mb-2">
               Initialisation du protocole
             </h1>
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-muted-foreground font-mono text-xs md:text-sm">
               {'>'} autorisation_requise: true
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function Checkout() {
             </div>
 
             {/* Centered Content */}
-            <div className="p-8 md:p-12">
+            <div className="p-5 md:p-12">
               <div className="flex items-center justify-center gap-2 mb-8">
                 <Shield className="w-5 h-5 text-primary" />
                 <span className="font-mono text-sm text-primary uppercase tracking-widest">
@@ -171,61 +171,61 @@ export default function Checkout() {
               </div>
 
               {/* Package Card - Holographic - Enlarged */}
-              <div className="p-8 rounded-xl bg-gradient-to-br from-primary/15 via-white/5 to-transparent border border-primary/30 relative overflow-hidden mb-8">
+              <div className="p-5 md:p-8 rounded-xl bg-gradient-to-br from-primary/15 via-white/5 to-transparent border border-primary/30 relative overflow-hidden mb-6 md:mb-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
                 
                 <div className="relative z-10">
                   {/* Blinking Package Name */}
-                  <div className="flex items-center justify-center gap-3 mb-6">
-                    <span className="font-mono text-primary text-lg animate-pulse">▶</span>
-                    <span className="font-mono text-2xl md:text-3xl text-foreground font-medium">
+                  <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
+                    <span className="font-mono text-primary text-base md:text-lg animate-pulse">▶</span>
+                    <span className="font-mono text-lg md:text-3xl text-foreground font-medium text-center">
                       {program.name}
                     </span>
                   </div>
 
-                  <div className="flex justify-center mb-6">
-                    <span className="inline-block px-3 py-1.5 rounded text-xs font-mono bg-primary/20 border border-primary/30 text-primary">
+                  <div className="flex justify-center mb-4 md:mb-6">
+                    <span className="inline-block px-2.5 md:px-3 py-1 md:py-1.5 rounded text-[10px] md:text-xs font-mono bg-primary/20 border border-primary/30 text-primary">
                       {program.tag}
                     </span>
                   </div>
 
                   {/* Features as code */}
-                  <div className="font-mono text-sm space-y-2 mb-8 max-w-md mx-auto">
+                  <div className="font-mono text-xs md:text-sm space-y-1.5 md:space-y-2 mb-6 md:mb-8 max-w-md mx-auto">
                     {program.features.map((feature, i) => (
                       <motion.div
                         key={i}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="flex items-center gap-3 text-slate-400"
+                        className="flex items-center gap-2 md:gap-3 text-slate-400"
                       >
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span>{feature}... <span className="text-green-500">[CHARGÉ]</span></span>
+                        <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 flex-shrink-0" />
+                        <span className="truncate">{feature}... <span className="text-green-500">[OK]</span></span>
                       </motion.div>
                     ))}
                   </div>
 
                   {/* Price - Critical Data */}
-                  <div className="pt-6 border-t border-white/10 text-center">
-                    <span className="font-mono text-xs text-muted-foreground uppercase tracking-wider block mb-2">
-                      TOTAL_TRANSFERT
+                  <div className="pt-4 md:pt-6 border-t border-white/10 text-center">
+                    <span className="font-mono text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider block mb-1 md:mb-2">
+                      TOTAL
                     </span>
-                    <span className="font-heading font-medium text-5xl md:text-6xl tracking-tight text-primary">
+                    <span className="font-heading font-medium text-4xl md:text-6xl tracking-tight text-primary">
                       {program.price}€
                     </span>
-                    <span className="font-mono text-sm text-muted-foreground ml-3">
-                      // paiement unique
+                    <span className="font-mono text-xs md:text-sm text-muted-foreground ml-2 md:ml-3">
+                      // unique
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Security Badge */}
-              <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-white/5 border border-white/10 mb-8">
-                <Lock className="w-5 h-5 text-green-500" />
-                <div className="font-mono text-sm">
-                  <span className="text-green-500">SSL_CHIFFRÉ</span>
-                  <span className="text-muted-foreground"> • 256-bit • Transaction Sécurisée</span>
+              <div className="flex items-center justify-center gap-2 md:gap-3 p-3 md:p-4 rounded-lg bg-white/5 border border-white/10 mb-6 md:mb-8">
+                <Lock className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0" />
+                <div className="font-mono text-xs md:text-sm">
+                  <span className="text-green-500">SSL</span>
+                  <span className="text-muted-foreground"> • 256-bit • Sécurisé</span>
                 </div>
               </div>
 
@@ -233,23 +233,25 @@ export default function Checkout() {
               <Button
                 onClick={handleCheckout}
                 disabled={isLoading}
-                className="w-full h-16 bg-primary hover:bg-primary/90 text-background font-mono font-medium text-base shadow-radioactive transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-14 md:h-16 min-h-[56px] bg-primary hover:bg-primary/90 text-background font-mono font-medium text-sm md:text-base shadow-radioactive transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                    CONNEXION AU TERMINAL...
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3 animate-spin" />
+                    <span className="hidden sm:inline">CONNEXION AU TERMINAL...</span>
+                    <span className="sm:hidden">CONNEXION...</span>
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="w-5 h-5 mr-3" />
-                    ACCÉDER AU TERMINAL DE PAIEMENT SÉCURISÉ
+                    <ExternalLink className="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3" />
+                    <span className="hidden sm:inline">ACCÉDER AU PAIEMENT SÉCURISÉ</span>
+                    <span className="sm:hidden">PAYER MAINTENANT</span>
                   </>
                 )}
               </Button>
 
-              <p className="text-center font-mono text-xs text-muted-foreground mt-4">
-                {'>'} Vous serez redirigé vers Stripe pour finaliser la transaction chiffrée.
+              <p className="text-center font-mono text-[10px] md:text-xs text-muted-foreground mt-3 md:mt-4">
+                {'>'} Redirection vers Stripe
               </p>
             </div>
           </div>

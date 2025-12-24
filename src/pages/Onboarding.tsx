@@ -352,7 +352,7 @@ export default function Onboarding() {
                   </div>
                   
                   <Select value={objective} onValueChange={setObjective}>
-                    <SelectTrigger className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 focus:ring-0 focus:ring-offset-0 font-mono">
+                    <SelectTrigger className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 focus:ring-0 focus:ring-offset-0 font-mono h-12 min-h-[48px]">
                       <SelectValue placeholder="Sélectionnez votre objectif" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#0a0a15] border-white/10">
@@ -360,7 +360,7 @@ export default function Onboarding() {
                         <SelectItem 
                           key={obj.value} 
                           value={obj.value}
-                          className="font-mono text-sm focus:bg-primary/20 focus:text-foreground"
+                          className="font-mono text-sm focus:bg-primary/20 focus:text-foreground min-h-[44px] py-3"
                         >
                           {obj.label}
                         </SelectItem>
@@ -399,7 +399,7 @@ export default function Onboarding() {
 
       {/* Welcome Modal */}
       <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
-        <DialogContent className="bg-[#0a0a15] border-white/10 text-foreground max-w-md p-0 overflow-hidden">
+        <DialogContent className="bg-[#0a0a15] border-white/10 text-foreground max-w-md p-0 overflow-hidden" aria-describedby="welcome-description">
           <div className="relative">
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-transparent pointer-events-none" />
@@ -418,7 +418,7 @@ export default function Onboarding() {
                 <h2 className="font-heading font-bold text-2xl text-foreground">
                   BIENVENUE CHEZ NIVO.
                 </h2>
-                <p className="font-mono text-sm text-foreground/60 leading-relaxed">
+                <p id="welcome-description" className="font-mono text-sm text-foreground/60 leading-relaxed">
                   Félicitations pour votre engagement. Votre programme personnalisé est généré et prêt à l'emploi. Vous pouvez lancer votre première session dès maintenant.
                 </p>
               </div>

@@ -95,6 +95,10 @@
     @apply border-border;
   }
 
+  html {
+    scroll-padding-top: 4rem; /* For fixed navbars */
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;

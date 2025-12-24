@@ -90,43 +90,43 @@ export default function Settings() {
       <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
 
       {/* Header */}
-      <header className="relative z-20 px-6 py-6 border-b border-white/5">
+      <header className="relative z-20 px-4 md:px-6 py-4 md:py-6 border-b border-white/5">
         <div className="container mx-auto flex items-center justify-between">
           <Link 
             to="/dashboard" 
-            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors font-mono text-sm group"
+            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors font-mono text-sm group p-2 -ml-2 rounded-lg hover:bg-white/5"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            <span>&lt;-- retour_cockpit</span>
+            <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+            <span className="hidden sm:inline">&lt;-- retour</span>
           </Link>
           
-          <div className="font-mono text-xs text-white/30">
-            NIVO_OS :: RÉGLAGES_SYSTÈME
+          <div className="font-mono text-[10px] md:text-xs text-white/30">
+            RÉGLAGES
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto px-6 py-12">
+      <main className="relative z-10 container mx-auto px-4 md:px-6 py-8 md:py-12">
         <div className="max-w-xl mx-auto">
           {/* Title */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-[#ff6b4a]/20 flex items-center justify-center">
-                <User className="h-5 w-5 text-[#ff6b4a]" />
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-[#ff6b4a]/20 flex items-center justify-center">
+                <User className="h-4 w-4 md:h-5 md:w-5 text-[#ff6b4a]" />
               </div>
-              <h1 className="font-heading text-2xl font-bold text-white">
+              <h1 className="font-heading text-xl md:text-2xl font-bold text-white">
                 Réglages du Profil
               </h1>
             </div>
-            <p className="font-mono text-xs text-white/40">
+            <p className="font-mono text-[10px] md:text-xs text-white/40">
               &gt; config.user.modify()
             </p>
           </div>
 
           {/* Form Container */}
-          <div className="bg-black/60 rounded-2xl border border-white/10 p-8 shadow-[inset_0_0_40px_rgba(0,0,0,0.5)]">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-5 md:p-8 shadow-[inset_0_0_40px_rgba(0,0,0,0.5)]">
+            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
               {/* First Name */}
               <div className="space-y-2">
                 <label className="font-mono text-xs text-white/50 flex items-center gap-2">
@@ -137,7 +137,7 @@ export default function Settings() {
                   value={firstName}
                   onChange={(e) => handleChange(setFirstName, e.target.value)}
                   placeholder="Votre prénom"
-                  className="w-full bg-transparent border-0 border-b border-white/20 focus:border-[#ff6b4a] px-0 py-3 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
+                  className="w-full bg-transparent border-0 border-b border-white/20 focus:border-[#ff6b4a] px-0 py-4 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
                 />
               </div>
 
@@ -151,7 +151,7 @@ export default function Settings() {
                   value={lastName}
                   onChange={(e) => handleChange(setLastName, e.target.value)}
                   placeholder="Votre nom"
-                  className="w-full bg-transparent border-0 border-b border-white/20 focus:border-[#ff6b4a] px-0 py-3 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
+                  className="w-full bg-transparent border-0 border-b border-white/20 focus:border-[#ff6b4a] px-0 py-4 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
                 />
               </div>
 
@@ -169,11 +169,11 @@ export default function Settings() {
               </div>
 
               {/* Submit Button */}
-              <div className="pt-4">
+              <div className="pt-3 md:pt-4">
                 <Button
                   type="submit"
                   disabled={!hasChanges || updateMutation.isPending}
-                  className="w-full bg-[#ff6b4a] hover:bg-[#ff8a6a] text-black font-mono font-bold py-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,107,74,0.4)]"
+                  className="w-full bg-[#ff6b4a] hover:bg-[#ff8a6a] text-black font-mono font-bold py-6 min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,107,74,0.4)]"
                 >
                   {updateMutation.isPending ? (
                     <span className="flex items-center gap-2">
