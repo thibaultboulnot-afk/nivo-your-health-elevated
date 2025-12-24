@@ -203,18 +203,18 @@ export default function Diagnostic() {
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border backdrop-blur-md">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_-3px_hsl(var(--primary))]">
-              <span className="font-body font-bold text-lg text-background">N</span>
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_-3px_hsl(var(--primary))]">
+              <span className="font-body font-bold text-base md:text-lg text-background">N</span>
             </div>
-            <span className="font-body text-xl font-bold tracking-tight">NIVO</span>
+            <span className="font-body text-lg md:text-xl font-bold tracking-tight">NIVO</span>
           </Link>
 
           {/* Status Indicator */}
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${state === 'IDLE' ? 'bg-muted-foreground' : 'bg-primary animate-pulse'}`} />
-            <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            <span className="font-mono text-[9px] md:text-[10px] text-muted-foreground uppercase tracking-wider hidden sm:block">
               {state === 'IDLE' && 'Système en attente'}
               {state === 'SCANNING' && 'Scan en cours'}
               {(state === 'QUESTION_1' || state === 'QUESTION_2' || state === 'QUESTION_3') && 'Analyse interactive'}
@@ -225,7 +225,7 @@ export default function Diagnostic() {
         </div>
       </nav>
 
-      <main className="pt-24 pb-12 px-6 min-h-screen flex items-center justify-center">
+      <main className="pt-20 md:pt-24 pb-8 md:pb-12 px-4 md:px-6 min-h-screen flex items-center justify-center">
         <AnimatePresence mode="wait">
           {/* IDLE State */}
           {state === 'IDLE' && (
@@ -369,7 +369,7 @@ export default function Diagnostic() {
                       </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 md:gap-4">
+                    <div className="grid grid-cols-1 gap-3">
                       {q.choices.map((choice, index) => (
                         <motion.button
                           key={choice.id}
@@ -377,17 +377,21 @@ export default function Diagnostic() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                           onClick={() => handleAnswer(qKey, choice.id)}
-                          className="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 text-left"
+                          className="group p-4 md:p-6 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 active:bg-primary/10 transition-all duration-300 text-left min-h-[72px] md:min-h-0"
                         >
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <Gauge className="w-6 h-6 text-primary" />
+                          <div className="flex items-center gap-4 md:block">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center md:mb-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                              <Gauge className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                            </div>
+                            <div>
+                              <h3 className="font-heading font-medium text-lg md:text-xl tracking-tight mb-0.5 md:mb-1">
+                                {choice.label}
+                              </h3>
+                              <p className="font-mono text-[11px] md:text-xs text-slate-500">
+                                {choice.subtitle}
+                              </p>
+                            </div>
                           </div>
-                          <h3 className="font-heading font-medium text-xl tracking-tight mb-1">
-                            {choice.label}
-                          </h3>
-                          <p className="font-mono text-xs text-slate-500">
-                            {choice.subtitle}
-                          </p>
                         </motion.button>
                       ))}
                     </div>

@@ -132,19 +132,19 @@ const ForgotPassword = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
                     {/* Email Input */}
                     <div className="space-y-2">
                       <label className="font-mono text-xs text-white/50 flex items-center gap-2">
                         <Terminal className="w-3 h-3" />
-                        VOTRE_EMAIL &gt;
+                        VOTRE EMAIL &gt;
                       </label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="utilisateur@nivo.system"
-                        className="w-full bg-transparent border-0 border-b border-white/20 focus:border-primary px-0 py-3 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
+                        className="w-full bg-transparent border-0 border-b border-white/20 focus:border-primary px-0 py-4 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
                       />
                     </div>
 
@@ -152,7 +152,7 @@ const ForgotPassword = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-primary hover:bg-primary/90 text-black font-mono font-bold py-6 text-sm tracking-wider shimmer-btn"
+                      className="w-full bg-primary hover:bg-primary/90 text-black font-mono font-bold py-6 min-h-[56px] text-sm tracking-wider shimmer-btn"
                     >
                       {isLoading ? (
                         <motion.span
@@ -162,7 +162,10 @@ const ForgotPassword = () => {
                           ENVOI EN COURS...
                         </motion.span>
                       ) : (
-                        "RECEVOIR LE LIEN DE RÉINITIALISATION"
+                        <>
+                          <span className="hidden sm:inline">RECEVOIR LE LIEN</span>
+                          <span className="sm:hidden">ENVOYER</span>
+                        </>
                       )}
                     </Button>
                   </form>
