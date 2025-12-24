@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
-import { ArrowRight, ChevronRight, Map, Brain, Zap, Activity, Check, Lock, Eye, Shield, Cpu, X } from 'lucide-react';
+import { ArrowRight, ChevronRight, ChevronUp, Map, Brain, Zap, Activity, Check, Lock, Eye, Shield, Cpu, X } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 // --- CONFIGURATION DU CONTENU DYNAMIQUE ---
@@ -79,6 +79,7 @@ export default function Landing() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const details = PROGRAM_DETAILS[selectedProgram];
 
   // Check for mobile
@@ -88,6 +89,19 @@ export default function Landing() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Show/hide back to top button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 600);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Scroll animations for Hero Dashboard
   const heroRef = useRef<HTMLDivElement>(null);
@@ -1242,6 +1256,24 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Mobile Back to Top Button */}
+      {isMobile && (
+        <motion.button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-glow-primary flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: showBackToTop ? 1 : 0, 
+            scale: showBackToTop ? 1 : 0.8,
+            pointerEvents: showBackToTop ? 'auto' : 'none'
+          }}
+          transition={{ duration: 0.2 }}
+          aria-label="Retour en haut"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      )}
 
       {/* Footer */}
       <footer className="py-10 px-6 border-t border-white/5 bg-[#030307] relative z-10">
