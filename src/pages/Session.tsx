@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, Play, Pause, SkipBack, SkipForward, Volume2, Moon } from 'lucide-react';
+import { X, Play, Pause, SkipBack, SkipForward, Volume2, Moon, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +20,30 @@ export default function Session() {
   const [volume, setVolume] = useState(0.7);
   const [isBlackoutMode, setIsBlackoutMode] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check for mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Show/hide back to top button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Map URL param to program ID
   const programMap: Record<string, ProgramTier> = {
@@ -454,6 +477,24 @@ export default function Session() {
           ))}
         </div>
       </footer>
+
+      {/* Mobile Back to Top Button */}
+      {isMobile && (
+        <motion.button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-glow-primary flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: showBackToTop ? 1 : 0, 
+            scale: showBackToTop ? 1 : 0.8,
+            pointerEvents: showBackToTop ? 'auto' : 'none'
+          }}
+          transition={{ duration: 0.2 }}
+          aria-label="Retour en haut"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      )}
     </div>
   );
 }

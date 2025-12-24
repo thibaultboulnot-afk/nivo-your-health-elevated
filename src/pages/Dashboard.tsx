@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -15,14 +16,39 @@ import {
   Battery,
   AlertTriangle,
   ArrowRight,
+  ChevronUp,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { stats, isLoading } = useUserStats();
+  const [isMobile, setIsMobile] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Check for mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Show/hide back to top button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Get current session data
   const currentProgram = stats ? PROGRAMS[stats.currentProgram] : PROGRAMS['SYSTEM_REBOOT'];
@@ -435,6 +461,24 @@ export default function Dashboard() {
           </div>
         </section>
       </main>
+
+      {/* Mobile Back to Top Button */}
+      {isMobile && (
+        <motion.button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-glow-primary flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: showBackToTop ? 1 : 0, 
+            scale: showBackToTop ? 1 : 0.8,
+            pointerEvents: showBackToTop ? 'auto' : 'none'
+          }}
+          transition={{ duration: 0.2 }}
+          aria-label="Retour en haut"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      )}
     </div>
   );
 }
