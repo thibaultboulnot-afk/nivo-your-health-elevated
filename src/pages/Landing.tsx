@@ -280,7 +280,8 @@ export default function Landing() {
       </section>
 
       {/* 2. PRODUCT SHOWCASE - 3D Floating Dashboard with Scroll Animation */}
-      <section className="py-12 md:py-20 px-4 md:px-6 relative z-10 overflow-hidden" ref={heroRef}>
+      {/* Masquer complètement sur mobile */}
+      <section className="hidden md:block py-12 md:py-20 px-4 md:px-6 relative z-10 overflow-hidden" ref={heroRef}>
         <div className="container mx-auto max-w-6xl">
           {/* Section Label */}
           <div className="text-center mb-8 md:mb-12">
@@ -288,13 +289,12 @@ export default function Landing() {
             <p className="text-white/30 text-xs md:text-sm">Découvrez votre futur tableau de bord personnalisé</p>
           </div>
 
-          {/* Floating App Window Container - 2D flat on mobile with scale down */}
+          {/* Floating App Window Container */}
           <motion.div 
-            className={`relative ${isMobile ? 'scale-[0.65] origin-top -mb-32' : ''}`}
+            className="relative"
             style={{ 
-              perspective: isMobile ? 'none' : '2000px',
-              opacity: isMobile ? 1 : dashboardOpacity,
-              transform: isMobile ? 'none' : undefined,
+              perspective: '2000px',
+              opacity: dashboardOpacity,
             }}
           >
             {/* MASSIVE Orange/Red Glow Effect Behind Dashboard - Radioactive Shadow */}
@@ -326,12 +326,10 @@ export default function Landing() {
             <motion.div 
               className="relative rounded-[16px] md:rounded-[24px] border border-white/[0.06] bg-[#0A0A12] overflow-hidden glass-border"
               style={{
-                rotateX: isMobile ? 0 : smoothRotateX,
-                y: isMobile ? 0 : smoothY,
-                transformStyle: isMobile ? 'flat' : 'preserve-3d',
-                boxShadow: isMobile 
-                  ? '0 20px 40px -20px rgba(0,0,0,0.9)' 
-                  : `0 80px 160px -40px rgba(0,0,0,0.9), 0 40px 80px -30px rgba(255,107,74,0.12), 0 0 120px -20px rgba(255,107,74,0.15)`
+                rotateX: smoothRotateX,
+                y: smoothY,
+                transformStyle: 'preserve-3d',
+                boxShadow: `0 80px 160px -40px rgba(0,0,0,0.9), 0 40px 80px -30px rgba(255,107,74,0.12), 0 0 120px -20px rgba(255,107,74,0.15)`
               }}
             >
               {/* Glass Reflection Effect - Diagonal gradient on top */}
@@ -1240,11 +1238,12 @@ export default function Landing() {
               
               <motion.div
                 style={{ opacity: useTransform(manifesteScrollProgress, [0.5, 0.8], [0.2, 1]) }}
+                className="px-4"
               >
                 <Link to="/diagnostic">
-                  <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary h-12 md:h-16 px-6 md:px-12 text-sm md:text-lg rounded-full font-bold transition-all duration-500 ease-apple hover:scale-105">
-                    Sécuriser mon Actif Principal
-                    <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6" />
+                  <Button size="lg" className="shimmer-btn bg-primary hover:bg-primary/90 text-primary-foreground glow-primary h-12 md:h-16 px-5 md:px-12 text-xs md:text-lg rounded-full font-bold transition-all duration-500 ease-apple hover:scale-105 whitespace-nowrap">
+                    Sécuriser mon Actif
+                    <ArrowRight className="ml-2 h-4 w-4 md:ml-3 md:h-6 md:w-6" />
                   </Button>
                 </Link>
               </motion.div>
