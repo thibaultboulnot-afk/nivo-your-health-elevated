@@ -27,6 +27,13 @@ export default function Onboarding() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Vérification de session
+    if (!user?.id) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      navigate('/login');
+      return;
+    }
+
     if (!firstName.trim()) {
       toast.error('Le prénom est requis');
       return;
@@ -40,13 +47,15 @@ export default function Onboarding() {
     setIsSubmitting(true);
 
     try {
+      // Upsert pour créer ou mettre à jour le profil
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: user.id,
           first_name: firstName.trim(),
           last_name: lastName.trim() || null,
-        })
-        .eq('id', user?.id);
+          objective: objective,
+        }, { onConflict: 'id' });
 
       if (error) throw error;
 
@@ -54,7 +63,8 @@ export default function Onboarding() {
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      toast.error('Erreur lors de la sauvegarde');
+      // Affiche le message d'erreur précis de Supabase
+      toast.error(`Erreur: ${error.message || 'Sauvegarde impossible'}`);
     } finally {
       setIsSubmitting(false);
     }
