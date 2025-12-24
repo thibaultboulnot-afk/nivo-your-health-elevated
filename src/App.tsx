@@ -8,6 +8,8 @@ import Landing from "./pages/Landing";
 import Diagnostic from "./pages/Diagnostic";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import Session from "./pages/Session";
 import Settings from "./pages/Settings";
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/success" element={<Success />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session/:programId" element={<Session />} />
             <Route path="/settings" element={<Settings />} />
