@@ -215,26 +215,25 @@ export default function Landing() {
               </span>
             </motion.div>
 
-            {/* Title - Word by word animation with gradient */}
-            <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1] tracking-tight">
-              <motion.span variants={itemVariants} className="inline-block text-foreground">REPRENEZ LE </motion.span>
-              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">CONTRÔLE </motion.span>
+            {/* Title - Sentence case for readability */}
+            <motion.h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
+              <motion.span variants={itemVariants} className="inline-block text-foreground">Reprenez le </motion.span>
+              <motion.span variants={itemVariants} className="inline-block text-gradient-hero italic">contrôle </motion.span>
               <br />
               <motion.span 
                 variants={itemVariants} 
                 className="inline-block text-foreground"
               >
-                DE VOTRE CAPITAL PHYSIQUE.
+                de votre capital physique.
               </motion.span>
             </motion.h1>
 
-            {/* Description */}
+            {/* Description - Argument d'autorité avec sources */}
             <motion.p 
               variants={itemVariants}
-              className="text-lg md:text-xl text-white/50 font-light mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-white/60 font-light mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Fini le bricolage. Accédez à une méthode basée sur la science pour éliminer les douleurs et optimiser votre énergie quotidienne.<br />
-              <span className="text-white/30">Basé sur les méthodes McKenzie & McGill, utilisées par les athlètes de haut niveau.</span>
+              Une méthode basée sur les protocoles McKenzie & McGill pour éliminer les tensions et optimiser votre énergie. Simple, précise et conçue pour s'intégrer à votre rythme de vie.
             </motion.p>
 
             {/* CTA - With Shimmer Effect & Orange Glow */}
