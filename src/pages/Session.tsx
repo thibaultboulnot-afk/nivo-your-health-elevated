@@ -144,7 +144,7 @@ export default function Session() {
     navigate('/dashboard');
   };
 
-  // Save session to database
+  // Save session to database and update NIVO score
   const saveSession = async () => {
     if (!user) return;
 
@@ -152,8 +152,10 @@ export default function Session() {
     try {
       const sessionEnd = new Date();
       const durationSeconds = Math.round((sessionEnd.getTime() - sessionStartRef.current.getTime()) / 1000);
+      const today = new Date().toISOString().split('T')[0];
 
-      const { error } = await supabase.from('routine_sessions').insert({
+      // 1. Save the routine session
+      const { error: sessionError } = await supabase.from('routine_sessions').insert({
         user_id: user.id,
         routine_type: routine.type,
         duration_seconds: durationSeconds,
@@ -162,9 +164,33 @@ export default function Session() {
         score_boost: routine.score_boost
       });
 
-      if (error) throw error;
+      if (sessionError) throw sessionError;
 
-      toast.success('Session enregistrée !');
+      // 2. Get today's NIVO score and boost it
+      const { data: existingScore } = await supabase
+        .from('nivo_scores')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('score_date', today)
+        .maybeSingle();
+
+      if (existingScore) {
+        // Boost today's score (capped at 100)
+        const boostedScore = Math.min(100, existingScore.total_score + (routine.score_boost || 0));
+        
+        // We can't update nivo_scores due to RLS, so we insert a new boosted score
+        await supabase.from('nivo_scores').insert({
+          user_id: user.id,
+          total_score: boostedScore,
+          subjective_index: existingScore.subjective_index,
+          functional_index: existingScore.functional_index,
+          load_index: existingScore.load_index,
+          score_date: today,
+          decay_applied: false
+        });
+      }
+
+      toast.success('Session enregistrée ! +' + (routine.score_boost || 0) + ' points NIVO');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error saving session:', error);
