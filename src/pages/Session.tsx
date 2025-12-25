@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { X, Play, Pause, SkipBack, SkipForward, Volume2, Moon, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
+import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, getRoutineById, type Routine, type RoutineStep } from '@/data/programs';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Audio de test - bruit blanc relaxant
 const TEST_AUDIO_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
 export default function Session() {
-  const { programId } = useParams<{ programId: string }>();
+  const { routineId } = useParams<{ routineId: string }>();
   const navigate = useNavigate();
   const audioRef = useRef<HTMLAudioElement>(null);
   
@@ -23,6 +23,11 @@ export default function Session() {
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get routine from ID or default to daily loop
+  const routine: Routine = getRoutineById(routineId || 'daily_loop') || DAILY_ROUTINE;
+  const totalExercises = routine.steps.length;
+  const currentStep: RoutineStep | undefined = routine.steps[currentExercise - 1];
 
   // Check for mobile
   useEffect(() => {
@@ -44,18 +49,6 @@ export default function Session() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  // Map URL param to program ID
-  const programMap: Record<string, ProgramTier> = {
-    'rapid-patch': 'RAPID_PATCH',
-    'system-reboot': 'SYSTEM_REBOOT',
-    'architect-mode': 'ARCHITECT_MODE',
-  };
-
-  const currentProgramId = programMap[programId || 'system-reboot'] || 'SYSTEM_REBOOT';
-  const currentDay = 1;
-  const session = getCurrentSession(currentDay, currentProgramId);
-  const totalExercises = session?.steps.length || 5;
 
   // Audio synchronization
   useEffect(() => {
@@ -169,14 +162,6 @@ export default function Session() {
 
   const sessionProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="font-mono text-white/50">Session non trouvée</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
       {/* Hidden Audio Element */}
@@ -266,10 +251,10 @@ export default function Session() {
         {/* Session Title - Below on mobile */}
         <div className="text-center mt-2 md:absolute md:left-1/2 md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:mt-0">
           <h1 className="font-mono text-xs md:text-sm text-white/80 truncate max-w-[200px] md:max-w-none mx-auto">
-            {session.title}
+            {routine.name}
           </h1>
           <p className="font-mono text-[10px] md:text-xs text-white/30">
-            Jour {currentDay} • {session.subtitle}
+            {routine.subtitle} • {routine.duration_minutes} min
           </p>
         </div>
       </header>
@@ -354,11 +339,16 @@ export default function Session() {
           {/* Exercise Info - Floating below */}
           <div className="absolute -bottom-24 text-center">
             <p className="font-mono text-xs text-primary/60 mb-1 tracking-widest">
-              EXERCICE {currentExercise}/{totalExercises}
+              {currentStep?.phase_label || `EXERCICE ${currentExercise}/${totalExercises}`}
             </p>
             <h2 className="font-heading text-xl text-white/80">
-              {session.steps[currentExercise - 1] || 'Exercice en cours'}
+              {currentStep?.exercise.name || 'Exercice en cours'}
             </h2>
+            {currentStep && (
+              <p className="font-mono text-xs text-white/40 mt-1">
+                {Math.round(currentStep.exercise.duration_seconds / 60)} min
+              </p>
+            )}
           </div>
         </div>
       </main>
@@ -473,39 +463,40 @@ export default function Session() {
           </button>
           
           <div className="flex gap-2">
-            {session.steps.map((_, index) => (
+            {routine.steps.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentExercise(index + 1)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index + 1 === currentExercise
-                    ? 'bg-primary w-6 shadow-[0_0_10px_rgba(255,107,74,0.6)]'
-                    : index + 1 < currentExercise
-                    ? 'bg-emerald-500'
-                    : 'bg-white/20 hover:bg-white/40'
+                  index + 1 === currentExercise 
+                    ? 'bg-primary scale-125' 
+                    : index + 1 < currentExercise 
+                      ? 'bg-emerald-500/50' 
+                      : 'bg-white/20 hover:bg-white/40'
                 }`}
               />
             ))}
           </div>
         </div>
+
+        {/* Current Exercise Instructions */}
+        {currentStep && (
+          <div className="mt-6 max-w-md mx-auto text-center">
+            <p className="font-mono text-xs text-white/50 leading-relaxed">
+              {currentStep.exercise.instructions[0]}
+            </p>
+          </div>
+        )}
       </footer>
 
-      {/* Mobile Back to Top Button */}
-      {isMobile && (
-        <motion.button
+      {/* Back to top button - Mobile only */}
+      {showBackToTop && isMobile && (
+        <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-glow-primary flex items-center justify-center"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ 
-            opacity: showBackToTop ? 1 : 0, 
-            scale: showBackToTop ? 1 : 0.8,
-            pointerEvents: showBackToTop ? 'auto' : 'none'
-          }}
-          transition={{ duration: 0.2 }}
-          aria-label="Retour en haut"
+          className="fixed bottom-24 right-4 z-40 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/60 hover:bg-white/20 transition-all"
         >
-          <ChevronUp className="w-6 h-6" />
-        </motion.button>
+          <ChevronUp className="w-5 h-5" />
+        </button>
       )}
     </div>
   );
