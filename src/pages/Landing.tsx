@@ -262,9 +262,9 @@ export default function Landing() {
               variants={itemVariants}
               className="flex flex-col items-center justify-center gap-3 md:gap-4"
             >
-              <Link to="/diagnostic" className="w-full sm:w-auto">
+              <Link to="/onboarding" className="w-full sm:w-auto">
                 <Button size="lg" className="shimmer-btn w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-primary h-12 md:h-14 min-h-[48px] px-6 md:px-8 text-base md:text-lg rounded-full font-sans font-semibold transition-all duration-500 ease-apple hover:scale-105">
-                  DÉCOUVRIR LA MÉTHODE
+                  COMMENCER MAINTENANT
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
