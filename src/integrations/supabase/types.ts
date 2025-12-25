@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_checkins: {
+        Row: {
+          checkin_date: string
+          created_at: string
+          fatigue_vas: number | null
+          hours_seated: number | null
+          id: string
+          pain_vas: number | null
+          rmdq_answers: Json | null
+          stiffness_vas: number | null
+          stress_level: number | null
+          user_id: string
+        }
+        Insert: {
+          checkin_date?: string
+          created_at?: string
+          fatigue_vas?: number | null
+          hours_seated?: number | null
+          id?: string
+          pain_vas?: number | null
+          rmdq_answers?: Json | null
+          stiffness_vas?: number | null
+          stress_level?: number | null
+          user_id: string
+        }
+        Update: {
+          checkin_date?: string
+          created_at?: string
+          fatigue_vas?: number | null
+          hours_seated?: number | null
+          id?: string
+          pain_vas?: number | null
+          rmdq_answers?: Json | null
+          stiffness_vas?: number | null
+          stress_level?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nivo_scores: {
+        Row: {
+          checkin_id: string | null
+          created_at: string
+          decay_applied: boolean | null
+          functional_index: number | null
+          id: string
+          load_index: number | null
+          score_date: string
+          subjective_index: number | null
+          total_score: number
+          user_id: string
+        }
+        Insert: {
+          checkin_id?: string | null
+          created_at?: string
+          decay_applied?: boolean | null
+          functional_index?: number | null
+          id?: string
+          load_index?: number | null
+          score_date?: string
+          subjective_index?: number | null
+          total_score: number
+          user_id: string
+        }
+        Update: {
+          checkin_id?: string | null
+          created_at?: string
+          decay_applied?: boolean | null
+          functional_index?: number | null
+          id?: string
+          load_index?: number | null
+          score_date?: string
+          subjective_index?: number | null
+          total_score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nivo_scores_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "daily_checkins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      physical_tests: {
+        Row: {
+          created_at: string
+          finger_floor_distance_cm: number | null
+          id: string
+          mcgill_plank_seconds: number | null
+          test_date: string
+          user_id: string
+          wall_angel_contacts: number | null
+        }
+        Insert: {
+          created_at?: string
+          finger_floor_distance_cm?: number | null
+          id?: string
+          mcgill_plank_seconds?: number | null
+          test_date?: string
+          user_id: string
+          wall_angel_contacts?: number | null
+        }
+        Update: {
+          created_at?: string
+          finger_floor_distance_cm?: number | null
+          id?: string
+          mcgill_plank_seconds?: number | null
+          test_date?: string
+          user_id?: string
+          wall_angel_contacts?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +154,81 @@ export type Database = {
           id?: string
           last_name?: string | null
           objective?: string | null
+        }
+        Relationships: []
+      }
+      routine_sessions: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          duration_seconds: number
+          id: string
+          is_premium: boolean | null
+          routine_type: string
+          score_boost: number | null
+          session_date: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          is_premium?: boolean | null
+          routine_type: string
+          score_boost?: number | null
+          session_date?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          is_premium?: boolean | null
+          routine_type?: string
+          score_boost?: number | null
+          session_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
