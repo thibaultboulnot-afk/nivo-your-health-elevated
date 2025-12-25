@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
+import { useAccess } from '@/hooks/useAccess';
 import { Button } from '@/components/ui/button';
 import {
   Settings,
@@ -17,15 +18,17 @@ import {
   AlertTriangle,
   ArrowRight,
   ChevronUp,
+  Crown,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
-import { PROGRAMS, getCurrentSession, type ProgramTier } from '@/data/programs';
+import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, PILOT_PROGRAMS, type Protocol, type PilotProgram } from '@/data/programs';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { stats, isLoading } = useUserStats();
+  const { isPro, accessLevel } = useAccess();
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -50,46 +53,42 @@ export default function Dashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Get current session data
-  const currentProgram = stats ? PROGRAMS[stats.currentProgram] : PROGRAMS['SYSTEM_REBOOT'];
-  const currentSession = stats ? getCurrentSession(stats.currentDay, stats.currentProgram) : null;
-
-  // Check if current program is unlocked
-  const isProgramUnlocked = stats?.unlockedPrograms.includes(stats?.currentProgram || 'SYSTEM_REBOOT') || false;
-
-  // Upsell: Basic (Rapid Patch) -> Upgrade
-  const showUpgradeSystem =
-    !!stats &&
-    stats.unlockedPrograms.includes('RAPID_PATCH') &&
-    !stats.unlockedPrograms.includes('SYSTEM_REBOOT') &&
-    !stats.unlockedPrograms.includes('ARCHITECT_MODE');
-
-  // Determine status based on health score
+  // Determine status based on NIVO score
   const getStatusConfig = () => {
-    if (!stats?.healthScore) {
+    if (!stats?.nivoScore) {
       return {
+        text: 'FAIRE VOTRE CHECK-IN QUOTIDIEN',
         color: 'text-foreground/50',
         bgColor: 'bg-white/5',
         borderColor: 'border-white/10',
       };
     }
-    if (stats.healthScore < 50) {
+    if (stats.nivoScore < 40) {
       return {
-        text: 'NIVEAU DE FORME CRITIQUE. ROUTINE RECOMMANDÉE.',
+        text: 'SYSTÈME CRITIQUE. ROUTINE D\'URGENCE RECOMMANDÉE.',
+        color: 'text-red-400',
+        bgColor: 'bg-red-500/10',
+        borderColor: 'border-red-500/30',
+      };
+    }
+    if (stats.nivoScore < 60) {
+      return {
+        text: 'TENSIONS DÉTECTÉES. ROUTINE RECOMMANDÉE.',
         color: 'text-primary',
         bgColor: 'bg-primary/10',
         borderColor: 'border-primary/30',
       };
-    } else if (stats.healthScore >= 80) {
+    }
+    if (stats.nivoScore >= 80) {
       return {
-        text: 'NIVEAU DE FORME OPTIMAL. CONTINUEZ AINSI !',
+        text: 'SYSTÈME OPTIMAL. MODE MAINTENANCE.',
         color: 'text-emerald-400',
         bgColor: 'bg-emerald-500/10',
         borderColor: 'border-emerald-500/30',
       };
     }
     return {
-      text: 'NIVEAU DE FORME EN PROGRESSION.',
+      text: 'SYSTÈME STABLE. CONTINUEZ AINSI.',
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/30',
@@ -101,14 +100,14 @@ export default function Dashboard() {
   // Calculate SVG circle parameters
   const circleRadius = 90;
   const circumference = 2 * Math.PI * circleRadius;
-  const displayScore = stats?.healthScore ?? 0;
+  const displayScore = stats?.nivoScore ?? 0;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
-        <div className="font-mono text-primary animate-pulse mb-4">
+          <div className="font-mono text-primary animate-pulse mb-4">
             <div className="text-sm mb-2">&gt; CHARGEMENT EN COURS...</div>
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           </div>
@@ -144,6 +143,12 @@ export default function Dashboard() {
                 <span className="font-bold text-black text-base md:text-lg">N</span>
               </div>
               <span className="font-bold text-foreground text-base md:text-lg">NIVO</span>
+              {isPro && (
+                <span className="px-2 py-0.5 bg-primary/20 border border-primary/30 rounded-full font-mono text-[10px] text-primary flex items-center gap-1">
+                  <Crown className="w-3 h-3" />
+                  PRO
+                </span>
+              )}
             </div>
 
             {/* Right - Avatar & Settings */}
@@ -164,7 +169,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
-        {/* Hero - État du Système */}
+        {/* Hero - NIVO Score */}
         <section className="mb-6 md:mb-10 animate-fade-in">
           <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-8 relative overflow-hidden">
             {/* Subtle glow effect */}
@@ -208,9 +213,9 @@ export default function Dashboard() {
                 {/* Score Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="font-mono text-3xl md:text-5xl font-bold text-foreground">
-                    {stats?.healthScore ? `${stats.healthScore}%` : 'N/A'}
+                    {stats?.nivoScore ? `${stats.nivoScore}` : 'N/A'}
                   </span>
-                  <span className="font-mono text-[10px] md:text-xs text-foreground/40 mt-1">NIVEAU DE FORME</span>
+                  <span className="font-mono text-[10px] md:text-xs text-foreground/40 mt-1">NIVO SCORE</span>
                 </div>
               </div>
 
@@ -221,12 +226,12 @@ export default function Dashboard() {
                 </div>
 
                 {/* No Score CTA */}
-                {!stats?.healthScore && (
+                {!stats?.nivoScore && (
                   <div className="mb-4 md:mb-6">
                     <Link to="/diagnostic">
                       <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm">
                         <AlertTriangle className="h-4 w-4 mr-2" />
-                        FAIRE MON BILAN
+                        FAIRE MON CHECK-IN
                       </Button>
                     </Link>
                   </div>
@@ -234,7 +239,7 @@ export default function Dashboard() {
 
                 {/* Stats Widgets */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
-                  {/* Uptime */}
+                  {/* Streak */}
                   <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
                     <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
                       <Clock className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
@@ -242,13 +247,13 @@ export default function Dashboard() {
                     </div>
                     <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-xs md:text-sm text-foreground/40">J</span></p>
                   </div>
-                  {/* Total Patches */}
+                  {/* Total Sessions */}
                   <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
                     <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
                       <Activity className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
-                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">ROUTINES</span>
+                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SESSIONS</span>
                     </div>
-                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.totalPatches || 0}</p>
+                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.totalSessions || 0}</p>
                   </div>
                 </div>
               </div>
@@ -258,7 +263,7 @@ export default function Dashboard() {
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Left Column - Next Action */}
+          {/* Left Column - Daily Loop (FREE) */}
           <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="bg-black/60 rounded-xl md:rounded-2xl border border-primary/20 p-5 md:p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
               {/* Glow effect */}
@@ -267,49 +272,50 @@ export default function Dashboard() {
               </div>
 
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                  <Headphones className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                  <span className="font-mono text-[11px] md:text-xs text-primary">ROUTINE DU JOUR</span>
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <div className="flex items-center gap-2">
+                    <Headphones className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                    <span className="font-mono text-[11px] md:text-xs text-primary">ROUTINE QUOTIDIENNE</span>
+                  </div>
+                  <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full font-mono text-[10px] text-emerald-400">
+                    GRATUIT
+                  </span>
                 </div>
 
                 <h2 className="font-heading text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">
-                  {currentSession?.title || 'Session du jour'}
+                  {DAILY_ROUTINE.name}
                 </h2>
                 <p className="font-mono text-xs md:text-sm text-foreground/50 mb-4 md:mb-6">
-                  J-{stats?.currentDay || 1} :: {currentProgram.name} // {currentSession?.duration}
+                  {DAILY_ROUTINE.duration_minutes} min :: {DAILY_ROUTINE.steps.length} exercices // {DAILY_ROUTINE.focus}
                 </p>
 
-                {/* Objective */}
+                {/* Daily Loop Steps Preview */}
                 <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6">
-                  <p className="font-mono text-[10px] md:text-xs text-foreground/40 mb-1">OBJECTIF</p>
-                  <p className="text-sm md:text-base text-foreground/80">{currentSession?.clinicalGoal}</p>
+                  <p className="font-mono text-[10px] md:text-xs text-foreground/40 mb-2">SÉQUENCE</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DAILY_ROUTINE.steps.map((step, index) => (
+                      <span key={index} className="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-foreground/60">
+                        {step.exercise.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Launch Button - Show based on unlock status */}
-                {isProgramUnlocked ? (
-                  <Link to={`/session/${(stats?.currentProgram || 'system-reboot').toLowerCase().replace('_', '-')}`} className="block">
-                    <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                      <Play className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                      LANCER LA SESSION
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link to="/checkout" className="block">
-                    <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                      <Lock className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                      <span className="hidden sm:inline">ACCÉDER AU SAVOIR (49€)</span>
-                      <span className="sm:hidden">DÉBLOQUER (49€)</span>
-                    </Button>
-                  </Link>
-                )}
+                {/* Launch Button */}
+                <Link to="/session/daily_loop" className="block">
+                  <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
+                    <Play className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                    LANCER LA ROUTINE
+                  </Button>
+                </Link>
               </div>
             </div>
           </section>
 
           {/* Right Column - System Stats */}
           <section className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {/* Upgrade System (Rapid Patch owners) */}
-            {showUpgradeSystem && (
+            {/* Upgrade to Pro CTA (Free users only) */}
+            {!isPro && (
               <div className="bg-black/60 rounded-xl border border-primary/30 p-6 relative overflow-hidden hover:border-primary/50 transition-colors">
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute -top-16 -right-16 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
@@ -318,27 +324,27 @@ export default function Dashboard() {
                 <div className="relative z-10">
                   <div className="flex items-center justify-between gap-4 mb-3">
                     <div>
-                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">NIVEAU SUPÉRIEUR</p>
+                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">NIVO PRO</p>
                       <p className="font-heading text-lg font-semibold text-foreground mt-1">
-                        Accédez au Reset Fondamental complet (-20%)
+                        Débloquez les protocoles ciblés
                       </p>
                     </div>
                     <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-primary" />
+                      <Crown className="h-5 w-5 text-primary" />
                     </div>
                   </div>
 
-                  <Link to="/checkout?plan=SYSTEM_REBOOT" className="block">
+                  <Link to="/checkout" className="block">
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                       <ArrowRight className="h-4 w-4 mr-2" />
-                      ACCÉDER AU RESET FONDAMENTAL
+                      DEVENIR PRO
                     </Button>
                   </Link>
                 </div>
               </div>
             )}
 
-            {/* Battery Status */}
+            {/* Energy Level */}
             <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-center gap-2 mb-3">
                 <Battery className="h-4 w-4 text-foreground/40" />
@@ -355,14 +361,25 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Current Program */}
+            {/* Access Level */}
             <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">PROGRAMME ACTIF</span>
+                <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ACCÈS</span>
               </div>
-              <p className="font-mono text-lg font-semibold text-foreground">{currentProgram.name.replace('NIVO ', '')}</p>
-              <p className="font-mono text-xs text-foreground/40">Jour {stats?.currentDay || 1} / {currentProgram.totalDays}</p>
+              <p className="font-mono text-lg font-semibold text-foreground flex items-center gap-2">
+                {isPro ? (
+                  <>
+                    <Crown className="h-4 w-4 text-primary" />
+                    NIVO PRO
+                  </>
+                ) : (
+                  'GRATUIT'
+                )}
+              </p>
+              <p className="font-mono text-xs text-foreground/40">
+                {isPro ? 'Accès complet aux protocoles' : 'Routine quotidienne uniquement'}
+              </p>
             </div>
 
             {/* Quick Stats */}
@@ -374,7 +391,7 @@ export default function Dashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="font-mono text-xs text-foreground/40">SESSIONS</span>
-                  <span className="font-mono text-sm text-foreground">{stats?.totalPatches || 0}</span>
+                  <span className="font-mono text-sm text-foreground">{stats?.totalSessions || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono text-xs text-foreground/40">SÉRIE</span>
@@ -392,73 +409,118 @@ export default function Dashboard() {
           </section>
         </div>
 
-        {/* Available Modules Section */}
+        {/* Pro Protocols Section */}
         <section className="mt-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-foreground/40">AVAILABLE_MODULES //</span>
+            <span className="font-mono text-xs text-foreground/40">PROTOCOLES_CIBLÉS //</span>
             <div className="flex-1 h-px bg-white/10" />
+            {!isPro && (
+              <span className="px-2 py-1 bg-primary/10 border border-primary/20 rounded font-mono text-[10px] text-primary">
+                PRO REQUIS
+              </span>
+            )}
           </div>
 
           <div className="grid md:grid-cols-3 gap-4">
-            {Object.values(PROGRAMS).map((program) => {
-              const isActive = stats?.currentProgram === program.id;
-              const isUnlocked = stats?.unlockedPrograms.includes(program.id) || false;
-              
-              return (
-                <div 
-                  key={program.id}
-                  className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
-                    isActive 
-                      ? 'border-primary/50 shadow-[0_0_30px_rgba(255,107,74,0.15)]' 
-                      : isUnlocked 
-                        ? 'border-white/10 hover:border-white/20' 
-                        : 'border-white/5 opacity-60'
-                  }`}
-                >
-                  {/* Status Badge */}
+            {SPECIFIC_PROTOCOLS.map((protocol: Protocol) => (
+              <div 
+                key={protocol.id}
+                className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
+                  isPro 
+                    ? 'border-white/10 hover:border-primary/30 cursor-pointer' 
+                    : 'border-white/5 opacity-60'
+                }`}
+              >
+                {/* Lock Badge */}
+                {!isPro && (
                   <div className="absolute top-4 right-4">
-                    {isActive ? (
-                      <span className="px-2 py-1 bg-primary/20 border border-primary/30 rounded-full font-mono text-[10px] text-primary">
-                        ACTIVE
-                      </span>
-                    ) : !isUnlocked ? (
-                      <Lock className="h-4 w-4 text-foreground/30" />
-                    ) : null}
+                    <Lock className="h-4 w-4 text-foreground/30" />
                   </div>
+                )}
 
-                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isUnlocked ? 'text-foreground' : 'text-foreground/50'}`}>
-                    {program.name.replace('NIVO ', '')}
-                  </h3>
-                  <p className={`font-mono text-xs mb-4 ${isUnlocked ? 'text-foreground/50' : 'text-foreground/30'}`}>
-                    {program.description}
-                  </p>
-
-                  {/* Progress or Lock indicator */}
-                  {isUnlocked ? (
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary rounded-full"
-                          style={{ 
-                            width: isActive 
-                              ? `${((stats?.currentDay || 1) / program.totalDays) * 100}%` 
-                              : '0%' 
-                          }}
-                        />
-                      </div>
-                      <span className="font-mono text-[10px] text-foreground/40">
-                        {isActive ? `J${stats?.currentDay || 1}/${program.totalDays}` : `${program.totalDays}j`}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Lock className="h-3 w-3 text-foreground/30" />
-                      <span className="font-mono text-[10px] text-foreground/30">VERROUILLÉ</span>
-                    </div>
-                  )}
+                <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/50'}`}>
+                  {protocol.name}
+                </h3>
+                <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/30'}`}>
+                  {protocol.description}
+                </p>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="font-mono text-foreground/40">{protocol.duration_minutes} min</span>
+                  <span className="text-foreground/20">•</span>
+                  <span className="font-mono text-primary/60">{protocol.target_symptom}</span>
                 </div>
-              );
-            })}
+
+                {isPro ? (
+                  <Link to={`/session/${protocol.routines[0]?.id}`} className="block mt-4">
+                    <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                      <Play className="h-3 w-3 mr-2" />
+                      LANCER
+                    </Button>
+                  </Link>
+                ) : (
+                  <div className="mt-4 flex items-center gap-2">
+                    <Lock className="h-3 w-3 text-foreground/30" />
+                    <span className="font-mono text-[10px] text-foreground/30">{protocol.locked_label}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pilot Programs Section */}
+        <section className="mt-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-xs text-foreground/40">PROGRAMMES_PILOTES //</span>
+            <div className="flex-1 h-px bg-white/10" />
+            {!isPro && (
+              <span className="px-2 py-1 bg-primary/10 border border-primary/20 rounded font-mono text-[10px] text-primary">
+                PRO REQUIS
+              </span>
+            )}
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {PILOT_PROGRAMS.map((program: PilotProgram) => (
+              <div 
+                key={program.id}
+                className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
+                  isPro 
+                    ? 'border-white/10 hover:border-primary/30' 
+                    : 'border-white/5 opacity-60'
+                }`}
+              >
+                {/* Lock Badge */}
+                {!isPro && (
+                  <div className="absolute top-4 right-4">
+                    <Lock className="h-4 w-4 text-foreground/30" />
+                  </div>
+                )}
+
+                <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/50'}`}>
+                  {program.name}
+                </h3>
+                <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/30'}`}>
+                  {program.description}
+                </p>
+                <div className="flex items-center gap-2 text-xs">
+                  {program.duration_weeks > 0 && (
+                    <>
+                      <span className="font-mono text-foreground/40">{program.duration_weeks} semaines</span>
+                      <span className="text-foreground/20">•</span>
+                    </>
+                  )}
+                  <span className="font-mono text-primary/60">{program.focus}</span>
+                </div>
+
+                {!isPro && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <Lock className="h-3 w-3 text-foreground/30" />
+                    <span className="font-mono text-[10px] text-foreground/30">{program.locked_label}</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
       </main>

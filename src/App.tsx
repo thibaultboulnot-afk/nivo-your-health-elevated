@@ -39,7 +39,7 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/session/:programId" element={<Session />} />
+            <Route path="/session/:routineId" element={<Session />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/mentions-legales" element={<MentionsLegales />} />
             <Route path="/cgv" element={<CGV />} />
