@@ -5,6 +5,7 @@ import { useUserStats } from '@/hooks/useUserStats';
 import { useAccess } from '@/hooks/useAccess';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Settings,
   Activity,
@@ -107,16 +108,89 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
-        <div className="text-center">
-          <div className="font-mono text-primary animate-pulse mb-4">
-            <div className="text-sm mb-2">&gt; CHARGEMENT EN COURS...</div>
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+      <div className="min-h-screen bg-[#050510] relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
+        <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
+
+        {/* Header Skeleton */}
+        <header className="relative z-20 border-b border-white/5 bg-[#050510]/80 backdrop-blur-sm">
+          <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-lg bg-white/10" />
+                <Skeleton className="w-16 h-5 rounded bg-white/10" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-10 h-10 rounded-lg bg-white/10" />
+                <Skeleton className="w-10 h-10 rounded-full bg-white/10" />
+              </div>
+            </div>
           </div>
-          <div className="font-mono text-xs text-foreground/30">
-            Préparation de votre espace...
+        </header>
+
+        {/* Main Content Skeleton */}
+        <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
+          {/* Hero Score Skeleton */}
+          <div className="mb-6 md:mb-10">
+            <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-8">
+              <div className="flex flex-col items-center gap-6 md:gap-8">
+                {/* Circle Skeleton */}
+                <Skeleton className="w-36 h-36 md:w-52 md:h-52 rounded-full bg-white/10" />
+                
+                {/* Status Skeleton */}
+                <div className="w-full text-center">
+                  <Skeleton className="w-64 h-10 rounded-lg bg-white/10 mx-auto mb-6" />
+                  
+                  {/* Stats Grid Skeleton */}
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
+                    <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4">
+                      <Skeleton className="w-16 h-3 rounded bg-white/10 mb-2" />
+                      <Skeleton className="w-12 h-8 rounded bg-white/10" />
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4">
+                      <Skeleton className="w-16 h-3 rounded bg-white/10 mb-2" />
+                      <Skeleton className="w-12 h-8 rounded bg-white/10" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+
+          {/* Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2">
+              <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-5 md:p-8">
+                <Skeleton className="w-40 h-4 rounded bg-white/10 mb-4" />
+                <Skeleton className="w-64 h-8 rounded bg-white/10 mb-2" />
+                <Skeleton className="w-48 h-4 rounded bg-white/10 mb-6" />
+                <Skeleton className="w-full h-20 rounded-lg bg-white/10 mb-6" />
+                <Skeleton className="w-full h-14 rounded-lg bg-primary/20" />
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-4">
+              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
+                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-3" />
+                <Skeleton className="w-full h-2 rounded bg-white/10" />
+              </div>
+              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
+                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-3" />
+                <Skeleton className="w-24 h-6 rounded bg-white/10" />
+              </div>
+              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
+                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-4" />
+                <div className="space-y-3">
+                  <Skeleton className="w-full h-4 rounded bg-white/10" />
+                  <Skeleton className="w-full h-4 rounded bg-white/10" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
