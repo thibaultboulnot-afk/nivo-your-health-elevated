@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useAccess } from '@/hooks/useAccess';
+import { UpgradeModal } from '@/components/UpgradeModal';
 import { Button } from '@/components/ui/button';
 import {
   Settings,
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const { isPro, accessLevel } = useAccess();
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Check for mobile
   useEffect(() => {
@@ -425,44 +427,52 @@ export default function Dashboard() {
             {SPECIFIC_PROTOCOLS.map((protocol: Protocol) => (
               <div 
                 key={protocol.id}
+                onClick={() => !isPro && setShowUpgradeModal(true)}
                 className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
                   isPro 
                     ? 'border-white/10 hover:border-primary/30 cursor-pointer' 
-                    : 'border-white/5 opacity-60'
+                    : 'border-white/5 opacity-70 cursor-pointer hover:opacity-80'
                 }`}
               >
-                {/* Lock Badge */}
+                {/* Lock Badge & Blur Overlay */}
                 {!isPro && (
-                  <div className="absolute top-4 right-4">
-                    <Lock className="h-4 w-4 text-foreground/30" />
-                  </div>
+                  <>
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] rounded-xl" />
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                        <Lock className="h-4 w-4 text-foreground/50" />
+                      </div>
+                    </div>
+                  </>
                 )}
 
-                <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/50'}`}>
-                  {protocol.name}
-                </h3>
-                <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/30'}`}>
-                  {protocol.description}
-                </p>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="font-mono text-foreground/40">{protocol.duration_minutes} min</span>
-                  <span className="text-foreground/20">•</span>
-                  <span className="font-mono text-primary/60">{protocol.target_symptom}</span>
+                <div className={!isPro ? 'relative z-10' : ''}>
+                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/60'}`}>
+                    {protocol.name}
+                  </h3>
+                  <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/40'}`}>
+                    {protocol.description}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-mono text-foreground/40">{protocol.duration_minutes} min</span>
+                    <span className="text-foreground/20">•</span>
+                    <span className="font-mono text-primary/60">{protocol.target_symptom}</span>
+                  </div>
+
+                  {isPro ? (
+                    <Link to={`/session/${protocol.routines[0]?.id}`} className="block mt-4" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                        <Play className="h-3 w-3 mr-2" />
+                        LANCER
+                      </Button>
+                    </Link>
+                  ) : (
+                    <div className="mt-4 flex items-center gap-2">
+                      <Lock className="h-3 w-3 text-primary/60" />
+                      <span className="font-mono text-[10px] text-primary/60">{protocol.locked_label}</span>
+                    </div>
+                  )}
                 </div>
-
-                {isPro ? (
-                  <Link to={`/session/${protocol.routines[0]?.id}`} className="block mt-4">
-                    <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
-                      <Play className="h-3 w-3 mr-2" />
-                      LANCER
-                    </Button>
-                  </Link>
-                ) : (
-                  <div className="mt-4 flex items-center gap-2">
-                    <Lock className="h-3 w-3 text-foreground/30" />
-                    <span className="font-mono text-[10px] text-foreground/30">{protocol.locked_label}</span>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -484,41 +494,56 @@ export default function Dashboard() {
             {PILOT_PROGRAMS.map((program: PilotProgram) => (
               <div 
                 key={program.id}
+                onClick={() => !isPro && setShowUpgradeModal(true)}
                 className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
                   isPro 
-                    ? 'border-white/10 hover:border-primary/30' 
-                    : 'border-white/5 opacity-60'
+                    ? 'border-white/10 hover:border-primary/30 cursor-pointer' 
+                    : 'border-white/5 opacity-70 cursor-pointer hover:opacity-80'
                 }`}
               >
-                {/* Lock Badge */}
+                {/* Lock Badge & Blur Overlay */}
                 {!isPro && (
-                  <div className="absolute top-4 right-4">
-                    <Lock className="h-4 w-4 text-foreground/30" />
-                  </div>
+                  <>
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] rounded-xl" />
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                        <Lock className="h-4 w-4 text-foreground/50" />
+                      </div>
+                    </div>
+                  </>
                 )}
 
-                <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/50'}`}>
-                  {program.name}
-                </h3>
-                <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/30'}`}>
-                  {program.description}
-                </p>
-                <div className="flex items-center gap-2 text-xs">
-                  {program.duration_weeks > 0 && (
-                    <>
-                      <span className="font-mono text-foreground/40">{program.duration_weeks} semaines</span>
-                      <span className="text-foreground/20">•</span>
-                    </>
+                <div className={!isPro ? 'relative z-10' : ''}>
+                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/60'}`}>
+                    {program.name}
+                  </h3>
+                  <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/40'}`}>
+                    {program.description}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs">
+                    {program.duration_weeks > 0 && (
+                      <>
+                        <span className="font-mono text-foreground/40">{program.duration_weeks} semaines</span>
+                        <span className="text-foreground/20">•</span>
+                      </>
+                    )}
+                    <span className="font-mono text-primary/60">{program.focus}</span>
+                  </div>
+
+                  {isPro ? (
+                    <div className="mt-4">
+                      <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                        <Play className="h-3 w-3 mr-2" />
+                        VOIR LE PROGRAMME
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-4 flex items-center gap-2">
+                      <Lock className="h-3 w-3 text-primary/60" />
+                      <span className="font-mono text-[10px] text-primary/60">{program.locked_label}</span>
+                    </div>
                   )}
-                  <span className="font-mono text-primary/60">{program.focus}</span>
                 </div>
-
-                {!isPro && (
-                  <div className="mt-4 flex items-center gap-2">
-                    <Lock className="h-3 w-3 text-foreground/30" />
-                    <span className="font-mono text-[10px] text-foreground/30">{program.locked_label}</span>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -542,6 +567,9 @@ export default function Dashboard() {
           <ChevronUp className="w-6 h-6" />
         </motion.button>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
 }
