@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { ProgramTier } from '@/data/programs';
 
 interface UserStats {
   firstName: string | null;
   lastName: string | null;
-  healthScore: number | null;
-  currentProgram: ProgramTier;
-  currentDay: number;
+  nivoScore: number | null;
   streak: number;
-  totalPatches: number;
-  unlockedPrograms: ProgramTier[];
+  totalSessions: number;
+  lastCheckinDate: string | null;
 }
 
 export function useUserStats() {
@@ -20,80 +17,104 @@ export function useUserStats() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetchUserStats = async () => {
     if (!user) {
       setIsLoading(false);
       return;
     }
 
-    async function fetchUserStats() {
-      try {
-        setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-        // Fetch profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', user.id)
-          .maybeSingle();
+      // Fetch profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .maybeSingle();
 
-        if (profileError) throw profileError;
+      if (profileError) throw profileError;
 
-        // Fetch latest diagnostic
-        const { data: diagnostic, error: diagnosticError } = await supabase
-          .from('user_diagnostics')
-          .select('health_score')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      // Fetch latest NIVO score
+      const { data: latestScore, error: scoreError } = await supabase
+        .from('nivo_scores')
+        .select('total_score, score_date')
+        .eq('user_id', user.id)
+        .order('score_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-        if (diagnosticError) throw diagnosticError;
+      if (scoreError) throw scoreError;
 
-        // Fetch progression
-        const { data: progressions, error: progressionError } = await supabase
-          .from('user_progression')
-          .select('program_id, current_day, streak_count, unlocked')
-          .eq('user_id', user.id);
+      // Fetch latest checkin date
+      const { data: latestCheckin, error: checkinError } = await supabase
+        .from('daily_checkins')
+        .select('checkin_date')
+        .eq('user_id', user.id)
+        .order('checkin_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-        if (progressionError) throw progressionError;
+      if (checkinError) throw checkinError;
 
-        // Normalize DB program ids to match ProgramTier enum (handles "rapid_patch" vs "RAPID_PATCH")
-        const normalizeProgramId = (value: string | null | undefined): ProgramTier | null => {
-          if (!value) return null;
-          return value
-            .toString()
-            .trim()
-            .replace(/-/g, '_')
-            .toUpperCase() as ProgramTier;
-        };
+      // Count total routine sessions
+      const { count: sessionsCount, error: sessionsError } = await supabase
+        .from('routine_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
 
-        // Find active program (the one with most recent activity or first row)
-        const activeProgression = progressions?.find((p) => p.unlocked) || progressions?.[0];
+      if (sessionsError) throw sessionsError;
 
-        // Get unlocked programs
-        const unlockedPrograms =
-          progressions?.filter((p) => p.unlocked).map((p) => normalizeProgramId(p.program_id)!).filter(Boolean) || [];
+      // Calculate streak (consecutive days with sessions)
+      const { data: recentSessions, error: streakError } = await supabase
+        .from('routine_sessions')
+        .select('session_date')
+        .eq('user_id', user.id)
+        .order('session_date', { ascending: false })
+        .limit(30);
 
-        setStats({
-          firstName: profile?.first_name || user.user_metadata?.first_name || null,
-          lastName: profile?.last_name || null,
-          healthScore: diagnostic?.health_score || null,
-          currentProgram: normalizeProgramId(activeProgression?.program_id) || 'SYSTEM_REBOOT',
-          currentDay: activeProgression?.current_day || 1,
-          streak: activeProgression?.streak_count || 0,
-          totalPatches: progressions?.reduce((acc, p) => acc + (p.current_day || 0), 0) || 0,
-          unlockedPrograms,
-        });
-      } catch (e) {
-        setError(e as Error);
-      } finally {
-        setIsLoading(false);
+      if (streakError) throw streakError;
+
+      let streak = 0;
+      if (recentSessions && recentSessions.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const uniqueDates = [...new Set(recentSessions.map(s => s.session_date))].sort().reverse();
+        
+        for (let i = 0; i < uniqueDates.length; i++) {
+          const sessionDate = new Date(uniqueDates[i]);
+          sessionDate.setHours(0, 0, 0, 0);
+          
+          const expectedDate = new Date(today);
+          expectedDate.setDate(today.getDate() - i);
+          
+          if (sessionDate.getTime() === expectedDate.getTime()) {
+            streak++;
+          } else {
+            break;
+          }
+        }
       }
-    }
 
+      setStats({
+        firstName: profile?.first_name || user.user_metadata?.first_name || null,
+        lastName: profile?.last_name || null,
+        nivoScore: latestScore?.total_score || null,
+        streak,
+        totalSessions: sessionsCount || 0,
+        lastCheckinDate: latestCheckin?.checkin_date || null,
+      });
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserStats();
   }, [user]);
 
-  return { stats, isLoading, error, refetch: () => {} };
+  return { stats, isLoading, error, refetch: fetchUserStats };
 }
