@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -8,20 +7,56 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Crown, Zap, Shield, Headphones, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Price ID for NIVO PRO subscription (9.90€/month)
+const NIVO_PRO_PRICE_ID = 'price_NIVO_PRO_MONTHLY'; // Placeholder - replace with actual Stripe price ID
+
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
   const features = [
     { icon: Headphones, text: 'Protocoles ciblés (Sciatique, Cou Texto...)' },
     { icon: Zap, text: 'Programmes pilotes de 6+ semaines' },
     { icon: Shield, text: 'Algorithme personnalisé NIVO' },
   ];
+
+  const handleUpgrade = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { programId: 'NIVO_PRO' }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la session de paiement. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -72,13 +107,24 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           </div>
 
           {/* CTA Button */}
-          <Link to="/checkout" onClick={onClose}>
-            <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-              <Crown className="h-5 w-5 mr-2" />
-              DEVENIR PRO
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleUpgrade}
+            disabled={isLoading}
+            className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300 disabled:opacity-70"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Chargement...
+              </>
+            ) : (
+              <>
+                <Crown className="h-5 w-5 mr-2" />
+                DEVENIR PRO
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </>
+            )}
+          </Button>
 
           {/* Cancel hint */}
           <p className="text-center font-mono text-[10px] text-foreground/30 mt-4">
