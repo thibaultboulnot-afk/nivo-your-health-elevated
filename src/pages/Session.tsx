@@ -1,94 +1,114 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, Play, Pause, SkipBack, SkipForward, Volume2, Moon, ChevronUp } from 'lucide-react';
+import { X, Play, Pause, ChevronLeft, ChevronRight, Volume2, Moon, Check, Trophy, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, getRoutineById, type Routine, type RoutineStep } from '@/data/programs';
+import { DAILY_ROUTINE, getRoutineById, type Routine, type RoutineStep } from '@/data/programs';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Audio de test - bruit blanc relaxant
-const TEST_AUDIO_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+// Audio ambiant
+const AMBIENT_AUDIO_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+type SessionPhase = 'warmup' | 'exercise' | 'rest' | 'completed';
 
 export default function Session() {
   const { routineId } = useParams<{ routineId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const audioRef = useRef<HTMLAudioElement>(null);
   
+  // Core state
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [sessionPhase, setSessionPhase] = useState<SessionPhase>('exercise');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentExercise, setCurrentExercise] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.7);
+  
+  // Timer state
+  const [exerciseTimer, setExerciseTimer] = useState(0);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+  
+  // Audio state
+  const [volume, setVolume] = useState(0.5);
+  
+  // UI state
   const [isBlackoutMode, setIsBlackoutMode] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get routine from ID or default to daily loop
+  // Get routine
   const routine: Routine = getRoutineById(routineId || 'daily_loop') || DAILY_ROUTINE;
-  const totalExercises = routine.steps.length;
-  const currentStep: RoutineStep | undefined = routine.steps[currentExercise - 1];
+  const totalSteps = routine.steps.length;
+  const currentStep: RoutineStep | undefined = routine.steps[currentStepIndex];
+  const isLastStep = currentStepIndex === totalSteps - 1;
 
-  // Check for mobile
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  // Session start time
+  const sessionStartRef = useRef<Date>(new Date());
+
+  // Timer logic
+  const startTimer = useCallback(() => {
+    if (currentStep) {
+      setExerciseTimer(currentStep.exercise.duration_seconds);
+      setIsTimerActive(true);
+    }
+  }, [currentStep]);
+
+  const pauseTimer = useCallback(() => {
+    setIsTimerActive(false);
   }, []);
 
-  // Show/hide back to top button on scroll
+  const resetTimer = useCallback(() => {
+    if (currentStep) {
+      setExerciseTimer(currentStep.exercise.duration_seconds);
+      setIsTimerActive(false);
+    }
+  }, [currentStep]);
+
+  // Timer countdown effect
   useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Audio synchronization
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-    };
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      if (currentExercise < totalExercises) {
-        setCurrentExercise(prev => prev + 1);
-      }
-    };
-
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('ended', handleEnded);
+    if (isTimerActive && exerciseTimer > 0) {
+      timerIntervalRef.current = setInterval(() => {
+        setExerciseTimer(prev => {
+          if (prev <= 1) {
+            setIsTimerActive(false);
+            // Auto-advance to next step when timer ends
+            if (!isLastStep) {
+              setTimeout(() => handleNext(), 500);
+            } else {
+              setSessionPhase('completed');
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('ended', handleEnded);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
     };
-  }, [currentExercise, totalExercises]);
+  }, [isTimerActive, exerciseTimer, isLastStep]);
 
-  // Volume control
+  // Initialize timer when step changes
+  useEffect(() => {
+    if (currentStep) {
+      setExerciseTimer(currentStep.exercise.duration_seconds);
+      setIsTimerActive(false);
+    }
+  }, [currentStepIndex, currentStep]);
+
+  // Audio control
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
-  const togglePlayPause = () => {
+  const toggleAudio = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -100,27 +120,20 @@ export default function Session() {
     setIsPlaying(!isPlaying);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
+  // Navigation
   const handlePrevious = () => {
-    if (currentExercise > 1) {
-      setCurrentExercise(currentExercise - 1);
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-      }
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
+      setIsTimerActive(false);
     }
   };
 
   const handleNext = () => {
-    if (currentExercise < totalExercises) {
-      setCurrentExercise(currentExercise + 1);
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-      }
+    if (currentStepIndex < totalSteps - 1) {
+      setCurrentStepIndex(prev => prev + 1);
+      setIsTimerActive(false);
+    } else {
+      setSessionPhase('completed');
     }
   };
 
@@ -131,15 +144,37 @@ export default function Session() {
     navigate('/dashboard');
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
+  // Save session to database
+  const saveSession = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const sessionEnd = new Date();
+      const durationSeconds = Math.round((sessionEnd.getTime() - sessionStartRef.current.getTime()) / 1000);
+
+      const { error } = await supabase.from('routine_sessions').insert({
+        user_id: user.id,
+        routine_type: routine.type,
+        duration_seconds: durationSeconds,
+        completed: true,
+        is_premium: routine.is_pro,
+        score_boost: routine.score_boost
+      });
+
+      if (error) throw error;
+
+      toast.success('Session enregistrée !');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error saving session:', error);
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setIsSaving(false);
     }
-    setCurrentTime(time);
   };
 
-  // Blackout mode long-press handlers
+  // Blackout mode handlers
   const handleWakeStart = () => {
     holdTimerRef.current = setInterval(() => {
       setHoldProgress(prev => {
@@ -160,16 +195,110 @@ export default function Session() {
     setHoldProgress(0);
   };
 
-  const sessionProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Progress percentage
+  const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100;
+
+  // Completed screen
+  if (sessionPhase === 'completed') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 relative overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/20 blur-[150px]" />
+        </div>
+
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10 text-center max-w-md"
+        >
+          {/* Success icon */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-24 h-24 mx-auto mb-8 rounded-full bg-primary/20 flex items-center justify-center"
+          >
+            <Trophy className="w-12 h-12 text-primary" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="font-heading text-3xl md:text-4xl text-foreground mb-4"
+          >
+            Session Complétée
+          </motion.h1>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-4 mb-8"
+          >
+            <div className="p-4 rounded-xl bg-card/50 border border-border/50">
+              <p className="font-mono text-xs text-muted-foreground mb-2">ROUTINE TERMINÉE</p>
+              <p className="font-heading text-xl text-foreground">{routine.name}</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="font-mono text-xs text-primary/70 mb-2">BÉNÉFICE</p>
+              <p className="text-foreground/80">
+                Niveau de charge vertébrale réduit<br />
+                <span className="text-primary font-semibold">+{routine.score_boost} points NIVO</span>
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Button
+              onClick={saveSession}
+              disabled={isSaving}
+              className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </motion.div>
+                  Enregistrement...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Check className="w-5 h-5" />
+                  Retour au Dashboard
+                </span>
+              )}
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Hidden Audio Element */}
-      <audio ref={audioRef} src={TEST_AUDIO_URL} preload="metadata" />
+      <audio ref={audioRef} src={AMBIENT_AUDIO_URL} preload="metadata" loop />
 
       {/* Subtle noise texture */}
       <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }}
@@ -186,7 +315,6 @@ export default function Session() {
             className="fixed inset-0 z-50 bg-black flex items-center justify-center"
           >
             <div className="text-center">
-              {/* Hold to wake button */}
               <button
                 onMouseDown={handleWakeStart}
                 onMouseUp={handleWakeEnd}
@@ -195,7 +323,6 @@ export default function Session() {
                 onTouchEnd={handleWakeEnd}
                 className="relative w-20 h-20 rounded-full border border-white/10 flex items-center justify-center group"
               >
-                {/* Progress ring */}
                 <svg className="absolute inset-0 w-full h-full -rotate-90">
                   <circle
                     cx="40"
@@ -214,148 +341,233 @@ export default function Session() {
                 Maintenir pour réveiller
               </p>
               
-              {/* Timer still visible in blackout */}
-              <div className="mt-8 font-mono text-lg text-white/10">
-                {formatTime(currentTime)}
+              {/* Timer visible in blackout */}
+              <div className="mt-8 font-mono text-4xl text-primary/30">
+                {formatTimer(exerciseTimer)}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Header HUD */}
-      <header className="relative z-20 px-4 md:px-6 py-3 md:py-4">
+      {/* Progress Bar - Top */}
+      <div className="relative z-20 px-4 pt-4">
+        <div className="flex gap-1">
+          {routine.steps.map((step, index) => (
+            <div
+              key={index}
+              className="flex-1 h-1 rounded-full overflow-hidden bg-muted/30"
+            >
+              <motion.div
+                className="h-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: index < currentStepIndex 
+                    ? '100%' 
+                    : index === currentStepIndex 
+                      ? `${((currentStep?.exercise.duration_seconds || 60) - exerciseTimer) / (currentStep?.exercise.duration_seconds || 60) * 100}%`
+                      : '0%'
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-1">
+          <span className="font-mono text-[10px] text-muted-foreground">
+            {currentStepIndex + 1}/{totalSteps}
+          </span>
+          <span className="font-mono text-[10px] text-muted-foreground">
+            {routine.duration_minutes} min
+          </span>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-20 px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Exit Button */}
           <button
             onClick={handleExit}
-            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group p-2 -ml-2"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 -ml-2"
           >
             <X className="h-5 w-5" />
-            <span className="font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline">
-              QUITTER
-            </span>
           </button>
 
-          {/* Timer - Always visible */}
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="font-mono text-xl md:text-2xl text-primary tabular-nums">
-              {formatTime(currentTime)}
-            </div>
-            {isPlaying && (
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            )}
+          <div className="text-center">
+            <p className="font-mono text-[10px] text-primary tracking-widest">
+              {currentStep?.phase_label}
+            </p>
           </div>
-        </div>
-        
-        {/* Session Title - Below on mobile */}
-        <div className="text-center mt-2 md:absolute md:left-1/2 md:-translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:mt-0">
-          <h1 className="font-mono text-xs md:text-sm text-white/80 truncate max-w-[200px] md:max-w-none mx-auto">
-            {routine.name}
-          </h1>
-          <p className="font-mono text-[10px] md:text-xs text-white/30">
-            {routine.subtitle} • {routine.duration_minutes} min
-          </p>
+
+          {/* Audio toggle */}
+          <button
+            onClick={toggleAudio}
+            className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Volume2 className={`h-5 w-5 ${isPlaying ? 'text-primary' : ''}`} />
+          </button>
         </div>
       </header>
 
-      {/* Main Visualization Area */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
-        <div className="relative flex items-center justify-center">
-          
-          {/* Expanding Radar Waves */}
-          {isPlaying && (
-            <>
-              {[...Array(4)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full border border-primary/20"
-                  initial={{ width: 100, height: 100, opacity: 0.6 }}
-                  animate={{ 
-                    width: [100, 400, 600],
-                    height: [100, 400, 600],
-                    opacity: [0.4, 0.15, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    delay: i * 1,
-                    ease: "easeOut",
-                  }}
-                />
-              ))}
-            </>
-          )}
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col px-6 py-4 relative z-10">
+        
+        {/* Exercise Title */}
+        <motion.div
+          key={currentStepIndex}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="text-center mb-6"
+        >
+          <h1 className="font-heading text-2xl md:text-3xl text-foreground mb-2">
+            {currentStep?.exercise.name}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {currentStep?.exercise.description}
+          </p>
+        </motion.div>
 
-          {/* Central Breathing Circle */}
+        {/* Timer Circle - Main Focus */}
+        <div className="flex-1 flex items-center justify-center">
           <motion.div
-            className="relative w-40 h-40 rounded-full flex items-center justify-center cursor-pointer"
-            style={{
-              background: 'radial-gradient(circle, rgba(255,107,74,0.15) 0%, rgba(255,107,74,0.05) 50%, transparent 70%)',
-              boxShadow: isPlaying ? '0 0 80px rgba(255,107,74,0.2), inset 0 0 40px rgba(255,107,74,0.1)' : 'none',
-            }}
-            animate={isPlaying ? {
-              scale: [1, 1.08, 1],
-            } : { scale: 1 }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            onClick={togglePlayPause}
+            key={currentStepIndex}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
           >
-            {/* Inner glow ring */}
+            {/* Outer glow ring */}
             <motion.div
-              className="absolute inset-2 rounded-full border border-primary/30"
-              animate={isPlaying ? {
-                opacity: [0.3, 0.6, 0.3],
-              } : { opacity: 0.2 }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            
-            {/* Core */}
-            <motion.div
-              className="w-20 h-20 rounded-full flex items-center justify-center"
+              className="absolute inset-0 rounded-full"
               style={{
-                background: isPlaying 
-                  ? 'radial-gradient(circle, rgba(255,107,74,0.4) 0%, rgba(255,107,74,0.1) 100%)'
-                  : 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, rgba(255,107,74,0.05) 100%)',
+                background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)',
               }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isPlaying ? (
-                <Pause className="w-8 h-8 text-primary/80" />
-              ) : (
-                <Play className="w-8 h-8 text-primary/80 ml-1" />
-              )}
-            </motion.div>
-          </motion.div>
+              animate={isTimerActive ? {
+                scale: [1, 1.1, 1],
+                opacity: [0.5, 0.8, 0.5],
+              } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
 
-          {/* Exercise Info - Floating below */}
-          <div className="absolute -bottom-24 text-center">
-            <p className="font-mono text-xs text-primary/60 mb-1 tracking-widest">
-              {currentStep?.phase_label || `EXERCICE ${currentExercise}/${totalExercises}`}
-            </p>
-            <h2 className="font-heading text-xl text-white/80">
-              {currentStep?.exercise.name || 'Exercice en cours'}
-            </h2>
-            {currentStep && (
-              <p className="font-mono text-xs text-white/40 mt-1">
-                {Math.round(currentStep.exercise.duration_seconds / 60)} min
-              </p>
-            )}
-          </div>
+            {/* Timer circle */}
+            <div 
+              className="relative w-56 h-56 md:w-72 md:h-72 rounded-full border-4 border-muted/30 flex items-center justify-center cursor-pointer"
+              onClick={() => isTimerActive ? pauseTimer() : startTimer()}
+            >
+              {/* Progress ring */}
+              <svg className="absolute inset-0 w-full h-full -rotate-90">
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="calc(50% - 8px)"
+                  fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(1 - exerciseTimer / (currentStep?.exercise.duration_seconds || 60)) * 100 * 6.28} 628`}
+                  className="transition-all duration-1000"
+                />
+              </svg>
+
+              {/* Timer display */}
+              <div className="text-center">
+                <motion.p
+                  className="font-mono text-5xl md:text-6xl text-foreground tabular-nums"
+                  animate={isTimerActive ? { scale: [1, 1.02, 1] } : {}}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  {formatTimer(exerciseTimer)}
+                </motion.p>
+                <p className="font-mono text-xs text-muted-foreground mt-2 uppercase tracking-wider">
+                  {isTimerActive ? 'En cours' : 'Appuyez pour démarrer'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
+
+        {/* Instructions Panel */}
+        <motion.div
+          key={`instructions-${currentStepIndex}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 p-4 rounded-xl bg-card/50 border border-border/50"
+        >
+          <p className="font-mono text-[10px] text-primary tracking-widest mb-3">INSTRUCTIONS</p>
+          <ul className="space-y-2">
+            {currentStep?.exercise.instructions.slice(0, 3).map((instruction, i) => (
+              <li key={i} className="flex gap-3 text-sm text-muted-foreground">
+                <span className="text-primary font-mono">{i + 1}.</span>
+                <span>{instruction}</span>
+              </li>
+            ))}
+          </ul>
+          {currentStep?.exercise.audio_cue && (
+            <div className="mt-4 pt-3 border-t border-border/30">
+              <p className="text-xs italic text-foreground/70">
+                💡 {currentStep.exercise.audio_cue}
+              </p>
+            </div>
+          )}
+        </motion.div>
       </main>
 
-      {/* Volume Slider - Right Side (hidden on mobile) */}
+      {/* Footer Controls */}
+      <footer className="relative z-20 px-6 py-6">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          {/* Previous */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePrevious}
+            disabled={currentStepIndex === 0}
+            className="w-14 h-14 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/30 disabled:opacity-30"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
+
+          {/* Play/Pause Timer */}
+          <Button
+            onClick={() => isTimerActive ? pauseTimer() : startTimer()}
+            className={`w-16 h-16 rounded-full transition-all duration-300 ${
+              isTimerActive 
+                ? 'bg-muted hover:bg-muted/80 text-foreground' 
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_rgba(255,107,74,0.3)]'
+            }`}
+          >
+            {isTimerActive ? (
+              <Pause className="h-7 w-7" />
+            ) : (
+              <Play className="h-7 w-7 ml-0.5" />
+            )}
+          </Button>
+
+          {/* Next */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNext}
+            className="w-14 h-14 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/30"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </Button>
+        </div>
+
+        {/* Blackout mode toggle - Mobile */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setIsBlackoutMode(true)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-xs"
+          >
+            <Moon className="w-4 h-4" />
+            <span className="font-mono tracking-wider uppercase">Mode Immersion</span>
+          </button>
+        </div>
+      </footer>
+
+      {/* Desktop Volume Slider */}
       <div className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3">
-        <Volume2 className="w-4 h-4 text-white/30" />
+        <Volume2 className="w-4 h-4 text-muted-foreground" />
         <input
           type="range"
           min="0"
@@ -363,141 +575,16 @@ export default function Session() {
           step="0.01"
           value={volume}
           onChange={(e) => setVolume(parseFloat(e.target.value))}
-          className="h-32 w-1 appearance-none bg-white/10 rounded-full cursor-pointer"
+          className="h-32 w-1 appearance-none bg-muted/30 rounded-full cursor-pointer"
           style={{
             writingMode: 'vertical-lr',
             direction: 'rtl',
           }}
         />
-        <span className="font-mono text-[10px] text-white/30">
+        <span className="font-mono text-[10px] text-muted-foreground">
           {Math.round(volume * 100)}%
         </span>
       </div>
-
-      {/* Blackout Mode Button - Desktop: left side, Mobile: in footer area */}
-      <button
-        onClick={() => setIsBlackoutMode(true)}
-        className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors group"
-      >
-        <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
-          <Moon className="w-4 h-4" />
-        </div>
-        <span className="font-mono text-[9px] tracking-wider uppercase opacity-0 group-hover:opacity-100 transition-opacity">
-          Immersion
-        </span>
-      </button>
-
-      {/* Footer Controls */}
-      <footer className="relative z-20 px-6 py-6">
-        {/* Audio Progress Bar */}
-        <div className="w-full max-w-2xl mx-auto mb-4">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs text-white/40 w-12 text-right">
-              {formatTime(currentTime)}
-            </span>
-            <div className="flex-1 relative">
-              <input
-                type="range"
-                min="0"
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleSeek}
-                className="w-full h-1 appearance-none bg-white/10 rounded-full cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #10b981 0%, #10b981 ${sessionProgress}%, rgba(255,255,255,0.1) ${sessionProgress}%, rgba(255,255,255,0.1) 100%)`,
-                }}
-              />
-            </div>
-            <span className="font-mono text-xs text-white/40 w-12">
-              {formatTime(duration)}
-            </span>
-          </div>
-        </div>
-
-        {/* Control Buttons */}
-        <div className="flex items-center justify-center gap-4 md:gap-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevious}
-            disabled={currentExercise <= 1}
-            className="w-11 h-11 md:w-12 md:h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <SkipBack className="h-5 w-5" />
-          </Button>
-
-          <Button
-            onClick={togglePlayPause}
-            className={`w-14 h-14 md:w-16 md:h-16 rounded-full transition-all duration-300 ${
-              isPlaying 
-                ? 'bg-white/10 hover:bg-white/20 text-white' 
-                : 'bg-primary hover:bg-primary/90 text-black shadow-[0_0_30px_rgba(255,107,74,0.4)]'
-            }`}
-          >
-            {isPlaying ? (
-              <Pause className="h-6 w-6 md:h-7 md:w-7" />
-            ) : (
-              <Play className="h-6 w-6 md:h-7 md:w-7 ml-0.5" />
-            )}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNext}
-            disabled={currentExercise >= totalExercises}
-            className="w-11 h-11 md:w-12 md:h-12 rounded-full text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <SkipForward className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Exercise Steps Indicator + Mobile Blackout Button */}
-        <div className="flex items-center justify-center gap-3 mt-4">
-          {/* Mobile Blackout Button */}
-          <button
-            onClick={() => setIsBlackoutMode(true)}
-            className="md:hidden w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white/60 hover:border-primary/30 transition-all"
-          >
-            <Moon className="w-4 h-4" />
-          </button>
-          
-          <div className="flex gap-2">
-            {routine.steps.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentExercise(index + 1)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index + 1 === currentExercise 
-                    ? 'bg-primary scale-125' 
-                    : index + 1 < currentExercise 
-                      ? 'bg-emerald-500/50' 
-                      : 'bg-white/20 hover:bg-white/40'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Current Exercise Instructions */}
-        {currentStep && (
-          <div className="mt-6 max-w-md mx-auto text-center">
-            <p className="font-mono text-xs text-white/50 leading-relaxed">
-              {currentStep.exercise.instructions[0]}
-            </p>
-          </div>
-        )}
-      </footer>
-
-      {/* Back to top button - Mobile only */}
-      {showBackToTop && isMobile && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-24 right-4 z-40 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/60 hover:bg-white/20 transition-all"
-        >
-          <ChevronUp className="w-5 h-5" />
-        </button>
-      )}
     </div>
   );
 }
