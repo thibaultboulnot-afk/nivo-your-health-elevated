@@ -1038,7 +1038,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {/* Starter - Free */}
             <ScrollReveal delay={0.1}>
-              <div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm">
+              <motion.div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm">
                 <div className="mb-6">
                   <h3 className="font-sans text-xl font-semibold mb-1">Essentiel</h3>
                   <p className="text-white/40 text-sm">Pour surveiller vos signes vitaux.</p>
@@ -1143,7 +1143,7 @@ export default function Landing() {
                     </Button>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             </ScrollReveal>
           </div>
         </div>
