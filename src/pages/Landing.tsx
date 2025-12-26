@@ -689,7 +689,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
             {/* Large Card - Algorithm */}
             <ScrollReveal delay={0.1}>
-              <div className="md:col-span-2 md:row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-8 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04] overflow-hidden">
+              <div className="md:col-span-2 md:row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-8 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
                   style={{ background: 'radial-gradient(circle at 30% 30%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
                 />
@@ -784,9 +784,9 @@ export default function Landing() {
                   <Target className="w-6 h-6 text-primary mb-3 md:mb-4" />
                   <h4 className="font-semibold mb-2 tracking-tight">3 Phases</h4>
                   <div className="flex flex-wrap gap-2 text-[10px] font-mono text-white/40">
-                    <span className="px-2 py-1 rounded bg-white/5">DECOMPRESS</span>
-                    <span className="px-2 py-1 rounded bg-white/5">MOBILIZE</span>
-                    <span className="px-2 py-1 rounded bg-white/5">STABILIZE</span>
+                    <span className="px-2 py-1 rounded bg-white/5">DÉCOMPRESSION</span>
+                    <span className="px-2 py-1 rounded bg-white/5">MOBILISATION</span>
+                    <span className="px-2 py-1 rounded bg-white/5">STABILISATION</span>
                   </div>
                 </div>
               </div>

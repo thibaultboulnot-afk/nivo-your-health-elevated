@@ -359,10 +359,10 @@ export default function Dashboard() {
                 </div>
 
                 <h2 className="font-heading text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">
-                  {DAILY_ROUTINE.name}
+                  Boucle Quotidienne
                 </h2>
                 <p className="font-mono text-xs md:text-sm text-foreground/50 mb-4 md:mb-6">
-                  {DAILY_ROUTINE.duration_minutes} min :: {DAILY_ROUTINE.steps.length} exercices // {DAILY_ROUTINE.focus}
+                  {DAILY_ROUTINE.duration_minutes} min :: {DAILY_ROUTINE.steps.length} exercices // Entretien
                 </p>
 
                 {/* Daily Loop Steps Preview */}

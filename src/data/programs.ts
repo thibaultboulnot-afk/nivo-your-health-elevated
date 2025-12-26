@@ -203,36 +203,36 @@ const EXERCISES: Record<string, Exercise> = {
 export const DAILY_ROUTINE: Routine = {
   id: 'daily_loop',
   type: 'daily_loop',
-  name: 'Daily Loop',
+  name: 'Boucle Quotidienne',
   subtitle: 'ROUTINE QUOTIDIENNE',
-  description: 'Votre dose quotidienne de maintenance vertébrale. 8 minutes pour maintenir votre système en équilibre.',
+  description: 'Votre dose quotidienne d\'entretien vertébral. 8 minutes pour maintenir votre système en équilibre.',
   duration_minutes: 8,
-  focus: 'Maintenance',
+  focus: 'Entretien',
   is_pro: false,
   score_boost: 5,
   steps: [
     {
-      phase: 'decompress',
+      phase: 'decompression',
       phase_label: 'PHASE 1 :: DÉCOMPRESSION',
       exercise: EXERCISES.FOUNDER
     },
     {
-      phase: 'mobilize',
+      phase: 'mobilisation',
       phase_label: 'PHASE 2 :: MOBILISATION',
       exercise: EXERCISES.WALL_ANGEL
     },
     {
-      phase: 'stabilize',
+      phase: 'stabilisation',
       phase_label: 'PHASE 3 :: STABILISATION',
       exercise: EXERCISES.CURL_UP
     },
     {
-      phase: 'stabilize',
+      phase: 'stabilisation',
       phase_label: 'PHASE 3 :: STABILISATION',
       exercise: EXERCISES.SIDE_PLANK
     },
     {
-      phase: 'stabilize',
+      phase: 'stabilisation',
       phase_label: 'PHASE 3 :: STABILISATION',
       exercise: EXERCISES.BIRD_DOG
     }
@@ -252,7 +252,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
     target_symptom: 'Douleur irradiant dans la jambe (sciatique)',
     duration_minutes: 15,
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     trigger_condition: 'pain_vas > 60 AND symptom_type = sciatica',
     routines: [
       {
@@ -264,7 +264,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
         duration_minutes: 15,
         focus: 'Centralisation',
         is_pro: true,
-        locked_label: 'Débloquer avec NIVO Pro',
+        locked_label: 'Débloquer l\'accès',
         score_boost: 10,
         steps: [
           {
@@ -289,7 +289,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
     target_symptom: 'Douleurs cervicales, raideur de la nuque',
     duration_minutes: 10,
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     routines: [
       {
         id: 'reset_neck',
@@ -300,7 +300,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
         duration_minutes: 10,
         focus: 'Mobilité',
         is_pro: true,
-        locked_label: 'Débloquer avec NIVO Pro',
+        locked_label: 'Débloquer l\'accès',
         score_boost: 8,
         steps: [
           {
@@ -325,7 +325,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
     target_symptom: 'Raideur lombaire matinale, difficulté à se lever',
     duration_minutes: 12,
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     routines: [
       {
         id: 'unlock_lumbar',
@@ -336,7 +336,7 @@ export const SPECIFIC_PROTOCOLS: Protocol[] = [
         duration_minutes: 12,
         focus: 'Déverrouillage',
         is_pro: true,
-        locked_label: 'Débloquer avec NIVO Pro',
+        locked_label: 'Débloquer l\'accès',
         score_boost: 8,
         steps: [
           {
@@ -373,7 +373,7 @@ export const PILOT_PROGRAMS: PilotProgram[] = [
     duration_weeks: 6,
     focus: 'Stabilité Core',
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     phases: [
       { week_start: 1, week_end: 2, name: 'Fondations', focus: 'Apprentissage des patterns moteurs' },
       { week_start: 3, week_end: 4, name: 'Construction', focus: 'Augmentation du volume et de l\'endurance' },
@@ -388,18 +388,18 @@ export const PILOT_PROGRAMS: PilotProgram[] = [
     duration_weeks: 0, // On-demand
     focus: 'Mobilité voyage',
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     phases: []
   },
   {
     id: 'deep_work',
-    name: 'Deep Work Protocol',
+    name: 'Protocole Deep Work',
     subtitle: 'PERFORMANCE COGNITIVE',
     description: 'Routines de micro-pauses pour les sessions de travail intense (Pomodoro intégré).',
     duration_weeks: 0, // On-demand
     focus: 'Productivité',
     is_pro: true,
-    locked_label: 'Débloquer avec NIVO Pro',
+    locked_label: 'Débloquer l\'accès',
     phases: []
   }
 ];
