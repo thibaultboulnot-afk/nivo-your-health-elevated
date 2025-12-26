@@ -393,6 +393,19 @@
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
   }
+
+  /* ============================================
+     SLOW PULSE FOR BACKGROUND ORBS - Performance Optimized
+     ============================================ */
+  .animate-pulse-slow {
+    animation: pulse-slow 8s ease-in-out infinite;
+    will-change: opacity;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
 }
 
 @layer utilities {
