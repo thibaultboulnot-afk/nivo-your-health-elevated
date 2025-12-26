@@ -261,7 +261,7 @@ export default function Session() {
             transition={{ delay: 0.3 }}
             className="font-heading text-3xl md:text-4xl text-foreground mb-4"
           >
-            Session Complétée
+            Séance Terminée
           </motion.h1>
 
           <motion.div
@@ -271,15 +271,15 @@ export default function Session() {
             className="space-y-4 mb-8"
           >
             <div className="p-4 rounded-xl bg-card/50 border border-border/50">
-              <p className="font-mono text-xs text-muted-foreground mb-2">ROUTINE TERMINÉE</p>
+              <p className="font-mono text-xs text-muted-foreground mb-2">SÉANCE TERMINÉE</p>
               <p className="font-heading text-xl text-foreground">{routine.name}</p>
-            </div>
+              </div>
 
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-              <p className="font-mono text-xs text-primary/70 mb-2">BÉNÉFICE</p>
-              <p className="text-foreground/80">
-                Niveau de charge vertébrale réduit<br />
-                <span className="text-primary font-semibold">+{routine.score_boost} points NIVO</span>
+              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                <p className="font-mono text-xs text-primary/70 mb-2">BÉNÉFICES</p>
+                <p className="text-foreground/80">
+                  Niveau de charge vertébrale réduit<br />
+                  <span className="text-primary font-semibold">+{routine.score_boost} points NIVO</span>
               </p>
             </div>
           </motion.div>
@@ -307,7 +307,7 @@ export default function Session() {
               ) : (
                 <span className="flex items-center gap-2">
                   <Check className="w-5 h-5" />
-                  Retour au Dashboard
+                  Retour au Tableau de Bord
                 </span>
               )}
             </Button>
@@ -364,7 +364,7 @@ export default function Session() {
                 <Moon className="w-6 h-6 text-white/20 group-hover:text-white/40 transition-colors" />
               </button>
               <p className="font-mono text-[10px] text-white/20 mt-4 tracking-widest uppercase">
-                Maintenir pour réveiller
+                Maintenir pour revenir
               </p>
               
               {/* Timer visible in blackout */}
@@ -505,7 +505,7 @@ export default function Session() {
                   {formatTimer(exerciseTimer)}
                 </motion.p>
                 <p className="font-mono text-xs text-muted-foreground mt-2 uppercase tracking-wider">
-                  {isTimerActive ? 'En cours' : 'Appuyez pour démarrer'}
+                  {isTimerActive ? 'Chrono en cours' : 'Appuyez pour démarrer'}
                 </p>
               </div>
             </div>
