@@ -160,7 +160,7 @@ export default function Landing() {
             >
               Quantifiez votre santé dorsale. Optimisez votre posture. 
               <br className="hidden md:block" />
-              Une boucle de maintenance quotidienne de <span className="text-white/80 font-medium">8 minutes</span> basée sur la data.
+              Une boucle d'entretien quotidienne de <span className="text-white/80 font-medium">8 minutes</span> basée sur vos données.
             </motion.p>
 
             {/* CTAs */}
@@ -247,7 +247,7 @@ export default function Landing() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">STREAK</div>
+                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">SÉRIE</div>
                     <div className="text-2xl font-semibold text-primary">J-5</div>
                   </div>
                 </div>
@@ -273,7 +273,7 @@ export default function Landing() {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">INTEGRITY</span>
+                      <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">INTÉGRITÉ</span>
                       <span className="text-3xl md:text-4xl font-bold text-white">72%</span>
                     </div>
                   </div>
@@ -282,18 +282,18 @@ export default function Landing() {
                 {/* Right Panel - Stats */}
                 <div className="flex flex-row md:flex-col gap-4">
                   <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">PAIN INDEX</div>
+                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">INDICE DOULEUR</div>
                     <div className="text-xl md:text-2xl font-semibold text-emerald-400">-18%</div>
                     <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div className="h-full w-3/4 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" />
                     </div>
                   </div>
                   <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">DAILY LOOP</div>
+                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">BOUCLE QUOTIDIENNE</div>
                     <div className="text-xl md:text-2xl font-semibold text-white">8 min</div>
                   </div>
                   <div className="hidden md:block rounded-xl border border-primary/20 bg-primary/5 p-3 backdrop-blur-md">
-                    <div className="font-mono text-[10px] text-primary uppercase tracking-widest">READY TO SCAN</div>
+                    <div className="font-mono text-[10px] text-primary uppercase tracking-widest">PRÊT À SCANNER</div>
                   </div>
                 </div>
               </div>
@@ -563,7 +563,7 @@ export default function Landing() {
                       animate={{ opacity: [0.3, 0.8, 0.3] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     >
-                      ANALYZING
+                      ANALYSE
                     </motion.span>
                     <span className="text-4xl md:text-5xl font-bold text-white">85</span>
                     <span className="font-mono text-xs text-primary mt-1">SCORE</span>
@@ -676,7 +676,7 @@ export default function Landing() {
                 // LE PROTOCOLE
               </span>
               <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight mb-4">
-                La Daily Loop :
+                La Boucle Quotidienne :
                 <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent"> 8 minutes.</span>
               </h2>
               <p className="text-white/40 text-lg">
@@ -698,7 +698,7 @@ export default function Landing() {
                     <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                       <Cpu className="w-5 h-5 text-primary" />
                     </div>
-                    <span className="font-mono text-xs text-white/30 uppercase tracking-wider">CORE ENGINE</span>
+                    <span className="font-mono text-xs text-white/30 uppercase tracking-wider">MOTEUR CENTRAL</span>
                   </div>
                   <h3 className="font-sans text-xl md:text-3xl font-bold tracking-tight mb-3 md:mb-4">L'Algorithme Adaptatif</h3>
                   <p className="text-white/40 text-sm leading-relaxed mb-4 md:mb-6 break-words whitespace-normal">
@@ -730,7 +730,7 @@ export default function Landing() {
                 />
                 <div className="relative">
                   <Clock className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  <h4 className="font-semibold mb-2 tracking-tight">Check-in 60s</h4>
+                  <h4 className="font-semibold mb-2 tracking-tight">Bilan 60s</h4>
                   <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Évaluez votre état en moins d'une minute.</p>
                 </div>
               </div>
@@ -744,7 +744,7 @@ export default function Landing() {
                 />
                 <div className="relative">
                   <Sparkles className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  <h4 className="font-semibold mb-2 tracking-tight">NASA Protocol</h4>
+                  <h4 className="font-semibold mb-2 tracking-tight">Protocole NASA</h4>
                   <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Basé sur les contre-mesures spatiales.</p>
                 </div>
               </div>
@@ -832,7 +832,7 @@ export default function Landing() {
             <ScrollReveal delay={0.1}>
               <div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm">
                 <div className="mb-6">
-                  <h3 className="font-sans text-xl font-semibold mb-1">Starter</h3>
+                  <h3 className="font-sans text-xl font-semibold mb-1">Essentiel</h3>
                   <p className="text-white/40 text-sm">Pour surveiller vos signes vitaux.</p>
                 </div>
                 
@@ -891,7 +891,7 @@ export default function Landing() {
                   <ul className="space-y-3 mb-8">
                     <li className="flex items-center gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary" />
-                      <span>Tout Starter</span>
+                      <span>Tout Essentiel</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary" />
@@ -899,11 +899,11 @@ export default function Landing() {
                     </li>
                     <li className="flex items-center gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary" />
-                      <span>Historique Data</span>
+                      <span>Historique complet</span>
                     </li>
                     <li className="flex items-center gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary" />
-                      <span>Mode Focus</span>
+                      <span>Mode Concentration</span>
                     </li>
                   </ul>
 
