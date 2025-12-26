@@ -399,12 +399,43 @@ export default function Landing() {
             {/* Radar Scan Visualization */}
             <ScrollReveal delay={0.1}>
               <div className="relative aspect-square max-w-md mx-auto">
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-full blur-[60px] bg-primary/20" />
+                {/* Pulsing glow effect */}
+                <motion.div 
+                  className="absolute inset-0 rounded-full blur-[80px] bg-primary/30"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    opacity: [0.2, 0.35, 0.2]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
                 
                 {/* Radar container */}
                 <div className="relative w-full h-full rounded-full border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-xl overflow-hidden">
-                  {/* Radar grid */}
+                  
+                  {/* Propagating waves - multiple rings expanding outward */}
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={`wave-${i}`}
+                      className="absolute inset-0 rounded-full border border-primary/30"
+                      initial={{ scale: 0.1, opacity: 0.8 }}
+                      animate={{ 
+                        scale: [0.1, 1.2],
+                        opacity: [0.6, 0]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: i * 1,
+                        ease: "easeOut"
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Radar grid SVG */}
                   <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
                     {/* Concentric circles */}
                     <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
@@ -417,41 +448,149 @@ export default function Landing() {
                     <line x1="29" y1="29" x2="171" y2="171" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
                     <line x1="171" y1="29" x2="29" y2="171" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
                     
-                    {/* Data polygon */}
-                    <polygon 
+                    {/* Data polygon with animated opacity */}
+                    <motion.polygon 
                       points="100,35 155,75 145,140 55,140 45,75" 
                       fill="rgba(255,107,74,0.1)" 
                       stroke="rgba(255,107,74,0.6)" 
                       strokeWidth="1.5"
                       style={{ filter: 'drop-shadow(0 0 8px rgba(255,107,74,0.4))' }}
+                      animate={{ opacity: [0.6, 1, 0.6] }}
+                      transition={{ duration: 2, repeat: Infinity }}
                     />
                     
-                    {/* Data points */}
-                    <circle cx="100" cy="35" r="4" fill="#ff6b4a" style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} />
-                    <circle cx="155" cy="75" r="4" fill="#ff6b4a" style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} />
-                    <circle cx="145" cy="140" r="4" fill="#ff6b4a" style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} />
-                    <circle cx="55" cy="140" r="4" fill="#ff6b4a" style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} />
-                    <circle cx="45" cy="75" r="4" fill="#ff6b4a" style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} />
+                    {/* Data points with pulse */}
+                    {[
+                      { cx: 100, cy: 35 },
+                      { cx: 155, cy: 75 },
+                      { cx: 145, cy: 140 },
+                      { cx: 55, cy: 140 },
+                      { cx: 45, cy: 75 }
+                    ].map((point, i) => (
+                      <g key={`point-${i}`}>
+                        <motion.circle 
+                          cx={point.cx} 
+                          cy={point.cy} 
+                          r="8" 
+                          fill="rgba(255,107,74,0.2)"
+                          animate={{ 
+                            r: [4, 10, 4],
+                            opacity: [0.4, 0.1, 0.4]
+                          }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: i * 0.2
+                          }}
+                        />
+                        <circle 
+                          cx={point.cx} 
+                          cy={point.cy} 
+                          r="4" 
+                          fill="#ff6b4a" 
+                          style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} 
+                        />
+                      </g>
+                    ))}
                   </svg>
                   
-                  {/* Scanning line animation */}
-                  <div 
-                    className="absolute top-1/2 left-1/2 w-1/2 h-0.5 origin-left animate-[spin_4s_linear_infinite]"
-                    style={{ background: 'linear-gradient(90deg, rgba(255,107,74,0.8) 0%, transparent 100%)' }}
+                  {/* Scanning sweep - cone shape */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 w-1/2 h-1/2 origin-top-left"
+                    style={{ 
+                      background: 'conic-gradient(from 0deg, rgba(255,107,74,0.4) 0deg, rgba(255,107,74,0.1) 30deg, transparent 60deg)',
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ 
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
                   />
                   
+                  {/* Scanning line */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 w-1/2 h-0.5 origin-left"
+                    style={{ 
+                      background: 'linear-gradient(90deg, rgba(255,107,74,1) 0%, rgba(255,107,74,0.5) 50%, transparent 100%)',
+                      boxShadow: '0 0 10px rgba(255,107,74,0.8), 0 0 20px rgba(255,107,74,0.4)'
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ 
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                  
+                  {/* Floating particles */}
+                  {[...Array(12)].map((_, i) => {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const radius = 25 + Math.random() * 55;
+                    const x = 50 + Math.cos(angle) * radius;
+                    const y = 50 + Math.sin(angle) * radius;
+                    return (
+                      <motion.div
+                        key={`particle-${i}`}
+                        className="absolute w-1 h-1 rounded-full bg-primary"
+                        style={{ 
+                          left: `${x}%`, 
+                          top: `${y}%`,
+                          boxShadow: '0 0 4px rgba(255,107,74,0.8)'
+                        }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0.5, 1.5, 0.5],
+                          x: [0, (Math.random() - 0.5) * 20],
+                          y: [0, (Math.random() - 0.5) * 20]
+                        }}
+                        transition={{ 
+                          duration: 2 + Math.random() * 2,
+                          repeat: Infinity,
+                          delay: i * 0.3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    );
+                  })}
+                  
                   {/* Center score */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-1">ANALYZING</span>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <motion.span 
+                      className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-1"
+                      animate={{ opacity: [0.3, 0.8, 0.3] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      ANALYZING
+                    </motion.span>
                     <span className="text-4xl md:text-5xl font-bold text-white">85</span>
                     <span className="font-mono text-xs text-primary mt-1">SCORE</span>
                   </div>
                 </div>
                 
-                {/* Status labels */}
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider">SUBJECTIF: 45%</div>
-                <div className="absolute top-1/2 -right-4 -translate-y-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider rotate-90 origin-center">FONCTIONNEL: 30%</div>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider">CHARGE: 25%</div>
+                {/* Status labels with subtle animation */}
+                <motion.div 
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider"
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0 }}
+                >
+                  SUBJECTIF: 45%
+                </motion.div>
+                <motion.div 
+                  className="absolute top-1/2 -right-4 -translate-y-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider rotate-90 origin-center"
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                >
+                  FONCTIONNEL: 30%
+                </motion.div>
+                <motion.div 
+                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider"
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                >
+                  CHARGE: 25%
+                </motion.div>
               </div>
             </ScrollReveal>
             
