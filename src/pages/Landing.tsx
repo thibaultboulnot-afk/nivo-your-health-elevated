@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ArrowRight, Check, Zap, TrendingDown, AlertTriangle, Activity, Brain, Timer, Sparkles, Cpu, BarChart3, Clock, Target } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 
@@ -196,7 +197,7 @@ export default function Landing() {
       <section className="py-12 md:py-20 px-4 md:px-6 relative z-10" ref={heroRef}>
         <div className="container mx-auto max-w-5xl">
           <motion.div 
-            className="relative"
+            className="relative w-full"
             style={{ 
               perspective: '2000px',
               opacity: dashboardOpacity,
@@ -214,7 +215,7 @@ export default function Landing() {
             
             {/* Dashboard Window - Cyberpunk Style */}
             <motion.div 
-              className="relative rounded-2xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-xl overflow-hidden"
+              className="relative rounded-2xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-xl overflow-hidden w-full"
               style={{
                 rotateX: smoothRotateX,
                 y: smoothY,
@@ -229,17 +230,17 @@ export default function Landing() {
                   <div className="w-3 h-3 rounded-full bg-white/10" />
                   <div className="w-3 h-3 rounded-full bg-white/10" />
                 </div>
-                <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">app.nivo.health</span>
+                <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest hidden sm:block">app.nivo.health</span>
                 <div className="w-16" />
               </div>
               
-              {/* Dashboard Content - Abstract Grid */}
-              <div className="p-6 md:p-10 grid grid-cols-3 gap-4 min-h-[320px]">
-                {/* Left Panel - Score */}
-                <div className="col-span-1 flex flex-col gap-4">
+              {/* Dashboard Content - Responsive Grid */}
+              <div className="p-4 md:p-10 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[280px] md:min-h-[320px]">
+                {/* Left Panel - Score (Full width on mobile) */}
+                <div className="flex flex-row md:flex-col gap-4">
                   <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-3">NIVO SCORE</div>
-                    <div className="text-5xl md:text-6xl font-bold text-white">72</div>
+                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2 md:mb-3">NIVO SCORE</div>
+                    <div className="text-4xl md:text-6xl font-bold text-white">72</div>
                     <div className="mt-2 flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="font-mono text-xs text-emerald-400">OPTIMAL</span>
@@ -251,8 +252,8 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Center Panel - Circular Gauge */}
-                <div className="col-span-1 flex items-center justify-center">
+                {/* Center Panel - Circular Gauge (Hidden on small mobile, visible md+) */}
+                <div className="hidden md:flex items-center justify-center">
                   <div className="relative w-36 h-36 md:w-44 md:h-44">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
@@ -279,19 +280,19 @@ export default function Landing() {
                 </div>
 
                 {/* Right Panel - Stats */}
-                <div className="col-span-1 flex flex-col gap-4">
+                <div className="flex flex-row md:flex-col gap-4">
                   <div className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
                     <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">PAIN INDEX</div>
-                    <div className="text-2xl font-semibold text-emerald-400">-18%</div>
+                    <div className="text-xl md:text-2xl font-semibold text-emerald-400">-18%</div>
                     <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div className="h-full w-3/4 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" />
                     </div>
                   </div>
                   <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
                     <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">DAILY LOOP</div>
-                    <div className="text-2xl font-semibold text-white">8 min</div>
+                    <div className="text-xl md:text-2xl font-semibold text-white">8 min</div>
                   </div>
-                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 backdrop-blur-md">
+                  <div className="hidden md:block rounded-xl border border-primary/20 bg-primary/5 p-3 backdrop-blur-md">
                     <div className="font-mono text-[10px] text-primary uppercase tracking-widest">READY TO SCAN</div>
                   </div>
                 </div>
@@ -684,36 +685,36 @@ export default function Landing() {
             </div>
           </ScrollReveal>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {/* Bento Grid - Mobile-first responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
             {/* Large Card - Algorithm */}
             <ScrollReveal delay={0.1}>
-              <div className="col-span-2 row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 overflow-hidden">
+              <div className="md:col-span-2 md:row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-8 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04] overflow-hidden">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
                   style={{ background: 'radial-gradient(circle at 30% 30%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
                 />
                 <div className="relative h-full flex flex-col">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-4 md:mb-6">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                       <Cpu className="w-5 h-5 text-primary" />
                     </div>
                     <span className="font-mono text-xs text-white/30 uppercase tracking-wider">CORE ENGINE</span>
                   </div>
-                  <h3 className="font-sans text-2xl md:text-3xl font-bold mb-4">L'Algorithme Adaptatif</h3>
-                  <p className="text-white/40 text-sm leading-relaxed mb-6">
+                  <h3 className="font-sans text-xl md:text-3xl font-bold tracking-tight mb-3 md:mb-4">L'Algorithme Adaptatif</h3>
+                  <p className="text-white/40 text-sm leading-relaxed mb-4 md:mb-6 break-words whitespace-normal">
                     Le système analyse vos données quotidiennes et ajuste le protocole en temps réel. Plus vous l'utilisez, plus il devient précis.
                   </p>
-                  <div className="mt-auto grid grid-cols-3 gap-4 pt-6 border-t border-white/5">
+                  <div className="mt-auto grid grid-cols-3 gap-4 pt-4 md:pt-6 border-t border-white/5">
                     <div>
-                      <div className="text-2xl font-bold text-primary">3</div>
+                      <div className="text-xl md:text-2xl font-bold text-primary">3</div>
                       <div className="font-mono text-[10px] text-white/30 uppercase">PHASES</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-white">8</div>
+                      <div className="text-xl md:text-2xl font-bold text-white">8</div>
                       <div className="font-mono text-[10px] text-white/30 uppercase">MINUTES</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-emerald-400">∞</div>
+                      <div className="text-xl md:text-2xl font-bold text-emerald-400">∞</div>
                       <div className="font-mono text-[10px] text-white/30 uppercase">SCANS</div>
                     </div>
                   </div>
@@ -723,44 +724,44 @@ export default function Landing() {
 
             {/* Small Card - Check-in */}
             <ScrollReveal delay={0.2}>
-              <div className="col-span-1 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30">
+              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
                   style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
                 />
                 <div className="relative">
-                  <Clock className="w-6 h-6 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">Check-in 60s</h4>
-                  <p className="text-white/40 text-xs leading-relaxed">Évaluez votre état en moins d'une minute.</p>
+                  <Clock className="w-6 h-6 text-primary mb-3 md:mb-4" />
+                  <h4 className="font-semibold mb-2 tracking-tight">Check-in 60s</h4>
+                  <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Évaluez votre état en moins d'une minute.</p>
                 </div>
               </div>
             </ScrollReveal>
 
             {/* Small Card - NASA */}
             <ScrollReveal delay={0.25}>
-              <div className="col-span-1 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30">
+              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
                   style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
                 />
                 <div className="relative">
-                  <Sparkles className="w-6 h-6 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">NASA Protocol</h4>
-                  <p className="text-white/40 text-xs leading-relaxed">Basé sur les contre-mesures spatiales.</p>
+                  <Sparkles className="w-6 h-6 text-primary mb-3 md:mb-4" />
+                  <h4 className="font-semibold mb-2 tracking-tight">NASA Protocol</h4>
+                  <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Basé sur les contre-mesures spatiales.</p>
                 </div>
               </div>
             </ScrollReveal>
 
             {/* Tall Card - History */}
             <ScrollReveal delay={0.3}>
-              <div className="col-span-1 row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30">
+              <div className="md:row-span-2 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
                   style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
                 />
                 <div className="relative h-full flex flex-col">
-                  <BarChart3 className="w-6 h-6 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">Suivi Historique</h4>
-                  <p className="text-white/40 text-xs leading-relaxed mb-4">Visualisez l'évolution de votre score sur 30, 90, 365 jours.</p>
+                  <BarChart3 className="w-6 h-6 text-primary mb-3 md:mb-4" />
+                  <h4 className="font-semibold mb-2 tracking-tight">Suivi Historique</h4>
+                  <p className="text-white/40 text-xs leading-relaxed mb-4 break-words whitespace-normal">Visualisez l'évolution de votre score sur 30, 90, 365 jours.</p>
                   {/* Mini chart visualization */}
-                  <div className="mt-auto flex items-end gap-1 h-20">
+                  <div className="mt-auto flex items-end gap-1 h-16 md:h-20">
                     {[40, 55, 45, 60, 70, 65, 75, 80, 72, 85].map((h, i) => (
                       <div 
                         key={i}
@@ -775,14 +776,14 @@ export default function Landing() {
 
             {/* Wide Card - 3 Steps */}
             <ScrollReveal delay={0.35}>
-              <div className="col-span-1 group relative rounded-2xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30">
+              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
                   style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
                 />
                 <div className="relative">
-                  <Target className="w-6 h-6 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">3 Phases</h4>
-                  <div className="flex gap-2 text-[10px] font-mono text-white/40">
+                  <Target className="w-6 h-6 text-primary mb-3 md:mb-4" />
+                  <h4 className="font-semibold mb-2 tracking-tight">3 Phases</h4>
+                  <div className="flex flex-wrap gap-2 text-[10px] font-mono text-white/40">
                     <span className="px-2 py-1 rounded bg-white/5">DECOMPRESS</span>
                     <span className="px-2 py-1 rounded bg-white/5">MOBILIZE</span>
                     <span className="px-2 py-1 rounded bg-white/5">STABILIZE</span>
@@ -916,6 +917,74 @@ export default function Landing() {
               </div>
             </ScrollReveal>
           </div>
+        </div>
+      </section>
+
+      {/* ===== FAQ SECTION ===== */}
+      <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
+        <div className="container mx-auto max-w-3xl">
+          <ScrollReveal>
+            <div className="text-center mb-12 md:mb-16">
+              <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
+                // FAQ
+              </span>
+              <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight">
+                Questions Fréquentes
+              </h2>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem 
+                value="item-1" 
+                className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
+              >
+                <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
+                  Est-ce que ça remplace mon kiné ?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
+                  Non. NIVO est un outil de maintenance proactive. En cas de pathologie ou douleur aiguë, consultez un médecin.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem 
+                value="item-2" 
+                className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
+              >
+                <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
+                  J'ai peu de temps, combien ça dure ?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
+                  Le check-in prend 60 secondes. La routine quotidienne dure 8 minutes. Conçu pour les agendas chargés.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem 
+                value="item-3" 
+                className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
+              >
+                <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
+                  Ai-je besoin de matériel ?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
+                  Non. Un mur et le sol suffisent. Idéal pour le bureau ou en déplacement.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem 
+                value="item-4" 
+                className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
+              >
+                <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
+                  Puis-je annuler ?
+                </AccordionTrigger>
+                <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
+                  Oui, à tout moment depuis votre espace membre.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </ScrollReveal>
         </div>
       </section>
 
