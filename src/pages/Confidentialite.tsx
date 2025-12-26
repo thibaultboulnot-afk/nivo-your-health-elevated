@@ -31,7 +31,7 @@ export default function Confidentialite() {
         {/* Trust Badges */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
           {[
-            { icon: Shield, label: "RGPD Compliant" },
+            { icon: Shield, label: "Conforme RGPD" },
             { icon: Lock, label: "Données Cryptées" },
             { icon: Eye, label: "Transparence" },
             { icon: UserCheck, label: "Vos Droits" },

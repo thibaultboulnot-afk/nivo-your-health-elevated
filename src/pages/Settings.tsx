@@ -175,7 +175,7 @@ export default function Settings() {
                           <>
                             <span className="font-heading text-xl text-white/70">Gratuit</span>
                             <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/50 font-mono text-[10px]">
-                              FREE
+                              GRATUIT
                             </span>
                           </>
                         )}
@@ -323,7 +323,7 @@ export default function Settings() {
           <div className="p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="font-mono text-xs text-white/30 space-y-1">
               <p>&gt; user_id: {user?.id?.slice(0, 8)}...</p>
-              <p>&gt; status: {isPro ? 'PRO' : 'FREE'}</p>
+              <p>&gt; statut: {isPro ? 'PRO' : 'GRATUIT'}</p>
               <p>&gt; version: NIVO_OS v2.0.4</p>
             </div>
           </div>
