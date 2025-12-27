@@ -13,12 +13,14 @@ import {
   Minus,
   Plus,
   ArrowRight,
-  Loader2
+  Loader2,
+  Camera
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateNivoScore, DailyLog, PhysicalAssessment } from '@/lib/nivo-engine';
 import { toast } from 'sonner';
+import PostureScanner from '@/components/PostureScanner';
 
 type ScanStep = 'IDLE' | 'SUBJECTIVE' | 'LOAD' | 'FUNCTIONAL' | 'COMPUTING' | 'COMPLETE';
 
@@ -35,6 +37,8 @@ interface LoadData {
 interface FunctionalData {
   wallAngelScore: number; // 0, 1.5, or 3
 }
+
+type FunctionalMode = 'scanner' | 'manual';
 
 const computingLines = [
   '> Analyse des données sensorielles...',
@@ -55,6 +59,7 @@ export default function Diagnostic() {
   const [functional, setFunctional] = useState<FunctionalData>({ wallAngelScore: 1.5 });
   const [computingLine, setComputingLine] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [functionalMode, setFunctionalMode] = useState<FunctionalMode>('scanner');
 
   const handleStartScan = () => {
     setStep('SUBJECTIVE');
@@ -455,72 +460,94 @@ export default function Diagnostic() {
               exit={{ opacity: 0, x: -50 }}
               className="w-full max-w-lg"
             >
-              <div className="text-center mb-8">
+              <div className="text-center mb-6">
                 <span className="inline-flex items-center gap-2 text-primary font-mono text-xs tracking-widest uppercase mb-4 px-3 py-1 rounded-full border border-primary/30 bg-primary/10">
-                  <Activity className="w-3 h-3" />
-                  Étape 3/3 — Test Fonctionnel
+                  <Camera className="w-3 h-3" />
+                  Étape 3/3 — Analyse Posturale
                 </span>
                 <h2 className="font-sans font-semibold text-2xl md:text-3xl tracking-tight">
-                  Seated Wall Angel
+                  {functionalMode === 'scanner' ? 'Scan Postural' : 'Seated Wall Angel'}
                 </h2>
+                {functionalMode === 'scanner' && (
+                  <p className="text-muted-foreground text-sm mt-2">
+                    Placez-vous de profil face à la caméra
+                  </p>
+                )}
               </div>
 
               <div className="p-6 rounded-2xl glass-card mb-6">
-                {/* Instructions */}
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
-                    <Activity className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground font-sans text-sm leading-relaxed">
-                    Assis, dos au mur. Levez les bras en "W" puis en "Y".<br />
-                    Gardez le contact avec le mur.
-                  </p>
-                </div>
+                {functionalMode === 'scanner' ? (
+                  <PostureScanner
+                    onScoreCapture={(score) => handleFunctionalComplete(score)}
+                    onFallback={() => setFunctionalMode('manual')}
+                  />
+                ) : (
+                  <>
+                    {/* Manual Mode - Original UI */}
+                    <div className="text-center mb-6">
+                      <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+                        <Activity className="w-10 h-10 text-primary" />
+                      </div>
+                      <p className="text-muted-foreground font-sans text-sm leading-relaxed">
+                        Assis, dos au mur. Levez les bras en "W" puis en "Y".<br />
+                        Gardez le contact avec le mur.
+                      </p>
+                    </div>
 
-                {/* Result Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleFunctionalComplete(3)}
-                    disabled={isSaving}
-                    className="w-full p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors flex items-center gap-4"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-sans font-medium text-emerald-400">Succès</p>
-                      <p className="font-mono text-xs text-muted-foreground">Je touche partout</p>
-                    </div>
-                  </button>
+                    {/* Result Buttons */}
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => handleFunctionalComplete(3)}
+                        disabled={isSaving}
+                        className="w-full p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors flex items-center gap-4"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-sans font-medium text-emerald-400">Succès</p>
+                          <p className="font-mono text-xs text-muted-foreground">Je touche partout</p>
+                        </div>
+                      </button>
 
-                  <button
-                    onClick={() => handleFunctionalComplete(1.5)}
-                    disabled={isSaving}
-                    className="w-full p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors flex items-center gap-4"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-amber-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-sans font-medium text-amber-400">Partiel</p>
-                      <p className="font-mono text-xs text-muted-foreground">Je décolle les poignets</p>
-                    </div>
-                  </button>
+                      <button
+                        onClick={() => handleFunctionalComplete(1.5)}
+                        disabled={isSaving}
+                        className="w-full p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors flex items-center gap-4"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                          <AlertTriangle className="w-5 h-5 text-amber-400" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-sans font-medium text-amber-400">Partiel</p>
+                          <p className="font-mono text-xs text-muted-foreground">Je décolle les poignets</p>
+                        </div>
+                      </button>
 
-                  <button
-                    onClick={() => handleFunctionalComplete(0)}
-                    disabled={isSaving}
-                    className="w-full p-4 rounded-xl bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors flex items-center gap-4"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-destructive/20 flex items-center justify-center">
-                      <XCircle className="w-5 h-5 text-destructive" />
+                      <button
+                        onClick={() => handleFunctionalComplete(0)}
+                        disabled={isSaving}
+                        className="w-full p-4 rounded-xl bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors flex items-center gap-4"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-destructive/20 flex items-center justify-center">
+                          <XCircle className="w-5 h-5 text-destructive" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-sans font-medium text-destructive">Échec</p>
+                          <p className="font-mono text-xs text-muted-foreground">Douleur ou impossible</p>
+                        </div>
+                      </button>
                     </div>
-                    <div className="text-left">
-                      <p className="font-sans font-medium text-destructive">Échec</p>
-                      <p className="font-mono text-xs text-muted-foreground">Douleur ou impossible</p>
-                    </div>
-                  </button>
-                </div>
+
+                    {/* Switch to scanner */}
+                    <button
+                      onClick={() => setFunctionalMode('scanner')}
+                      className="w-full text-center text-xs text-primary hover:text-primary/80 transition-colors py-3 mt-4"
+                    >
+                      ← Utiliser le scan par caméra
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Progress Dots */}
