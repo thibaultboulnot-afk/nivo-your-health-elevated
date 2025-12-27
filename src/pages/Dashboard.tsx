@@ -6,6 +6,7 @@ import { useAccess } from '@/hooks/useAccess';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Settings,
   Activity,
@@ -21,10 +22,20 @@ import {
   ArrowRight,
   ChevronUp,
   Crown,
+  TrendingUp,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, PILOT_PROGRAMS, type Protocol, type PilotProgram } from '@/data/programs';
 import { motion } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+interface PostureHistoryItem {
+  date: string;
+  score: number;
+  formattedDate: string;
+}
 
 export default function Dashboard() {
   const { signOut, user } = useAuth();
@@ -34,6 +45,44 @@ export default function Dashboard() {
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [postureHistory, setPostureHistory] = useState<PostureHistoryItem[]>([]);
+  const [loadingPosture, setLoadingPosture] = useState(true);
+
+  // Fetch posture history from physical_tests
+  useEffect(() => {
+    const fetchPostureHistory = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('physical_tests')
+          .select('test_date, wall_angel_contacts')
+          .eq('user_id', user.id)
+          .order('test_date', { ascending: true })
+          .limit(30);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const formattedData: PostureHistoryItem[] = data
+            .filter(item => item.wall_angel_contacts !== null)
+            .map(item => ({
+              date: item.test_date,
+              // Convert wall_angel_contacts (0-3) to percentage score (0-100)
+              score: Math.round((item.wall_angel_contacts! / 3) * 100),
+              formattedDate: format(new Date(item.test_date), 'dd/MM', { locale: fr })
+            }));
+          setPostureHistory(formattedData);
+        }
+      } catch (error) {
+        console.error('Error fetching posture history:', error);
+      } finally {
+        setLoadingPosture(false);
+      }
+    };
+
+    fetchPostureHistory();
+  }, [user?.id]);
 
   // Check for mobile
   useEffect(() => {
@@ -334,6 +383,75 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Posture Evolution Chart */}
+        <section className="mb-6 md:mb-10 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+          <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-6 relative overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="font-mono text-xs text-foreground/40">ÉVOLUTION_POSTURALE //</span>
+            </div>
+            
+            {loadingPosture ? (
+              <div className="h-48 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            ) : postureHistory.length === 0 ? (
+              <div className="h-48 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                  <TrendingUp className="w-6 h-6 text-foreground/30" />
+                </div>
+                <p className="font-mono text-sm text-foreground/40 mb-2">Aucune donnée posturale</p>
+                <p className="font-mono text-xs text-foreground/30">Faites un diagnostic pour voir votre évolution</p>
+              </div>
+            ) : (
+              <div className="h-48 md:h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={postureHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="postureGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#4ADE80" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#4ADE80" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="formattedDate" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'monospace' }}
+                    />
+                    <YAxis 
+                      domain={[0, 100]}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'monospace' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(0,0,0,0.9)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        fontFamily: 'monospace',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: 'rgba(255,255,255,0.6)' }}
+                      formatter={(value: number) => [`${value}%`, 'Score']}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="#4ADE80" 
+                      strokeWidth={2}
+                      fill="url(#postureGradient)"
+                      dot={postureHistory.length === 1 ? { fill: '#4ADE80', strokeWidth: 2, r: 6 } : false}
+                      activeDot={{ fill: '#4ADE80', strokeWidth: 2, r: 6 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         </section>
 
