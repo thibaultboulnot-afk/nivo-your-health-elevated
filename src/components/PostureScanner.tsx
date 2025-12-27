@@ -12,7 +12,9 @@ import {
   CheckCircle2, 
   Loader2,
   Target,
-  RotateCcw
+  RotateCcw,
+  User,
+  ArrowRight
 } from 'lucide-react';
 
 interface PostureScannerProps {
@@ -22,8 +24,12 @@ interface PostureScannerProps {
 
 interface PostureMetrics {
   alignmentScore: number;
+  neckScore: number;
+  torsoScore: number;
   isForwardHead: boolean;
+  isSlouching: boolean;
   headOffset: number;
+  torsoAngle: number;
 }
 
 export default function PostureScanner({ onScoreCapture, onFallback }: PostureScannerProps) {
@@ -32,6 +38,7 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
   const poseRef = useRef<Pose | null>(null);
   const cameraRef = useRef<Camera | null>(null);
   
+  const [showTutorial, setShowTutorial] = useState(true);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,49 +46,81 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
   const [scoreHistory, setScoreHistory] = useState<number[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
 
-  // Calculate posture metrics from landmarks
+  // Calculate advanced posture metrics from landmarks (Neck + Torso)
   const calculatePostureMetrics = useCallback((landmarks: Results['poseLandmarks']): PostureMetrics => {
-    if (!landmarks || landmarks.length < 12) {
-      return { alignmentScore: 0, isForwardHead: true, headOffset: 0 };
+    if (!landmarks || landmarks.length < 25) {
+      return { 
+        alignmentScore: 0, 
+        neckScore: 0, 
+        torsoScore: 0, 
+        isForwardHead: true, 
+        isSlouching: true, 
+        headOffset: 0, 
+        torsoAngle: 0 
+      };
     }
 
-    // Key landmarks (using right side for profile detection)
-    const nose = landmarks[0];
+    // Key landmarks
     const leftEar = landmarks[7];
     const rightEar = landmarks[8];
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
 
-    // Use the ear that's more visible (higher visibility score)
-    const ear = leftEar.visibility! > rightEar.visibility! ? leftEar : rightEar;
-    const shoulder = leftShoulder.visibility! > rightShoulder.visibility! ? leftShoulder : rightShoulder;
-
-    // Calculate forward head offset (ear X relative to shoulder X)
-    // In a good posture, ear should be roughly above shoulder
-    const headOffset = (ear.x - shoulder.x) * 100; // Convert to percentage
+    // Choose the side with better visibility
+    const leftVisibility = (leftEar.visibility! + leftShoulder.visibility! + leftHip.visibility!) / 3;
+    const rightVisibility = (rightEar.visibility! + rightShoulder.visibility! + rightHip.visibility!) / 3;
     
-    // Threshold: if ear is more than 8% forward of shoulder, it's forward head
+    const ear = leftVisibility > rightVisibility ? leftEar : rightEar;
+    const shoulder = leftVisibility > rightVisibility ? leftShoulder : rightShoulder;
+    const hip = leftVisibility > rightVisibility ? leftHip : rightHip;
+
+    // === CHECK 1: Tech Neck (Ear vs Shoulder) ===
+    const headOffset = (ear.x - shoulder.x) * 100;
     const FORWARD_HEAD_THRESHOLD = 8;
     const isForwardHead = headOffset > FORWARD_HEAD_THRESHOLD;
+    
+    // Neck score (0-100)
+    const MAX_HEAD_OFFSET = 20;
+    const normalizedHeadOffset = Math.min(Math.abs(headOffset), MAX_HEAD_OFFSET);
+    const neckScore = Math.round(100 - (normalizedHeadOffset / MAX_HEAD_OFFSET) * 100);
 
-    // Calculate alignment score (0-100)
-    // Perfect alignment = 100, max forward offset (20%) = 0
-    const MAX_OFFSET = 20;
-    const normalizedOffset = Math.min(Math.abs(headOffset), MAX_OFFSET);
-    const alignmentScore = Math.round(100 - (normalizedOffset / MAX_OFFSET) * 100);
+    // === CHECK 2: Slouching/Torso Alignment (Shoulder vs Hip) ===
+    // Calculate angle of torso - if shoulder is significantly forward of hip, it's slouching
+    const shoulderHipOffsetX = (shoulder.x - hip.x) * 100;
+    const shoulderHipOffsetY = (hip.y - shoulder.y); // Vertical distance (hip below shoulder)
+    
+    // Calculate angle in degrees (forward lean)
+    const torsoAngle = Math.atan2(shoulderHipOffsetX, shoulderHipOffsetY * 100) * (180 / Math.PI);
+    const SLOUCH_THRESHOLD = 10; // degrees
+    const isSlouching = Math.abs(torsoAngle) > SLOUCH_THRESHOLD;
+    
+    // Torso score (0-100)
+    const MAX_TORSO_ANGLE = 25;
+    const normalizedTorsoAngle = Math.min(Math.abs(torsoAngle), MAX_TORSO_ANGLE);
+    const torsoScore = Math.round(100 - (normalizedTorsoAngle / MAX_TORSO_ANGLE) * 100);
+
+    // === COMBINED SCORE ===
+    // Weighted average: 50% neck, 50% torso
+    const alignmentScore = Math.round((neckScore * 0.5) + (torsoScore * 0.5));
 
     return {
       alignmentScore: Math.max(0, Math.min(100, alignmentScore)),
+      neckScore: Math.max(0, Math.min(100, neckScore)),
+      torsoScore: Math.max(0, Math.min(100, torsoScore)),
       isForwardHead,
-      headOffset: Math.round(headOffset)
+      isSlouching,
+      headOffset: Math.round(headOffset),
+      torsoAngle: Math.round(torsoAngle)
     };
   }, []);
 
-  // Draw skeleton on canvas
+  // Draw skeleton on canvas with advanced feedback
   const drawSkeleton = useCallback((
     results: Results,
     canvas: HTMLCanvasElement,
-    isGoodPosture: boolean
+    metrics: PostureMetrics
   ) => {
     const ctx = canvas.getContext('2d');
     if (!ctx || !results.poseLandmarks) return;
@@ -93,6 +132,7 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
 
+    const isGoodPosture = !metrics.isForwardHead && !metrics.isSlouching;
     const color = isGoodPosture ? '#22c55e' : '#ef4444';
     const highlightColor = isGoodPosture ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)';
 
@@ -110,8 +150,8 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
       radius: 4
     });
 
-    // Highlight key posture points (ear and shoulder)
-    const keyPoints = [0, 7, 8, 11, 12]; // nose, ears, shoulders
+    // Highlight key posture points (ear, shoulder, hip)
+    const keyPoints = [7, 8, 11, 12, 23, 24]; // ears, shoulders, hips
     keyPoints.forEach(idx => {
       const landmark = results.poseLandmarks[idx];
       if (landmark && landmark.visibility! > 0.5) {
@@ -157,7 +197,7 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
         return updated.slice(-90);
       });
 
-      drawSkeleton(results, canvas, !newMetrics.isForwardHead);
+      drawSkeleton(results, canvas, newMetrics);
     }
   }, [calculatePostureMetrics, drawSkeleton]);
 
@@ -240,6 +280,12 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
     }
   };
 
+  // Start scanning after tutorial
+  const startScanning = async () => {
+    setShowTutorial(false);
+    await enableCamera();
+  };
+
   // Capture average score from last 3 seconds
   const captureScore = () => {
     if (scoreHistory.length === 0) {
@@ -255,9 +301,6 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
     );
 
     // Convert 0-100 alignment score to 0-3 wall angel score
-    // 80-100% = 3 (success)
-    // 50-79% = 1.5 (partial)
-    // 0-49% = 0 (fail)
     let wallAngelScore: number;
     if (avgScore >= 80) {
       wallAngelScore = 3;
@@ -295,166 +338,261 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
     setMetrics(null);
   };
 
+  // Get status message based on metrics
+  const getStatusMessage = () => {
+    if (!metrics) return '';
+    if (metrics.isForwardHead && metrics.isSlouching) return 'Cou + Dos à corriger';
+    if (metrics.isForwardHead) return 'Tête avancée';
+    if (metrics.isSlouching) return 'Dos arrondi';
+    return 'Bonne posture';
+  };
+
   return (
     <div className="space-y-4">
-      {/* Camera View */}
-      <div className="relative aspect-[4/3] bg-black/50 rounded-2xl overflow-hidden border border-border">
-        {!cameraEnabled ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-              <CameraIcon className="w-8 h-8 text-primary" />
-            </div>
-            <p className="text-center text-muted-foreground text-sm mb-4">
-              Activez votre caméra pour l'analyse posturale en temps réel
-            </p>
-            <Button
-              onClick={enableCamera}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <CameraIcon className="w-4 h-4 mr-2" />
-              Activer la caméra
-            </Button>
-          </div>
-        ) : (
-          <>
-            <Webcam
-              ref={webcamRef}
-              mirrored
-              className="absolute inset-0 w-full h-full object-cover"
-              videoConstraints={{
-                width: 640,
-                height: 480,
-                facingMode: 'user'
-              }}
-            />
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            
-            {/* Loading Overlay */}
-            <AnimatePresence>
-              {isLoading && (
+      {/* Tutorial Overlay */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="relative aspect-[4/3] bg-gradient-to-br from-black/80 to-black/60 rounded-2xl overflow-hidden border border-border"
+          >
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              {/* Animated Profile Icon */}
+              <div className="relative w-32 h-32 mb-6">
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center"
+                  className="absolute inset-0 rounded-full border-2 border-primary/30"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="absolute inset-2 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <motion.div
+                    animate={{ rotateY: [0, -30, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                  >
+                    <User className="w-16 h-16 text-primary" />
+                  </motion.div>
+                </div>
+                {/* Profile arrow indicator */}
+                <motion.div
+                  className="absolute -right-4 top-1/2 -translate-y-1/2"
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
-                  <p className="text-sm text-muted-foreground font-mono">
-                    Chargement de MediaPipe...
-                  </p>
+                  <ArrowRight className="w-6 h-6 text-primary" />
                 </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Real-time Score Overlay */}
-            {metrics && !isLoading && (
-              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                <div className={`px-3 py-1.5 rounded-lg backdrop-blur-sm ${
-                  metrics.isForwardHead 
-                    ? 'bg-destructive/80 text-white' 
-                    : 'bg-emerald-500/80 text-white'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    {metrics.isForwardHead ? (
-                      <AlertTriangle className="w-4 h-4" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4" />
-                    )}
-                    <span className="font-mono text-sm font-bold">
-                      {metrics.alignmentScore}%
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
-                  <span className="font-mono text-xs text-white/80">
-                    {metrics.isForwardHead ? 'Tête avancée' : 'Bonne posture'}
-                  </span>
-                </div>
               </div>
-            )}
 
-            {/* Capture Animation */}
-            <AnimatePresence>
-              {isCapturing && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.2 }}
-                  className="absolute inset-0 bg-primary/20 flex items-center justify-center"
-                >
-                  <div className="w-24 h-24 rounded-full border-4 border-primary animate-ping" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-      </div>
+              {/* Instructions */}
+              <h3 className="font-heading text-lg font-bold text-foreground mb-3">
+                Positionnez-vous de Profil
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-6">
+                Placez-vous de <span className="text-primary font-semibold">profil</span> par rapport à la caméra. 
+                Votre <span className="text-primary">oreille</span>, <span className="text-primary">épaule</span> et <span className="text-primary">hanche</span> doivent être visibles.
+              </p>
 
-      {/* Error State */}
-      {cameraError && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-destructive/10 border border-destructive/20"
-        >
-          <div className="flex items-start gap-3">
-            <CameraOff className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-sans text-sm text-destructive mb-2">{cameraError}</p>
+              {/* Checklist */}
+              <div className="flex flex-wrap gap-2 justify-center mb-6">
+                <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-foreground/60">
+                  ✓ Corps entier visible
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-foreground/60">
+                  ✓ Vue de profil
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-foreground/60">
+                  ✓ Bien éclairé
+                </span>
+              </div>
+
+              {/* Start Button */}
               <Button
-                variant="outline"
-                size="sm"
-                onClick={onFallback}
-                className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                onClick={startScanning}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8"
               >
-                Saisie manuelle
+                <CameraIcon className="w-4 h-4 mr-2" />
+                Je suis prêt
               </Button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Camera View (hidden during tutorial) */}
+      {!showTutorial && (
+        <>
+          <div className="relative aspect-[4/3] bg-black/50 rounded-2xl overflow-hidden border border-border">
+            {!cameraEnabled ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                  <CameraIcon className="w-8 h-8 text-primary" />
+                </div>
+                <p className="text-center text-muted-foreground text-sm mb-4">
+                  Chargement de la caméra...
+                </p>
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            ) : (
+              <>
+                <Webcam
+                  ref={webcamRef}
+                  mirrored
+                  className="absolute inset-0 w-full h-full object-cover"
+                  videoConstraints={{
+                    width: 640,
+                    height: 480,
+                    facingMode: 'user'
+                  }}
+                />
+                <canvas
+                  ref={canvasRef}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                
+                {/* Loading Overlay */}
+                <AnimatePresence>
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center"
+                    >
+                      <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
+                      <p className="text-sm text-muted-foreground font-mono">
+                        Chargement de MediaPipe...
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Real-time Score Overlay with detailed metrics */}
+                {metrics && !isLoading && (
+                  <div className="absolute top-3 left-3 right-3 flex flex-col gap-2">
+                    {/* Main score badge */}
+                    <div className="flex items-center justify-between">
+                      <div className={`px-3 py-1.5 rounded-lg ${
+                        metrics.isForwardHead || metrics.isSlouching
+                          ? 'bg-destructive/80 text-white' 
+                          : 'bg-emerald-500/80 text-white'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          {metrics.isForwardHead || metrics.isSlouching ? (
+                            <AlertTriangle className="w-4 h-4" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4" />
+                          )}
+                          <span className="font-mono text-sm font-bold">
+                            {metrics.alignmentScore}%
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="px-3 py-1.5 rounded-lg bg-black/60">
+                        <span className="font-mono text-xs text-white/80">
+                          {getStatusMessage()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Detailed breakdown */}
+                    <div className="flex gap-2">
+                      <div className={`px-2 py-1 rounded text-xs font-mono ${
+                        metrics.isForwardHead ? 'bg-red-500/60' : 'bg-emerald-500/60'
+                      } text-white`}>
+                        Cou: {metrics.neckScore}%
+                      </div>
+                      <div className={`px-2 py-1 rounded text-xs font-mono ${
+                        metrics.isSlouching ? 'bg-red-500/60' : 'bg-emerald-500/60'
+                      } text-white`}>
+                        Dos: {metrics.torsoScore}%
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Capture Animation */}
+                <AnimatePresence>
+                  {isCapturing && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.2 }}
+                      className="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                    >
+                      <div className="w-24 h-24 rounded-full border-4 border-primary animate-ping" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            )}
           </div>
-        </motion.div>
-      )}
 
-      {/* Action Buttons */}
-      {cameraEnabled && !cameraError && !isLoading && (
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={resetScanner}
-            className="flex-1"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Réinitialiser
-          </Button>
-          <Button
-            onClick={captureScore}
-            disabled={scoreHistory.length < 30 || isCapturing}
-            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            <Target className="w-4 h-4 mr-2" />
-            Capturer le Score
-          </Button>
-        </div>
-      )}
+          {/* Error State */}
+          {cameraError && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl bg-destructive/10 border border-destructive/20"
+            >
+              <div className="flex items-start gap-3">
+                <CameraOff className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-sans text-sm text-destructive mb-2">{cameraError}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onFallback}
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                  >
+                    Saisie manuelle
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-      {/* Instructions */}
-      {cameraEnabled && !cameraError && !isLoading && scoreHistory.length < 30 && (
-        <p className="text-center text-xs text-muted-foreground font-mono">
-          Maintenez votre position de profil pendant 1 seconde...
-        </p>
-      )}
+          {/* Action Buttons */}
+          {cameraEnabled && !cameraError && !isLoading && (
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={resetScanner}
+                className="flex-1"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Réinitialiser
+              </Button>
+              <Button
+                onClick={captureScore}
+                disabled={scoreHistory.length < 30 || isCapturing}
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Capturer le Score
+              </Button>
+            </div>
+          )}
 
-      {/* Fallback Button */}
-      {cameraEnabled && !cameraError && (
-        <button
-          onClick={onFallback}
-          className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
-        >
-          Préférer la saisie manuelle →
-        </button>
+          {/* Instructions */}
+          {cameraEnabled && !cameraError && !isLoading && scoreHistory.length < 30 && (
+            <p className="text-center text-xs text-muted-foreground font-mono">
+              Maintenez votre position de profil pendant 1 seconde...
+            </p>
+          )}
+
+          {/* Fallback Button */}
+          {cameraEnabled && !cameraError && (
+            <button
+              onClick={onFallback}
+              className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+            >
+              Préférer la saisie manuelle →
+            </button>
+          )}
+        </>
       )}
     </div>
   );
