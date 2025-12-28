@@ -11,6 +11,7 @@ import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2 } from 'lucide-reac
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { safeStripeRedirect } from '@/lib/url-validator';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -42,12 +43,13 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
       }
 
       if (data?.url) {
-        window.location.href = data.url;
+        if (!safeStripeRedirect(data.url)) {
+          throw new Error('URL de paiement invalide');
+        }
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
-      console.error('Checkout error:', error);
       toast({
         title: "Erreur",
         description: "Impossible de créer la session de paiement. Veuillez réessayer.",
