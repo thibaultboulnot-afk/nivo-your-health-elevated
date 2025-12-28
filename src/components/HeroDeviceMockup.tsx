@@ -1,83 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useIsMobile } from '@/hooks/use-mobile';
-
-// Dashboard skeleton placeholder component
-const DashboardSkeleton = ({ device }: { device: 'mobile' | 'tablet' | 'desktop' }) => {
-  const isMobileLayout = device === 'mobile';
-  const isTabletLayout = device === 'tablet';
-  
-  return (
-    <div className="w-full h-full bg-[#0a0a0a] p-3 md:p-4 flex flex-col gap-2 md:gap-3">
-      {/* Header skeleton */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-primary/30 animate-pulse" />
-          <div className="w-16 md:w-20 h-3 md:h-4 rounded bg-white/10 animate-pulse" />
-        </div>
-        <div className="flex gap-2">
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 animate-pulse" />
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 animate-pulse" />
-        </div>
-      </div>
-      
-      {/* Bento Grid skeleton */}
-      <div className={`flex-1 grid gap-2 md:gap-3 ${
-        isMobileLayout 
-          ? 'grid-cols-2 grid-rows-3' 
-          : isTabletLayout 
-            ? 'grid-cols-3 grid-rows-2' 
-            : 'grid-cols-4 grid-rows-2'
-      }`}>
-        {/* Score card - larger */}
-        <div className={`${isMobileLayout ? 'col-span-1 row-span-2' : 'col-span-1 row-span-2'} rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-3 flex flex-col justify-between`}>
-          <div className="w-12 h-2 rounded bg-white/20 animate-pulse" />
-          <div className="space-y-1">
-            <div className="text-2xl md:text-4xl font-bold text-white/80">72</div>
-            <div className="w-8 h-1.5 rounded bg-emerald-400/50 animate-pulse" />
-          </div>
-        </div>
-        
-        {/* Other cards */}
-        <div className="rounded-xl bg-white/[0.03] border border-white/5 p-2 md:p-3 flex flex-col gap-1">
-          <div className="w-10 h-1.5 rounded bg-white/10 animate-pulse" />
-          <div className="w-6 h-4 rounded bg-white/20 animate-pulse mt-auto" />
-        </div>
-        <div className="rounded-xl bg-white/[0.03] border border-white/5 p-2 md:p-3 flex flex-col gap-1">
-          <div className="w-10 h-1.5 rounded bg-white/10 animate-pulse" />
-          <div className="flex-1 flex items-end">
-            <div className="w-full h-8 rounded bg-white/5 animate-pulse" />
-          </div>
-        </div>
-        {!isMobileLayout && (
-          <>
-            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-2 md:p-3 flex flex-col gap-1">
-              <div className="w-10 h-1.5 rounded bg-white/10 animate-pulse" />
-              <div className="w-full h-4 rounded bg-emerald-400/20 animate-pulse mt-auto" />
-            </div>
-            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-2 md:p-3 flex flex-col gap-1">
-              <div className="w-10 h-1.5 rounded bg-white/10 animate-pulse" />
-              <div className="w-8 h-4 rounded bg-white/20 animate-pulse mt-auto" />
-            </div>
-          </>
-        )}
-        <div className={`${isMobileLayout ? 'col-span-2' : 'col-span-2'} rounded-xl bg-white/[0.03] border border-white/5 p-2 md:p-3`}>
-          <div className="w-16 h-1.5 rounded bg-white/10 animate-pulse mb-2" />
-          <div className="flex gap-1">
-            {[...Array(7)].map((_, i) => (
-              <div key={i} className="flex-1 h-10 md:h-16 rounded bg-white/5 animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
-            ))}
-          </div>
-        </div>
-        {!isMobileLayout && (
-          <div className="rounded-xl bg-primary/10 border border-primary/20 p-2 md:p-3 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full border-2 border-primary/40 animate-pulse" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import DashboardPreview from '@/components/previews/DashboardPreview';
 
 // iPhone Frame Component
 const IPhoneFrame = ({ children }: { children: React.ReactNode }) => (
@@ -176,10 +99,40 @@ const MacBookFrame = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+// Scaled Dashboard container for device frames
+const ScaledDashboard = ({ 
+  scale, 
+  width, 
+  height,
+  forceMobile = false 
+}: { 
+  scale: number; 
+  width: number; 
+  height: number;
+  forceMobile?: boolean;
+}) => (
+  <div 
+    className="absolute inset-0 overflow-hidden"
+    style={{ 
+      width: '100%',
+      height: '100%',
+    }}
+  >
+    <div
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
+      }}
+    >
+      <DashboardPreview forceMobile={forceMobile} />
+    </div>
+  </div>
+);
+
 // Main component with responsive device switching
 export default function HeroDeviceMockup() {
-  const isMobile = useIsMobile();
-  
   // Animation variants for 3D entrance
   const deviceVariants = {
     hidden: { 
@@ -221,14 +174,8 @@ export default function HeroDeviceMockup() {
         style={{ transformStyle: 'preserve-3d' }}
       >
         <IPhoneFrame>
-          {/* Placeholder - will be replaced with image */}
-          <img 
-            src="/src/assets/dashboard-mobile.png" 
-            alt="NIVO Dashboard Mobile"
-            className="w-full h-full object-cover hidden"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <DashboardSkeleton device="mobile" />
+          {/* Dashboard scaled to fit iPhone - 375px width scaled down */}
+          <ScaledDashboard scale={0.56} width={500} height={1050} forceMobile={true} />
         </IPhoneFrame>
       </motion.div>
 
@@ -241,14 +188,8 @@ export default function HeroDeviceMockup() {
         style={{ transformStyle: 'preserve-3d' }}
       >
         <IPadFrame>
-          {/* Placeholder - will be replaced with image */}
-          <img 
-            src="/src/assets/dashboard-tablet.png" 
-            alt="NIVO Dashboard Tablet"
-            className="w-full h-full object-cover hidden"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <DashboardSkeleton device="tablet" />
+          {/* Dashboard scaled to fit iPad - 1024px width scaled down */}
+          <ScaledDashboard scale={0.52} width={1100} height={825} forceMobile={false} />
         </IPadFrame>
       </motion.div>
 
@@ -261,14 +202,8 @@ export default function HeroDeviceMockup() {
         style={{ transformStyle: 'preserve-3d' }}
       >
         <MacBookFrame>
-          {/* Placeholder - will be replaced with image */}
-          <img 
-            src="/src/assets/dashboard-desktop.png" 
-            alt="NIVO Dashboard Desktop"
-            className="w-full h-full object-cover hidden"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <DashboardSkeleton device="desktop" />
+          {/* Dashboard scaled to fit MacBook - 1440px width scaled down */}
+          <ScaledDashboard scale={0.58} width={1500} height={938} forceMobile={false} />
         </MacBookFrame>
       </motion.div>
     </div>
