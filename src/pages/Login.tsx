@@ -5,6 +5,7 @@ import { ArrowLeft, Fingerprint, Lock, ShieldCheck, Terminal, AlertCircle } from
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 // Google Icon SVG
 const GoogleIcon = () => (
@@ -34,6 +35,7 @@ const Login = () => {
   const [bootLine, setBootLine] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const runBootSequence = async (success: boolean) => {
     setPhase('booting');
@@ -68,10 +70,11 @@ const Login = () => {
       return;
     }
 
-    // Authentification Supabase
+    // Authentification Supabase avec captcha
     const { error: authError } = await supabase.auth.signInWithPassword({ 
       email, 
-      password 
+      password,
+      options: { captchaToken: captchaToken || undefined }
     });
     
     if (authError) {
@@ -259,10 +262,21 @@ const Login = () => {
                         </motion.div>
                       )}
 
+                      {/* Turnstile Captcha */}
+                      <div className="flex justify-center">
+                        <Turnstile
+                          siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                          onSuccess={(token) => setCaptchaToken(token)}
+                          onError={() => setCaptchaToken(null)}
+                          onExpire={() => setCaptchaToken(null)}
+                          options={{ theme: "dark" }}
+                        />
+                      </div>
+
                       {/* Submit Button */}
                       <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || !captchaToken}
                         className="w-full bg-primary hover:bg-primary/90 text-black font-mono font-bold py-6 min-h-[56px] text-sm tracking-wider shimmer-btn"
                       >
                         {isLoading ? (
