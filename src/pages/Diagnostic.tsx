@@ -463,10 +463,10 @@ export default function Diagnostic() {
               <div className="text-center mb-6">
                 <span className="inline-flex items-center gap-2 text-primary font-mono text-xs tracking-widest uppercase mb-4 px-3 py-1 rounded-full border border-primary/30 bg-primary/10">
                   <Camera className="w-3 h-3" />
-                  Étape 3/3 — Analyse Posturale
+                  Étape 3/3 — Bilan Postural
                 </span>
                 <h2 className="font-sans font-semibold text-2xl md:text-3xl tracking-tight">
-                  {functionalMode === 'scanner' ? 'Scan Postural' : 'Seated Wall Angel'}
+                  {functionalMode === 'scanner' ? 'Analyse Posturale' : 'Seated Wall Angel'}
                 </h2>
                 {functionalMode === 'scanner' && (
                   <p className="text-muted-foreground text-sm mt-2">

@@ -341,10 +341,10 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
   // Get status message based on metrics
   const getStatusMessage = () => {
     if (!metrics) return '';
-    if (metrics.isForwardHead && metrics.isSlouching) return 'Cou + Dos à corriger';
+    if (metrics.isForwardHead && metrics.isSlouching) return 'Cou + Dos à optimiser';
     if (metrics.isForwardHead) return 'Tête avancée';
     if (metrics.isSlouching) return 'Dos arrondi';
-    return 'Bonne posture';
+    return 'Bon alignement';
   };
 
   return (
@@ -592,6 +592,13 @@ export default function PostureScanner({ onScoreCapture, onFallback }: PostureSc
               Préférer la saisie manuelle →
             </button>
           )}
+
+          {/* Legal Disclaimer */}
+          <div className="mt-4 p-3 rounded-lg bg-white/5 border border-white/10">
+            <p className="text-[10px] text-muted-foreground text-center font-mono">
+              NIVO est un outil d'hygiène de vie. En cas de douleur, consultez un médecin.
+            </p>
+          </div>
         </>
       )}
     </div>

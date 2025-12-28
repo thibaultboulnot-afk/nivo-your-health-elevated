@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccess } from '@/hooks/useAccess';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, User, Loader2, CheckCircle2, Crown, CreditCard, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, User, Loader2, CheckCircle2, Crown, CreditCard, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { downloadICSFile } from '@/lib/ics-generator';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -229,6 +230,46 @@ export default function Settings() {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Routine Section */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <Clock className="h-4 w-4 md:h-5 md:w-5 text-emerald-500" />
+              </div>
+              <h2 className="font-heading text-xl md:text-2xl font-bold text-white">
+                Ma Routine
+              </h2>
+            </div>
+
+            <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-5 md:p-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.5)]">
+              <div className="space-y-4">
+                <div>
+                  <p className="font-mono text-xs text-white/50 mb-2">RAPPEL QUOTIDIEN</p>
+                  <p className="text-white/70 text-sm mb-4">
+                    Ajoutez votre session NIVO quotidienne à votre calendrier pour ne jamais oublier.
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    downloadICSFile();
+                    toast.success('Fichier calendrier téléchargé !', {
+                      description: 'Ouvrez-le pour l\'ajouter à votre calendrier.'
+                    });
+                  }}
+                  className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Ajouter ma session au Calendrier 📅
+                </Button>
+
+                <p className="font-mono text-[10px] text-white/30 text-center">
+                  Session quotidienne à 9h00 (8 min)
+                </p>
+              </div>
             </div>
           </div>
 

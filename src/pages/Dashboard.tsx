@@ -23,6 +23,7 @@ import {
   ChevronUp,
   Crown,
   TrendingUp,
+  Download,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, PILOT_PROGRAMS, type Protocol, type PilotProgram } from '@/data/programs';
@@ -30,6 +31,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { DownloadReportButton } from '@/components/DownloadReportButton';
 
 interface PostureHistoryItem {
   date: string;
@@ -342,6 +344,13 @@ export default function Dashboard() {
                   </span>
                   <span className="font-mono text-[10px] md:text-xs text-foreground/40 mt-1">NIVO SCORE</span>
                 </div>
+                {/* Download Report Button */}
+                <div className="absolute top-2 right-2">
+                  <DownloadReportButton 
+                    nivoScore={stats?.nivoScore ?? null} 
+                    postureHistory={postureHistory}
+                  />
+                </div>
               </div>
 
               {/* Status & Stats */}
@@ -391,7 +400,7 @@ export default function Dashboard() {
           <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-6 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="h-4 w-4 text-primary" />
-              <span className="font-mono text-xs text-foreground/40">ÉVOLUTION_POSTURALE //</span>
+              <span className="font-mono text-xs text-foreground/40">ÉVOLUTION_ALIGNEMENT //</span>
             </div>
             
             {loadingPosture ? (
@@ -403,8 +412,8 @@ export default function Dashboard() {
                 <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
                   <TrendingUp className="w-6 h-6 text-foreground/30" />
                 </div>
-                <p className="font-mono text-sm text-foreground/40 mb-2">Aucune donnée posturale</p>
-                <p className="font-mono text-xs text-foreground/30">Faites un diagnostic pour voir votre évolution</p>
+                <p className="font-mono text-sm text-foreground/40 mb-2">Aucune donnée d'alignement</p>
+                <p className="font-mono text-xs text-foreground/30">Faites un bilan pour voir votre évolution</p>
               </div>
             ) : (
               <div className="h-48 md:h-56">
