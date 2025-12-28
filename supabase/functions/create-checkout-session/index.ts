@@ -7,13 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Mapping des programmes vers leurs price IDs Stripe
-const PROGRAM_PRICE_IDS: Record<string, string> = {
-  RAPID_PATCH: "price_1ShEYJJZ4N5U4jZs7OB0pPLh",
-  SYSTEM_REBOOT: "price_1ShEiXJZ4N5U4jZsv9PBnuPg",
-  ARCHITECT_MODE: "price_1ShEjwJZ4N5U4jZsAeT4acHR",
-};
-
 // Sanitized logging - never log full emails or user IDs
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const sanitized = details ? Object.fromEntries(
@@ -44,16 +37,12 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     logStep("Stripe key verified");
 
-    // Parse request body
-    const { programId } = await req.json();
-    logStep("Request body parsed", { programId });
-
-    if (!programId || !PROGRAM_PRICE_IDS[programId]) {
-      throw new Error(`Invalid program ID: ${programId}`);
+    // Get subscription price ID from environment
+    const priceId = Deno.env.get("STRIPE_PRICE_ID");
+    if (!priceId) {
+      throw new Error("STRIPE_PRICE_ID environment variable is not configured. Please set it in Supabase Edge Function secrets.");
     }
-
-    const priceId = PROGRAM_PRICE_IDS[programId];
-    logStep("Price ID resolved", { priceId });
+    logStep("Subscription price ID resolved", { priceId });
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -91,7 +80,7 @@ serve(async (req) => {
       }
     }
 
-    // Create a one-time payment session
+    // Create a subscription session
     const origin = req.headers.get("origin") || "https://lovable.dev";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -103,12 +92,9 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: "payment",
-      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}&program=${programId}`,
-      cancel_url: `${origin}/checkout?plan=${programId}`,
-      metadata: {
-        programId,
-      },
+      mode: "subscription",
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/checkout`,
     });
 
     logStep("Checkout session created", { hasUrl: !!session.url });

@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Loader2, Terminal, User, Target, ArrowRight, Lock, CheckCircle2, Rocket } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { Turnstile } from "@marsidev/react-turnstile";
 
 // Google Icon SVG
 const GoogleIcon = () => (
@@ -48,6 +49,9 @@ export default function Onboarding() {
   
   // Step 3: Welcome Modal
   const [showWelcome, setShowWelcome] = useState(false);
+  
+  // Captcha token
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   // Check auth state and set appropriate step
   useEffect(() => {
@@ -77,6 +81,7 @@ export default function Onboarding() {
         password: password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
+          captchaToken: captchaToken || undefined,
         },
       });
 
@@ -306,9 +311,20 @@ export default function Onboarding() {
                   </div>
                 </div>
 
+                {/* Turnstile Captcha */}
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onError={() => setCaptchaToken(null)}
+                    onExpire={() => setCaptchaToken(null)}
+                    options={{ theme: "dark" }}
+                  />
+                </div>
+
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !captchaToken}
                   className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold text-sm shadow-[0_0_30px_rgba(255,107,74,0.4)] transition-all hover:scale-[1.02] disabled:opacity-50"
                 >
                   {isSubmitting ? (
