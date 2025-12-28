@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, User, Loader2, CheckCircle2, Crown, CreditCard, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadICSFile } from '@/lib/ics-generator';
+import { safeStripeRedirect } from '@/lib/url-validator';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -81,12 +82,13 @@ export default function Settings() {
       if (error) throw new Error(error.message);
 
       if (data?.url) {
-        window.location.href = data.url;
+        if (!safeStripeRedirect(data.url)) {
+          throw new Error('URL de portail invalide');
+        }
       } else {
         throw new Error('No portal URL received');
       }
     } catch (error) {
-      console.error('Portal error:', error);
       toast.error("Impossible d'accéder au portail. Avez-vous un abonnement actif ?");
     } finally {
       setIsPortalLoading(false);

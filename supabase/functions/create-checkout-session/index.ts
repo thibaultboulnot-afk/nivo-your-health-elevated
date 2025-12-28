@@ -14,8 +14,20 @@ const PROGRAM_PRICE_IDS: Record<string, string> = {
   ARCHITECT_MODE: "price_1ShEjwJZ4N5U4jZsAeT4acHR",
 };
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+// Sanitized logging - never log full emails or user IDs
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  const sanitized = details ? Object.fromEntries(
+    Object.entries(details).map(([key, value]) => {
+      if (key === 'email') {
+        return [key, '[redacted]'];
+      }
+      if (key === 'userId' || key === 'customerId' || key === 'sessionId') {
+        return [key, typeof value === 'string' ? value.slice(0, 8) + '...' : value];
+      }
+      return [key, value];
+    })
+  ) : undefined;
+  const detailsStr = sanitized ? ` - ${JSON.stringify(sanitized)}` : '';
   console.log(`[CREATE-CHECKOUT-SESSION] ${step}${detailsStr}`);
 };
 
@@ -61,7 +73,7 @@ serve(async (req) => {
       if (data.user) {
         userId = data.user.id;
         userEmail = data.user.email;
-        logStep("User authenticated", { userId, email: userEmail });
+        logStep("User authenticated", { hasUser: true });
       }
     }
 
@@ -75,7 +87,7 @@ serve(async (req) => {
       const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
-        logStep("Found existing Stripe customer", { customerId });
+        logStep("Found existing Stripe customer", { hasCustomer: true });
       }
     }
 
@@ -99,7 +111,7 @@ serve(async (req) => {
       },
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    logStep("Checkout session created", { hasUrl: !!session.url });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

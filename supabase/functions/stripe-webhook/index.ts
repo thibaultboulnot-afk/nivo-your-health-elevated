@@ -2,9 +2,28 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+// Sanitized logging - never log full emails or user IDs
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  // Sanitize sensitive fields before logging
+  const sanitized = details ? Object.fromEntries(
+    Object.entries(details).map(([key, value]) => {
+      if (key === 'email' || key === 'customerEmail') {
+        return [key, typeof value === 'string' ? '[redacted]' : value];
+      }
+      if (key === 'userId' || key === 'customerId' || key === 'sessionId') {
+        return [key, typeof value === 'string' ? value.slice(0, 8) + '...' : value];
+      }
+      return [key, value];
+    })
+  ) : undefined;
+  const detailsStr = sanitized ? ` - ${JSON.stringify(sanitized)}` : '';
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+};
+
+// Simple email format validation
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
 };
 
 serve(async (req) => {
@@ -34,7 +53,7 @@ serve(async (req) => {
       logStep("Event verified", { type: event.type });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      logStep("Signature verification failed", { error: message });
+      logStep("Signature verification failed");
       return new Response(`Webhook signature verification failed: ${message}`, { status: 400 });
     }
 
@@ -42,9 +61,8 @@ serve(async (req) => {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Checkout session completed", { 
         sessionId: session.id,
-        customerEmail: session.customer_email,
-        clientReferenceId: session.client_reference_id,
-        metadata: session.metadata
+        hasClientRef: !!session.client_reference_id,
+        hasProgramId: !!session.metadata?.programId
       });
 
       const programId = session.metadata?.programId;
@@ -64,9 +82,15 @@ serve(async (req) => {
 
       let targetUserId = userId;
 
-      // If no userId, try to find user by email
+      // If no userId, try to find user by email with validation
       if (!targetUserId && customerEmail) {
-        logStep("No userId, searching by email", { email: customerEmail });
+        // Validate email format before using in query
+        if (!isValidEmail(customerEmail)) {
+          logStep("Invalid email format, skipping email lookup");
+          return new Response(JSON.stringify({ received: true }), { status: 200 });
+        }
+
+        logStep("No userId, searching by email");
         const { data: users } = await supabaseAdmin
           .from("profiles")
           .select("id")
@@ -97,9 +121,9 @@ serve(async (req) => {
             .eq("program_id", programId);
 
           if (updateError) {
-            logStep("Error updating progression", { error: updateError.message });
+            logStep("Error updating progression");
           } else {
-            logStep("Progression unlocked", { userId: targetUserId, programId });
+            logStep("Progression unlocked", { programId });
           }
         } else {
           // Insert new progression
@@ -114,13 +138,13 @@ serve(async (req) => {
             });
 
           if (insertError) {
-            logStep("Error inserting progression", { error: insertError.message });
+            logStep("Error inserting progression");
           } else {
-            logStep("New progression created", { userId: targetUserId, programId });
+            logStep("New progression created", { programId });
           }
         }
       } else {
-        logStep("No user found to unlock program for", { customerEmail });
+        logStep("No user found to unlock program for");
       }
     }
 

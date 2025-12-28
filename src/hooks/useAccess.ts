@@ -49,7 +49,8 @@ export function useAccess(): AccessState {
         .maybeSingle();
 
       if (fetchError) {
-        console.error('[useAccess] Fetch error:', fetchError);
+        // Log error without sensitive details
+        console.error('[useAccess] Failed to fetch subscription status');
         setError(fetchError.message);
         setSubscription(null);
       } else if (data) {
@@ -64,7 +65,8 @@ export function useAccess(): AccessState {
         });
       }
     } catch (err) {
-      console.error('[useAccess] Unexpected error:', err);
+      // Log error without sensitive user context
+      console.error('[useAccess] Unexpected error fetching subscription');
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
       setSubscription(null);
     } finally {

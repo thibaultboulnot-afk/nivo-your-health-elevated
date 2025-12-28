@@ -5,6 +5,7 @@ import { Check, Lock, Shield, ArrowLeft, Terminal, Loader2, ExternalLink } from 
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { safeStripeRedirect } from '@/lib/url-validator';
 
 type ProgramTier = 'RAPID_PATCH' | 'SYSTEM_REBOOT' | 'ARCHITECT_MODE';
 
@@ -91,12 +92,13 @@ export default function Checkout() {
       }
 
       if (data?.url) {
-        window.location.href = data.url;
+        if (!safeStripeRedirect(data.url)) {
+          throw new Error('URL de paiement invalide');
+        }
       } else {
         throw new Error('URL de paiement non reçue');
       }
     } catch (error) {
-      console.error('Checkout error:', error);
       toast({
         title: "Erreur de paiement",
         description: error instanceof Error ? error.message : "Une erreur est survenue",

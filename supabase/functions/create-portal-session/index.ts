@@ -7,8 +7,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Sanitized logging - never log full emails or user IDs
 const logStep = (step: string, details?: Record<string, unknown>) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  const sanitized = details ? Object.fromEntries(
+    Object.entries(details).map(([key, value]) => {
+      if (key === 'email') {
+        return [key, '[redacted]'];
+      }
+      if (key === 'userId' || key === 'customerId' || key === 'sessionId') {
+        return [key, typeof value === 'string' ? value.slice(0, 8) + '...' : value];
+      }
+      return [key, value];
+    })
+  ) : undefined;
+  const detailsStr = sanitized ? ` - ${JSON.stringify(sanitized)}` : '';
   console.log(`[CREATE-PORTAL-SESSION] ${step}${detailsStr}`);
 };
 
@@ -39,7 +51,7 @@ serve(async (req) => {
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { hasUser: true });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -50,14 +62,14 @@ serve(async (req) => {
     }
     
     const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    logStep("Found Stripe customer", { hasCustomer: true });
 
     const origin = req.headers.get("origin") || "https://nivo.app";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/settings`,
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
+    logStep("Customer portal session created", { hasUrl: !!portalSession.url });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
