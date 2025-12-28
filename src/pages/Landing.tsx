@@ -6,6 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ArrowRight, Check, Zap, TrendingDown, AlertTriangle, Activity, Brain, Timer, Sparkles, Cpu, BarChart3, Clock, Target } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import HeroDeviceMockup from '@/components/HeroDeviceMockup';
 
 // Scroll reveal animation wrapper - simplified for performance
 const ScrollReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
@@ -273,115 +274,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== ABSTRACT DASHBOARD VISUALIZATION ===== */}
+      {/* ===== DEVICE MOCKUP VISUALIZATION ===== */}
       <section className="py-12 md:py-20 px-4 md:px-6 relative z-10" ref={heroRef}>
-        <div className="container mx-auto max-w-5xl">
-          <motion.div 
-            className="relative w-full"
-            style={{ 
-              perspective: isMobile ? 'none' : '2000px',
-              opacity: dashboardOpacity,
-            }}
-          >
-            {/* Glow behind dashboard - static on mobile */}
-            <div className="absolute inset-0 -z-10">
-              <div 
-                className="absolute inset-x-0 top-1/4 h-[400px] blur-[80px] rounded-full" 
-                style={{
-                  background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,107,74,0.15) 0%, transparent 70%)'
-                }}
-              />
-            </div>
-            
-            {/* Dashboard Window - Simplified for performance */}
-            <motion.div 
-              className="relative rounded-2xl border border-white/5 bg-[#0a0a0a]/90 overflow-hidden w-full"
-              style={isMobile ? {} : {
-                rotateX: dashboardRotateX,
-                y: dashboardY,
-                transformStyle: 'preserve-3d',
-                willChange: 'transform'
-              }}
-            >
-              {/* Window Chrome */}
-              <div className="flex items-center justify-between px-4 py-3 bg-white/[0.02] border-b border-white/5">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                  <div className="w-3 h-3 rounded-full bg-white/10" />
-                </div>
-                <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest hidden sm:block">app.nivo.health</span>
-                <div className="w-16" />
-              </div>
-              
-              {/* Dashboard Content - Responsive Grid */}
-              <div className="p-4 md:p-10 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[280px] md:min-h-[320px]">
-                {/* Left Panel - Score (Full width on mobile) */}
-                <div className="flex flex-row md:flex-col gap-4">
-                  <div className="flex-1 rounded-xl border border-white/5 bg-black/40 p-4">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2 md:mb-3">NIVO SCORE</div>
-                    <div className="text-4xl md:text-6xl font-bold text-white">72</div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <motion.div 
-                        className="w-2 h-2 rounded-full bg-emerald-400"
-                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      <span className="font-mono text-xs text-emerald-400">OPTIMAL</span>
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-white/5 bg-black/40 p-4">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">SÉRIE</div>
-                    <div className="text-2xl font-semibold text-primary">J-5</div>
-                  </div>
-                </div>
-
-                {/* Center Panel - Circular Gauge - static on mobile */}
-                <div className="hidden md:flex items-center justify-center">
-                  <div className="relative w-36 h-36 md:w-44 md:h-44">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
-                      <circle 
-                        cx="50" cy="50" r="42" fill="none" 
-                        stroke="url(#scoreGradient)" 
-                        strokeWidth="4" 
-                        strokeLinecap="round"
-                        strokeDasharray={`${72 * 2.64} ${100 * 2.64}`}
-                      />
-                      <defs>
-                        <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#ff6b4a" />
-                          <stop offset="100%" stopColor="#ff9f7a" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">INTÉGRITÉ</span>
-                      <span className="text-3xl md:text-4xl font-bold text-white">72%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Panel - Stats */}
-                <div className="flex flex-row md:flex-col gap-4">
-                  <div className="flex-1 rounded-xl border border-white/5 bg-black/40 p-4">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">INDICE DOULEUR</div>
-                    <div className="text-xl md:text-2xl font-semibold text-emerald-400">-18%</div>
-                    <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full w-3/4 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" />
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-white/5 bg-black/40 p-4">
-                    <div className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">BOUCLE QUOTIDIENNE</div>
-                    <div className="text-xl md:text-2xl font-semibold text-white">8 min</div>
-                  </div>
-                  <div className="hidden md:block rounded-xl border border-primary/20 bg-primary/5 p-3">
-                    <div className="font-mono text-[10px] text-primary uppercase tracking-widest">PRÊT À SCANNER</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+        <div className="container mx-auto max-w-6xl">
+          <HeroDeviceMockup />
         </div>
       </section>
 
