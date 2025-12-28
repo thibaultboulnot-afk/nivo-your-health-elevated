@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import type { RefObject } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ interface PostureHistoryItem {
 interface DownloadReportButtonProps {
   nivoScore: number | null;
   postureHistory: PostureHistoryItem[];
-  chartRef?: React.RefObject<HTMLDivElement>;
+  chartRef?: RefObject<HTMLDivElement>;
 }
 
 export function DownloadReportButton({ nivoScore, postureHistory, chartRef }: DownloadReportButtonProps) {
