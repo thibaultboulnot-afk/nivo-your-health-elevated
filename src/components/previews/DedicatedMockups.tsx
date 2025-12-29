@@ -6,10 +6,12 @@ export const MobileMockupScreen = () => (
     {/* Header */}
     <div className="flex items-center justify-between mb-8">
       <div>
-        <p className="text-white/50 text-xs">Bonjour</p>
-        <p className="text-white font-semibold text-lg">Thibault</p>
+        <p className="text-white/50 text-xs">Vue d'ensemble</p>
+        <p className="text-white font-semibold text-lg">Tableau de Bord</p>
       </div>
-      <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10" />
+      <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#4ADE80]/50 to-[#4ADE80]/20" />
+      </div>
     </div>
 
     {/* Score Ring - Hero */}
@@ -123,39 +125,57 @@ export const DesktopMockupScreen = () => (
 
         {/* Card 2 - Graph (spans 2 columns) */}
         <div className="col-span-2 bg-zinc-900/50 border border-white/10 rounded-xl p-4 flex flex-col">
-          <span className="text-white/50 text-xs uppercase tracking-wider mb-3">Mobilité Vertébrale</span>
-          <div className="flex-1 flex items-end">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-white/50 text-xs uppercase tracking-wider">Mobilité Vertébrale</span>
+            <span className="text-[#4ADE80] text-xs font-medium">+12% cette semaine</span>
+          </div>
+          <div className="flex-1 flex items-end relative">
             <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#4ADE80" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#4ADE80" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#4ADE80" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="#4ADE80" stopOpacity="0" />
                 </linearGradient>
               </defs>
+              {/* Grid lines */}
+              <line x1="0" y1="10" x2="100" y2="10" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+              <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+              <line x1="0" y1="30" x2="100" y2="30" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+              <line x1="20" y1="0" x2="20" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+              <line x1="40" y1="0" x2="40" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+              <line x1="60" y1="0" x2="60" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+              <line x1="80" y1="0" x2="80" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
               {/* Gradient fill area */}
               <path
-                d="M0 40 L0 35 C 20 35, 40 10, 100 5 L100 40 Z"
+                d="M0 40 L0 32 C 15 30, 25 28, 40 22 S 60 12, 80 8 S 95 5, 100 4 L100 40 Z"
                 fill="url(#chartGradient)"
               />
               {/* Line */}
               <path
-                d="M0 35 C 20 35, 40 10, 100 5"
+                d="M0 32 C 15 30, 25 28, 40 22 S 60 12, 80 8 S 95 5, 100 4"
                 fill="none"
                 stroke="#4ADE80"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 className="drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]"
               />
-              {/* End dot */}
-              <circle cx="100" cy="5" r="3" fill="#4ADE80" className="drop-shadow-[0_0_6px_rgba(74,222,128,0.8)]" />
+              {/* Data points */}
+              <circle cx="0" cy="32" r="2" fill="#4ADE80" />
+              <circle cx="20" cy="29" r="2" fill="#4ADE80" />
+              <circle cx="40" cy="22" r="2" fill="#4ADE80" />
+              <circle cx="60" cy="14" r="2" fill="#4ADE80" />
+              <circle cx="80" cy="8" r="2" fill="#4ADE80" />
+              <circle cx="100" cy="4" r="3" fill="#4ADE80" className="drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
             </svg>
           </div>
-          <div className="flex justify-between mt-2 text-white/30 text-xs">
+          <div className="flex justify-between mt-2 text-white/40 text-[10px] border-t border-white/5 pt-2">
             <span>Lun</span>
             <span>Mar</span>
             <span>Mer</span>
             <span>Jeu</span>
             <span>Ven</span>
+            <span className="text-[#4ADE80]">Auj.</span>
           </div>
         </div>
 
