@@ -9,29 +9,42 @@ const IPhoneFrame = ({ children }: { children: React.ReactNode }) => (
     <div 
       className="relative rounded-[2.5rem] border-[8px] border-[#1a1a1a] bg-black shadow-2xl"
       style={{
-        boxShadow: '0 0 50px -12px rgba(74,222,128,0.3), 0 25px 50px -12px rgba(0,0,0,0.8)'
+        boxShadow: '0 0 60px -12px rgba(74,222,128,0.25), 0 25px 50px -12px rgba(0,0,0,0.8)'
       }}
     >
+      {/* Inner metallic bevel ring */}
+      <div className="absolute inset-0 rounded-[2rem] ring-1 ring-white/20 ring-inset pointer-events-none" />
+      
       {/* Inner screen container */}
       <div className="relative rounded-[2rem] overflow-hidden bg-zinc-950">
         {/* Dynamic Island */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 w-24 h-7 bg-black rounded-full" />
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 w-24 h-7 bg-black rounded-full">
+          {/* Subtle camera lens inside dynamic island */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-zinc-900 ring-1 ring-zinc-700">
+            <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-zinc-600/50 to-zinc-800" />
+          </div>
+        </div>
         
         {/* Screen content */}
         <div className="relative aspect-[9/19.5]">
           {children}
         </div>
         
-        {/* Glass reflection overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-[2rem]" />
+        {/* Glass reflection overlay - diagonal sweep */}
+        <div 
+          className="absolute inset-0 pointer-events-none rounded-[2rem]"
+          style={{
+            background: 'linear-gradient(135deg, transparent 0%, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%, transparent 100%)'
+          }}
+        />
       </div>
     </div>
     
-    {/* Side buttons */}
-    <div className="absolute left-0 top-24 w-[3px] h-8 bg-[#2a2a2a] rounded-l-sm" />
-    <div className="absolute left-0 top-36 w-[3px] h-12 bg-[#2a2a2a] rounded-l-sm" />
-    <div className="absolute left-0 top-52 w-[3px] h-12 bg-[#2a2a2a] rounded-l-sm" />
-    <div className="absolute right-0 top-32 w-[3px] h-16 bg-[#2a2a2a] rounded-r-sm" />
+    {/* Side buttons with metallic look */}
+    <div className="absolute left-0 top-24 w-[3px] h-8 bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] rounded-l-sm" />
+    <div className="absolute left-0 top-36 w-[3px] h-12 bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] rounded-l-sm" />
+    <div className="absolute left-0 top-52 w-[3px] h-12 bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] rounded-l-sm" />
+    <div className="absolute right-0 top-32 w-[3px] h-16 bg-gradient-to-l from-[#1a1a1a] to-[#2a2a2a] rounded-r-sm" />
   </div>
 );
 
@@ -39,10 +52,19 @@ const IPhoneFrame = ({ children }: { children: React.ReactNode }) => (
 const MacBookFrame = ({ children }: { children: React.ReactNode }) => (
   <div className="relative">
     {/* Screen housing */}
-    <div className="relative bg-[#0d0d0d] rounded-t-xl pt-3 px-3 pb-2 border border-white/10 border-b-0">
+    <div 
+      className="relative bg-[#0d0d0d] rounded-t-xl pt-3 px-3 pb-2 border border-white/10 border-b-0"
+      style={{
+        boxShadow: '0 0 60px -12px rgba(74,222,128,0.2)'
+      }}
+    >
       {/* Camera notch */}
       <div className="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-black border border-white/10 flex items-center justify-center">
-        <div className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+        <div className="w-1.5 h-1.5 rounded-full bg-zinc-800 relative overflow-hidden">
+          {/* Camera lens reflection */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 via-transparent to-transparent" />
+          <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 rounded-full bg-white/40" />
+        </div>
       </div>
       
       {/* Screen bezel */}
@@ -52,29 +74,48 @@ const MacBookFrame = ({ children }: { children: React.ReactNode }) => (
           {children}
         </div>
         
-        {/* Glass reflection overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.06] pointer-events-none" />
+        {/* Glass reflection overlay - diagonal sweep */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, transparent 0%, transparent 35%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 55%, transparent 65%, transparent 100%)'
+          }}
+        />
       </div>
     </div>
     
     {/* Hinge */}
     <div className="relative h-3 bg-gradient-to-b from-[#1a1a1a] to-[#252525] rounded-b-sm mx-[10%]" />
     
-    {/* Keyboard base - trapezoid effect */}
+    {/* Keyboard base - trapezoid effect with aluminum texture */}
     <div className="relative">
       <div 
-        className="h-4 bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] rounded-b-xl"
+        className="h-4 rounded-b-xl relative overflow-hidden"
         style={{
           clipPath: 'polygon(3% 0%, 97% 0%, 100% 100%, 0% 100%)',
-          boxShadow: '0 0 50px -12px rgba(74,222,128,0.3)'
+          background: 'linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 50%, #1a1a1a 100%)',
+          boxShadow: '0 20px 50px -12px rgba(74,222,128,0.15), 0 8px 24px -4px rgba(0,0,0,0.5)'
         }}
-      />
+      >
+        {/* Subtle aluminum grain texture */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.02) 1px, rgba(255,255,255,0.02) 2px)'
+          }}
+        />
+      </div>
       {/* Trackpad hint */}
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-0.5 bg-zinc-700/50 rounded-full" />
+      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-0.5 bg-zinc-600/40 rounded-full" />
     </div>
     
-    {/* Shadow */}
-    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[95%] h-10 bg-black/50 blur-2xl rounded-full" />
+    {/* Diffuse green-tinted shadow */}
+    <div 
+      className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-12 rounded-full blur-2xl"
+      style={{
+        background: 'radial-gradient(ellipse at center, rgba(74,222,128,0.12) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)'
+      }}
+    />
   </div>
 );
 
