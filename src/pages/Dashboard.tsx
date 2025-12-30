@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useAccess } from '@/hooks/useAccess';
+import { useGamification } from '@/hooks/useGamification';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { VaultModal } from '@/components/VaultModal';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +26,8 @@ import {
   Crown,
   TrendingUp,
   Download,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, PILOT_PROGRAMS, type Protocol, type PilotProgram } from '@/data/programs';
@@ -44,9 +48,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { stats, isLoading } = useUserStats();
   const { isPro, accessLevel } = useAccess();
+  const { xp, level, currentStreak: streak, streakFreezes } = useGamification();
+  const getXpForNextLevel = (lvl: number) => lvl * 500;
+  const xpProgress = xp / getXpForNextLevel(level);
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showVaultModal, setShowVaultModal] = useState(false);
   const [postureHistory, setPostureHistory] = useState<PostureHistoryItem[]>([]);
   const [loadingPosture, setLoadingPosture] = useState(true);
 
@@ -260,8 +268,8 @@ export default function Dashboard() {
         }}
       />
 
-      {/* Header */}
-      <header className="relative z-20 border-b border-white/5 bg-[#050510]/80 backdrop-blur-sm">
+      {/* Header with Gamification */}
+      <header className="relative z-20 border-b border-white/5 nivo-glass-static">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Left - Logo */}
@@ -278,11 +286,49 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Right - Avatar & Settings */}
-            <div className="flex items-center gap-2 md:gap-4">
+            {/* Center - XP Bar (Desktop) */}
+            <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span className="font-mono text-[10px] text-foreground/50">LVL {level}</span>
+              </div>
+              <div className="flex-1 h-1.5 xp-bar-inset rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                  initial={{ width: 0 }}
+                animate={{ width: `${xpProgress * 100}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                />
+              </div>
+              <span className="font-mono text-[10px] text-foreground/40">
+                {xp} / {getXpForNextLevel(level)} XP
+              </span>
+            </div>
+
+            {/* Right - Streak, Vault & Settings */}
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Streak Flame */}
+              <div className="nivo-glass-static rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                <Flame className="h-4 w-4 text-orange-400 flame-glow" />
+                <span className="font-mono text-sm font-bold text-foreground">{streak}</span>
+                {streakFreezes > 0 && (
+                  <span className="ml-1 px-1 py-0.5 bg-blue-500/20 rounded text-[8px] font-mono text-blue-400">
+                    🛡️{streakFreezes}
+                  </span>
+                )}
+              </div>
+
+              {/* Vault Button */}
+              <button
+                onClick={() => setShowVaultModal(true)}
+                className="p-2 rounded-lg nivo-glass hover:border-emerald-500/30 transition-all"
+              >
+                <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-emerald-400" />
+              </button>
+
               <Link 
                 to="/settings"
-                className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
+                className="p-2 rounded-lg nivo-glass transition-all"
               >
                 <Settings className="h-4 w-4 md:h-5 md:w-5 text-foreground/60" />
               </Link>
@@ -291,6 +337,22 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Mobile XP Bar */}
+          <div className="md:hidden mt-3 flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <span className="font-mono text-[9px] text-foreground/50">LVL {level}</span>
+            </div>
+            <div className="flex-1 h-1 xp-bar-inset rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${xpProgress * 100}%` }}
+              />
+            </div>
+            <span className="font-mono text-[9px] text-foreground/40">{xp} XP</span>
+          </div>
         </div>
       </header>
 
@@ -298,7 +360,7 @@ export default function Dashboard() {
       <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Hero - NIVO Score */}
         <section className="mb-6 md:mb-10 animate-fade-in">
-          <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-8 relative overflow-hidden">
+          <div className="nivo-glass rounded-xl md:rounded-2xl p-4 md:p-8 relative overflow-hidden">
             {/* Subtle glow effect */}
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -374,15 +436,15 @@ export default function Dashboard() {
                 {/* Stats Widgets */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
                   {/* Streak */}
-                  <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
+                  <div className="nivo-glass rounded-lg md:rounded-xl p-3 md:p-4">
                     <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                      <Clock className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
+                      <Flame className="h-3 w-3 md:h-4 md:w-4 text-orange-400" />
                       <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SÉRIE</span>
                     </div>
-                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.streak || 0} <span className="text-xs md:text-sm text-foreground/40">J</span></p>
+                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{streak || 0} <span className="text-xs md:text-sm text-foreground/40">J</span></p>
                   </div>
                   {/* Total Sessions */}
-                  <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-primary/30 transition-colors">
+                  <div className="nivo-glass rounded-lg md:rounded-xl p-3 md:p-4">
                     <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
                       <Activity className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
                       <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SESSIONS</span>
@@ -397,7 +459,7 @@ export default function Dashboard() {
 
         {/* Posture Evolution Chart */}
         <section className="mb-6 md:mb-10 animate-fade-in" style={{ animationDelay: '0.15s' }}>
-          <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-6 relative overflow-hidden">
+          <div className="nivo-glass rounded-xl md:rounded-2xl p-4 md:p-6 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="h-4 w-4 text-primary" />
               <span className="font-mono text-xs text-foreground/40">ÉVOLUTION_ALIGNEMENT //</span>
@@ -468,7 +530,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Left Column - Daily Loop (FREE) */}
           <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="bg-black/60 rounded-xl md:rounded-2xl border border-primary/20 p-5 md:p-8 relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
+            <div className="nivo-glass-intense rounded-xl md:rounded-2xl p-5 md:p-8 relative overflow-hidden group" style={{ borderColor: 'rgba(255, 107, 74, 0.2)' }}>
               {/* Glow effect */}
               <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
@@ -493,7 +555,7 @@ export default function Dashboard() {
                 </p>
 
                 {/* Daily Loop Steps Preview */}
-                <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6">
+                <div className="nivo-glass-static rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6">
                   <p className="font-mono text-[10px] md:text-xs text-foreground/40 mb-2">SÉQUENCE</p>
                   <div className="flex flex-wrap gap-2">
                     {DAILY_ROUTINE.steps.map((step, index) => (
@@ -519,7 +581,7 @@ export default function Dashboard() {
           <section className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             {/* Upgrade to Pro CTA (Free users only) */}
             {!isPro && (
-              <div className="bg-black/60 rounded-xl border border-primary/30 p-6 relative overflow-hidden hover:border-primary/50 transition-colors">
+              <div className="nivo-glass-intense rounded-xl p-6 relative overflow-hidden" style={{ borderColor: 'rgba(255, 107, 74, 0.3)' }}>
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute -top-16 -right-16 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
                 </div>
@@ -548,7 +610,7 @@ export default function Dashboard() {
             )}
 
             {/* Energy Level */}
-            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+            <div className="nivo-glass rounded-xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Battery className="h-4 w-4 text-foreground/40" />
                 <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ÉNERGIE</span>
@@ -565,7 +627,7 @@ export default function Dashboard() {
             </div>
 
             {/* Access Level */}
-            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+            <div className="nivo-glass rounded-xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="h-4 w-4 text-foreground/40" />
                 <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ACCÈS</span>
@@ -586,7 +648,7 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-black/60 rounded-xl border border-white/10 p-6 hover:border-primary/30 transition-colors">
+            <div className="nivo-glass rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Zap className="h-4 w-4 text-foreground/40" />
                 <span className="font-mono text-[10px] text-foreground/40">MÉTRIQUES</span>
@@ -629,10 +691,10 @@ export default function Dashboard() {
               <div 
                 key={protocol.id}
                 onClick={() => !isPro && setShowUpgradeModal(true)}
-                className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
+                className={`relative nivo-glass rounded-xl p-6 transition-all duration-300 ${
                   isPro 
-                    ? 'border-white/10 hover:border-primary/30 cursor-pointer' 
-                    : 'border-white/5 opacity-70 cursor-pointer hover:opacity-80'
+                    ? 'cursor-pointer' 
+                    : 'opacity-70 cursor-pointer hover:opacity-80'
                 }`}
               >
                 {/* Lock Badge & Blur Overlay */}
@@ -696,10 +758,10 @@ export default function Dashboard() {
               <div 
                 key={program.id}
                 onClick={() => !isPro && setShowUpgradeModal(true)}
-                className={`relative bg-black/60 rounded-xl border p-6 transition-all duration-300 ${
+                className={`relative nivo-glass rounded-xl p-6 transition-all duration-300 ${
                   isPro 
-                    ? 'border-white/10 hover:border-primary/30 cursor-pointer' 
-                    : 'border-white/5 opacity-70 cursor-pointer hover:opacity-80'
+                    ? 'cursor-pointer' 
+                    : 'opacity-70 cursor-pointer hover:opacity-80'
                 }`}
               >
                 {/* Lock Badge & Blur Overlay */}
@@ -771,6 +833,9 @@ export default function Dashboard() {
 
       {/* Upgrade Modal */}
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+
+      {/* Vault Modal */}
+      <VaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
     </div>
   );
 }

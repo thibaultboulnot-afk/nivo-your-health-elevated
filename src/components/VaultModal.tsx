@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Lock, Check, Crown, Zap } from 'lucide-react';
+import { Lock, Check, Crown, Zap, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGamification } from '@/hooks/useGamification';
 import { UpgradeModal } from './UpgradeModal';
@@ -27,6 +27,7 @@ interface Skin {
   glowColor: string;
   requirement: 'free' | 'level10' | 'pro';
   icon: React.ReactNode;
+  hasliquidEffect?: boolean;
 }
 
 const SKINS: Skin[] = [
@@ -56,6 +57,7 @@ const SKINS: Skin[] = [
     glowColor: 'rgba(251, 191, 36, 0.4)',
     requirement: 'pro',
     icon: <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600" />,
+    hasliquidEffect: true,
   },
 ];
 
@@ -88,16 +90,16 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-lg bg-zinc-950 border border-white/10 p-0 overflow-hidden">
-          {/* Glow effect */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 bg-primary/10 rounded-full blur-3xl" />
+        <DialogContent className="sm:max-w-lg nivo-glass-intense border-white/10 p-0 overflow-hidden">
+          {/* Top glow through glass */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 bg-emerald-500/10 rounded-full blur-[60px]" />
           </div>
 
           <div className="relative p-6 md:p-8">
             <DialogHeader className="text-center mb-6">
-              <div className="mx-auto mb-4 w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                <Zap className="h-7 w-7 text-primary" />
+              <div className="mx-auto mb-4 w-14 h-14 rounded-xl nivo-glass flex items-center justify-center">
+                <Sparkles className="h-7 w-7 text-emerald-400" />
               </div>
               
               <DialogTitle className="font-heading text-2xl font-bold text-foreground">
@@ -109,7 +111,7 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
               </DialogDescription>
             </DialogHeader>
 
-            {/* Skins Grid */}
+            {/* Skins Grid - Vitrine Style */}
             <div className="space-y-3">
               {SKINS.map((skin, index) => {
                 const unlocked = isSkinUnlocked(skin);
@@ -124,28 +126,37 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                     onClick={() => handleSkinClick(skin)}
                     disabled={!unlocked && skin.requirement !== 'pro'}
                     className={`
-                      w-full p-4 rounded-xl border transition-all duration-300 text-left
+                      w-full p-4 rounded-xl transition-all duration-300 text-left relative overflow-hidden
                       ${isSelected 
-                        ? 'border-primary bg-primary/10 shadow-[0_0_20px_rgba(74,222,128,0.2)]' 
+                        ? 'vitrine-glass shadow-[0_0_30px_rgba(74,222,128,0.2)]' 
                         : unlocked 
-                          ? 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10' 
-                          : 'border-white/5 bg-white/[0.02] opacity-60'
+                          ? 'vitrine-glass' 
+                          : 'vitrine-glass opacity-60'
                       }
+                      ${isSelected ? 'ring-1 ring-emerald-500/50' : ''}
                     `}
+                    style={{
+                      borderColor: isSelected ? 'rgba(74, 222, 128, 0.3)' : undefined,
+                    }}
                   >
-                    <div className="flex items-center gap-4">
+                    {/* Liquid Refraction for Titanium */}
+                    {skin.hasliquidEffect && unlocked && (
+                      <div className="liquid-refraction absolute inset-0 pointer-events-none" />
+                    )}
+
+                    <div className="flex items-center gap-4 relative z-10">
                       {/* Skin Preview */}
                       <div 
-                        className="w-12 h-12 rounded-lg p-1 relative"
+                        className="w-12 h-12 rounded-lg p-1 relative nivo-glass-static"
                         style={{ 
-                          boxShadow: unlocked ? `0 0 20px ${skin.glowColor}` : 'none',
+                          boxShadow: unlocked ? `0 0 25px ${skin.glowColor}` : 'none',
                         }}
                       >
                         {skin.icon}
                         
                         {/* Lock Overlay */}
                         {!unlocked && (
-                          <div className="absolute inset-0 rounded-lg bg-black/60 flex items-center justify-center">
+                          <div className="absolute inset-0 rounded-lg bg-black/70 backdrop-blur-sm flex items-center justify-center">
                             {skin.requirement === 'pro' ? (
                               <Crown className="w-5 h-5 text-amber-400" />
                             ) : (
@@ -162,7 +173,7 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                             {skin.name}
                           </span>
                           {isSelected && (
-                            <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-primary/20 text-primary rounded">
+                            <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">
                               Actif
                             </span>
                           )}
@@ -181,17 +192,17 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                       <div className="shrink-0">
                         {unlocked ? (
                           isSelected ? (
-                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                              <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_15px_rgba(74,222,128,0.5)]">
+                              <Check className="w-3.5 h-3.5 text-white" />
                             </div>
                           ) : (
-                            <div className="w-6 h-6 rounded-full border border-white/20" />
+                            <div className="w-6 h-6 rounded-full border border-white/20 nivo-glass-static" />
                           )
                         ) : skin.requirement === 'pro' ? (
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 px-2 text-[10px] font-mono border-amber-400/30 text-amber-400 hover:bg-amber-400/10"
+                            className="h-7 px-2 text-[10px] font-mono border-amber-400/30 text-amber-400 hover:bg-amber-400/10 nivo-glass-static"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowUpgradeModal(true);
@@ -210,10 +221,13 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
             </div>
 
             {/* Current Tier Display */}
-            <div className="mt-6 pt-4 border-t border-white/10 text-center">
-              <span className="font-mono text-[10px] text-foreground/30">
-                Niveau actuel: {level} • Tier: {subscriptionTier === 'free' ? 'Gratuit' : 'PRO'}
-              </span>
+            <div className="mt-6 pt-4 border-t border-white/5 text-center">
+              <div className="inline-flex items-center gap-3 nivo-glass-static px-4 py-2 rounded-full">
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                <span className="font-mono text-[10px] text-foreground/50">
+                  Niveau {level} • {subscriptionTier === 'free' ? 'Gratuit' : 'PRO'}
+                </span>
+              </div>
             </div>
           </div>
         </DialogContent>
