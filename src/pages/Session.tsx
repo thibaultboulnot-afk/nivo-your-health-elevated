@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, Play, Pause, ChevronLeft, ChevronRight, Volume2, Moon, Check, Trophy, RotateCcw } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Moon, Check, Trophy, RotateCcw, Radio, Volume2, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DAILY_ROUTINE, getRoutineById, type Routine, type RoutineStep } from '@/data/programs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { AudioCommandCenter } from '@/components/AudioCommandCenter';
+import { useGamification } from '@/hooks/useGamification';
 
 // Audio ambiant
 const AMBIENT_AUDIO_URL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
@@ -17,6 +19,7 @@ export default function Session() {
   const { routineId } = useParams<{ routineId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { completeAudioSession } = useGamification();
   const audioRef = useRef<HTMLAudioElement>(null);
   
   // Core state
@@ -190,7 +193,10 @@ export default function Session() {
         });
       }
 
-      toast.success('Session enregistrée ! +' + (routine.score_boost || 0) + ' points NIVO');
+      // Award XP via gamification
+      await completeAudioSession();
+      
+      toast.success('Système calibré • +' + (routine.score_boost || 0) + ' points NIVO');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error saving session:', error);

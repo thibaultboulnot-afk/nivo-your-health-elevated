@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2 } from 'lucide-react';
+import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,24 +18,36 @@ interface UpgradeModalProps {
   onClose: () => void;
 }
 
-// Price ID for NIVO PRO subscription (9.90€/month)
-const NIVO_PRO_PRICE_ID = 'price_NIVO_PRO_MONTHLY'; // Placeholder - replace with actual Stripe price ID
+// Stripe Price IDs
+const PRICE_IDS = {
+  monthly: 'price_1SjzmGJZ4N5U4jZsYBcSCSoo',
+  yearly: 'price_1Sjzn6JZ4N5U4jZsu2S22ZCf',
+};
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const { toast } = useToast();
 
   const features = [
     { icon: Headphones, text: 'Protocoles ciblés (Sciatique, Cou Texto...)' },
     { icon: Zap, text: 'Programmes pilotes de 6+ semaines' },
     { icon: Shield, text: 'Algorithme personnalisé NIVO' },
+    { icon: Crown, text: 'Skin Titanium exclusif (Scanner)' },
   ];
+
+  const pricing = {
+    monthly: { amount: 9.90, period: '/mois', savings: null },
+    yearly: { amount: 99, period: '/an', savings: '20%' },
+  };
 
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
+      const priceId = PRICE_IDS[billingCycle];
+      
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { programId: 'NIVO_PRO' }
+        body: { priceId }
       });
 
       if (error) {
@@ -84,10 +96,61 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Price */}
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex p-1 bg-white/5 rounded-lg border border-white/10">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`
+                  px-4 py-2 rounded-md font-mono text-xs transition-all
+                  ${billingCycle === 'monthly' 
+                    ? 'bg-white/10 text-foreground' 
+                    : 'text-foreground/50 hover:text-foreground/70'
+                  }
+                `}
+              >
+                Mensuel
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`
+                  px-4 py-2 rounded-md font-mono text-xs transition-all relative
+                  ${billingCycle === 'yearly' 
+                    ? 'bg-primary/20 text-primary' 
+                    : 'text-foreground/50 hover:text-foreground/70'
+                  }
+                `}
+              >
+                Annuel
+                {pricing.yearly.savings && (
+                  <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded">
+                    -{pricing.yearly.savings}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Price Display */}
           <div className="text-center mb-6">
-            <span className="font-heading text-4xl font-bold text-foreground">9.90€</span>
-            <span className="font-mono text-sm text-foreground/40">/mois</span>
+            <motion.div
+              key={billingCycle}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span className="font-heading text-4xl font-bold text-foreground">
+                {pricing[billingCycle].amount}€
+              </span>
+              <span className="font-mono text-sm text-foreground/40">
+                {pricing[billingCycle].period}
+              </span>
+            </motion.div>
+            {billingCycle === 'yearly' && (
+              <p className="font-mono text-xs text-primary mt-1">
+                Soit 8.25€/mois • Économisez 19.80€
+              </p>
+            )}
           </div>
 
           {/* Features */}
@@ -104,6 +167,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                   <feature.icon className="h-4 w-4 text-primary" />
                 </div>
                 <span className="font-mono text-xs text-foreground/70">{feature.text}</span>
+                <Check className="w-4 h-4 text-primary ml-auto shrink-0" />
               </motion.div>
             ))}
           </div>
@@ -112,7 +176,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           <Button 
             onClick={handleUpgrade}
             disabled={isLoading}
-            className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300 disabled:opacity-70"
+            className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg shadow-[0_0_30px_rgba(74,222,128,0.4)] hover:shadow-[0_0_50px_rgba(74,222,128,0.6)] transition-all duration-300 disabled:opacity-70"
           >
             {isLoading ? (
               <>
@@ -122,7 +186,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             ) : (
               <>
                 <Crown className="h-5 w-5 mr-2" />
-                DEVENIR PRO
+                {billingCycle === 'yearly' ? 'DEVENIR PRO ANNUEL' : 'DEVENIR PRO'}
                 <ArrowRight className="h-5 w-5 ml-2" />
               </>
             )}

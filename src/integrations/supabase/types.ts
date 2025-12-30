@@ -133,27 +133,48 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          current_streak: number | null
           email: string | null
           first_name: string | null
           id: string
+          last_activity_date: string | null
           last_name: string | null
+          level: number | null
           objective: string | null
+          streak_freezes: number | null
+          subscription_tier: string | null
+          unlocked_skins: string[] | null
+          xp: number | null
         }
         Insert: {
           created_at?: string
+          current_streak?: number | null
           email?: string | null
           first_name?: string | null
           id: string
+          last_activity_date?: string | null
           last_name?: string | null
+          level?: number | null
           objective?: string | null
+          streak_freezes?: number | null
+          subscription_tier?: string | null
+          unlocked_skins?: string[] | null
+          xp?: number | null
         }
         Update: {
           created_at?: string
+          current_streak?: number | null
           email?: string | null
           first_name?: string | null
           id?: string
+          last_activity_date?: string | null
           last_name?: string | null
+          level?: number | null
           objective?: string | null
+          streak_freezes?: number | null
+          subscription_tier?: string | null
+          unlocked_skins?: string[] | null
+          xp?: number | null
         }
         Relationships: []
       }
