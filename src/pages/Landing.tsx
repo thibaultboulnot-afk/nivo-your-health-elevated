@@ -5,8 +5,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { 
   ArrowRight, Check, Lock, Shield, Zap, Eye, Volume2, 
   Cpu, FileCode, Flame, Trophy, Sparkles, AlertTriangle,
-  Briefcase, Activity, Microscope
+  Briefcase, Activity, Microscope, Github, Skull
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import HeroDeviceMockup from '@/components/HeroDeviceMockup';
@@ -74,6 +76,7 @@ const StaticOrb = ({
 
 export default function Landing() {
   const isMobile = useIsMobile();
+  const [isAnnual, setIsAnnual] = useState(true);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
@@ -207,7 +210,7 @@ export default function Landing() {
             >
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] backdrop-blur-sm">
                 <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="font-mono">Analyse Locale (On-Device)</span>
+                <span className="font-mono">Inférence Locale (On-Device)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] backdrop-blur-sm">
                 <Shield className="w-3.5 h-3.5 text-emerald-400" />
@@ -218,6 +221,18 @@ export default function Landing() {
                 <span className="font-mono">Open Source Engine</span>
               </div>
             </motion.div>
+            
+            {/* GitHub Link */}
+            <motion.a 
+              variants={itemVariants}
+              href="https://github.com/nicofratini/nivo-engine"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-4 text-xs text-white/30 hover:text-white/50 transition-colors font-mono"
+            >
+              <Github className="w-3.5 h-3.5" />
+              <span>Voir le code source sur GitHub (Audit)</span>
+            </motion.a>
           </motion.div>
         </div>
       </section>
@@ -283,9 +298,9 @@ export default function Landing() {
                       <Cpu className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div className="font-mono text-xs text-emerald-400/60 uppercase tracking-wider mb-2">02 // TRAITEMENT LOCAL</div>
-                    <h3 className="font-sans text-xl font-semibold mb-3">Calcul On-Device</h3>
+                    <h3 className="font-sans text-xl font-semibold mb-3">Modèle Pré-Entraîné</h3>
                     <p className="text-white/40 text-sm leading-relaxed">
-                      Angles et tensions calculés localement. <span className="text-emerald-400/80 font-medium">Vos données ne quittent pas votre navigateur.</span>
+                      Exécuté localement via TensorFlow.js. <span className="text-emerald-400/80 font-medium">Aucune donnée ne quitte votre navigateur.</span>
                     </p>
                   </div>
                 </div>
@@ -346,121 +361,109 @@ export default function Landing() {
             </div>
           </ScrollReveal>
 
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            {/* Gamification UI Mockup */}
+          {/* Skins Grid - 3 Vertical Cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {/* Skin 1 - Standard */}
             <ScrollReveal delay={0.1}>
-              <div className="nivo-glass-intense rounded-2xl p-6 md:p-8">
-                {/* XP Bar */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Trophy className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="font-mono text-sm text-white/60">NIVEAU 9</span>
-                    </div>
-                    <span className="font-mono text-xs text-white/40">2,450 / 3,000 XP</span>
+              <div className="vitrine-glass group relative rounded-2xl p-6 text-center transition-all duration-500 hover:border-emerald-500/30">
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                  style={{ background: 'radial-gradient(circle at 50% 50%, rgba(34,197,94,0.1) 0%, transparent 70%)' }} 
+                />
+                <div className="relative">
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <Skull className="w-12 h-12 text-emerald-400" />
                   </div>
-                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full"
-                      initial={{ width: 0 }}
-                      whileInView={{ width: '82%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="font-mono text-[10px] text-white/30">LVL 9</span>
-                    <span className="font-mono text-[10px] text-primary">→ LVL 10</span>
-                  </div>
-                </div>
-
-                {/* Streak */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/5 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <motion.div 
-                        className="absolute inset-0 rounded-full bg-orange-500/30 blur-lg"
-                        animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                        <Flame className="w-5 h-5 text-white" />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="font-mono text-xs text-white/40 uppercase">Série Active</div>
-                      <div className="font-bold text-xl text-white">12 Jours 🔥</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono text-xs text-emerald-400">+200 XP Bonus</div>
-                  </div>
-                </div>
-
-                {/* Unlocked Skin Card */}
-                <div className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
-                      <motion.div
-                        animate={{ rotate: [0, 5, -5, 0] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
-                        <Sparkles className="w-8 h-8 text-cyan-400" />
-                      </motion.div>
-                    </div>
-                    <div>
-                      <div className="font-mono text-xs text-cyan-400 uppercase mb-1">Nouveau Skin Débloqué</div>
-                      <div className="font-semibold text-white">Cyber-Skeleton</div>
-                      <div className="font-mono text-xs text-white/40 mt-1">Visualisation Néon Bleu</div>
-                    </div>
-                  </div>
+                  <h4 className="font-semibold text-lg mb-2">Standard</h4>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                    <Check className="w-3 h-3" />
+                    Débloqué
+                  </span>
                 </div>
               </div>
             </ScrollReveal>
 
-            {/* Features List */}
+            {/* Skin 2 - Cyber-Samurai */}
             <ScrollReveal delay={0.2}>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-5 h-5 text-primary" />
+              <div className="vitrine-glass group relative rounded-2xl p-6 text-center transition-all duration-500 hover:border-red-500/30">
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                  style={{ background: 'radial-gradient(circle at 50% 50%, rgba(239,68,68,0.1) 0%, transparent 70%)' }} 
+                />
+                <div className="relative">
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center relative overflow-hidden">
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-t from-red-500/20 to-transparent"
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <Skull className="w-12 h-12 text-red-400 relative z-10" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-lg mb-1">+100 XP par Session Audio</h4>
-                    <p className="text-white/40 text-sm">Chaque routine complétée vous rapproche du niveau suivant.</p>
-                  </div>
+                  <h4 className="font-semibold text-lg mb-2">Cyber-Samurai</h4>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-xs font-mono">
+                    <Lock className="w-3 h-3" />
+                    Niveau 10
+                  </span>
                 </div>
+              </div>
+            </ScrollReveal>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                    <Eye className="w-5 h-5 text-emerald-400" />
+            {/* Skin 3 - Golden God */}
+            <ScrollReveal delay={0.3}>
+              <div className="vitrine-glass group relative rounded-2xl p-6 text-center transition-all duration-500 hover:border-amber-500/30 overflow-hidden">
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                  style={{ background: 'radial-gradient(circle at 50% 50%, rgba(245,158,11,0.1) 0%, transparent 70%)' }} 
+                />
+                <div className="relative">
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center relative overflow-hidden">
+                    <motion.div 
+                      className="absolute inset-0"
+                      style={{ background: 'linear-gradient(135deg, transparent 0%, rgba(245,158,11,0.3) 50%, transparent 100%)' }}
+                      animate={{ x: ['-100%', '100%'] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <Skull className="w-12 h-12 text-amber-400 relative z-10" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-lg mb-1">+50 XP par Scan Webcam</h4>
-                    <p className="text-white/40 text-sm">Analysez votre posture et gagnez de l'expérience.</p>
-                  </div>
+                  <h4 className="font-semibold text-lg mb-2">Golden God</h4>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono">
+                    <Trophy className="w-3 h-3" />
+                    Top 100
+                  </span>
                 </div>
+              </div>
+            </ScrollReveal>
+          </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                    <Flame className="w-5 h-5 text-orange-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-lg mb-1">Double Session = Joker</h4>
-                    <p className="text-white/40 text-sm">Matin + Soir = +200 XP bonus + 1 Streak Freeze (Protection).</p>
-                  </div>
+          {/* View Gallery Button */}
+          <ScrollReveal delay={0.4}>
+            <div className="text-center">
+              <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white font-mono text-sm">
+                Voir la galerie complète
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </ScrollReveal>
+
+          {/* Features List */}
+          <div className="grid md:grid-cols-2 gap-6 mt-16 max-w-3xl mx-auto">
+            <ScrollReveal delay={0.1}>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
+                <div>
+                  <h4 className="font-semibold text-lg mb-1">+100 XP par Session</h4>
+                  <p className="text-white/40 text-sm">Chaque routine audio complétée.</p>
+                </div>
+              </div>
+            </ScrollReveal>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
-                    <Trophy className="w-5 h-5 text-violet-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-lg mb-1">Skins Exclusifs</h4>
-                    <p className="text-white/40 text-sm">Débloquez des visualisations uniques pour le scanner.</p>
-                  </div>
+            <ScrollReveal delay={0.2}>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-lg mb-1">Streak = Multiplicateur</h4>
+                  <p className="text-white/40 text-sm">Plus vous enchaînez, plus vous gagnez.</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -474,13 +477,12 @@ export default function Landing() {
           <ScrollReveal>
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] mb-6">
-                <Microscope className="w-4 h-4 text-white/60" />
-                <span className="font-mono text-xs text-white/60 uppercase tracking-wider">Approche Validée</span>
+                <Shield className="w-4 h-4 text-white/60" />
+                <span className="font-mono text-xs text-white/60 uppercase tracking-wider">Maintenance Responsable</span>
               </div>
               <h2 className="font-sans text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Une approche responsable
-                <br />
-                <span className="text-white/60">de la mobilité.</span>
+                Une pratique
+                <span className="text-white/60"> responsable.</span>
               </h2>
             </div>
           </ScrollReveal>
@@ -511,13 +513,23 @@ export default function Landing() {
             </ScrollReveal>
           </div>
 
-          {/* Medical Disclaimer */}
+          {/* Medical Disclaimer - CRITIQUE */}
           <ScrollReveal delay={0.3}>
-            <div className="mt-8 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-              <p className="text-amber-200/80 text-sm">
-                <strong>Important :</strong> NIVO est un outil de maintenance et de bien-être. En cas de douleur aiguë ou de hernie, consultez un médecin.
-              </p>
+            <div className="mt-8 p-5 rounded-xl border border-amber-500/30 bg-amber-500/5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-amber-200 mb-2">Pratique de Maintenance</h4>
+                  <p className="text-amber-200/70 text-sm leading-relaxed">
+                    NIVO est un outil de <span className="text-amber-200">bien-être</span>. Il ne remplace pas un professionnel de santé.
+                  </p>
+                  <p className="text-amber-200/50 text-xs mt-2 font-mono">
+                    ⚠️ Ne pas utiliser en cas de : Hernie aiguë, sciatique sévère ou douleur intense.
+                  </p>
+                </div>
+              </div>
             </div>
           </ScrollReveal>
         </div>
@@ -527,7 +539,7 @@ export default function Landing() {
       <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <ScrollReveal>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
                 // PRICING
               </span>
@@ -535,6 +547,28 @@ export default function Landing() {
                 Investissez dans votre
                 <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent"> structure.</span>
               </h2>
+            </div>
+          </ScrollReveal>
+
+          {/* Billing Toggle */}
+          <ScrollReveal delay={0.1}>
+            <div className="flex items-center justify-center gap-4 mb-12">
+              <span className={`font-mono text-sm transition-colors ${!isAnnual ? 'text-white' : 'text-white/40'}`}>
+                Mensuel
+              </span>
+              <Switch
+                checked={isAnnual}
+                onCheckedChange={setIsAnnual}
+                className="data-[state=checked]:bg-emerald-500"
+              />
+              <span className={`font-mono text-sm transition-colors ${isAnnual ? 'text-white' : 'text-white/40'}`}>
+                Annuel
+              </span>
+              {isAnnual && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                  -20%
+                </span>
+              )}
             </div>
           </ScrollReveal>
 
@@ -591,21 +625,37 @@ export default function Landing() {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 />
                 
-                {/* Badge */}
+                {/* Badge - Contextual */}
                 <div className="absolute -top-px left-1/2 -translate-x-1/2">
-                  <motion.div 
-                    className="px-4 py-1.5 bg-primary text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
-                    animate={{
-                      boxShadow: [
-                        '0 0 20px rgba(255,107,74,0.4)',
-                        '0 0 40px rgba(255,107,74,0.6)',
-                        '0 0 20px rgba(255,107,74,0.4)',
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    Le Choix Smart
-                  </motion.div>
+                  {isAnnual ? (
+                    <motion.div 
+                      className="px-4 py-1.5 bg-emerald-500 text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
+                      animate={{
+                        boxShadow: [
+                          '0 0 20px rgba(34,197,94,0.4)',
+                          '0 0 40px rgba(34,197,94,0.6)',
+                          '0 0 20px rgba(34,197,94,0.4)',
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      2 Mois Offerts
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      className="px-4 py-1.5 bg-primary text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
+                      animate={{
+                        boxShadow: [
+                          '0 0 20px rgba(255,107,74,0.4)',
+                          '0 0 40px rgba(255,107,74,0.6)',
+                          '0 0 20px rgba(255,107,74,0.4)',
+                        ],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      Offre Pionnier
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="relative">
@@ -614,24 +664,48 @@ export default function Landing() {
                     <h3 className="font-sans text-2xl font-bold mt-1">Pro</h3>
                   </div>
                   
+                  {/* Scarcity Badge (Monthly only) */}
+                  {!isAnnual && (
+                    <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03]">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                      </span>
+                      <span className="font-mono text-[10px] text-white/50">82/100 places prises</span>
+                    </div>
+                  )}
+                  
+                  {/* Dynamic Pricing */}
                   <div className="mb-8">
-                    <span className="text-4xl font-bold">9.90€</span>
-                    <span className="text-white/40">/mois</span>
+                    {isAnnual ? (
+                      <>
+                        <span className="text-4xl font-bold">99€</span>
+                        <span className="text-white/40"> / an</span>
+                        <div className="text-sm text-white/50 font-mono mt-1">
+                          soit <span className="text-emerald-400">8.25€/mois</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-4xl font-bold">9.90€</span>
+                        <span className="text-white/40"> / mois</span>
+                      </>
+                    )}
                   </div>
 
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="text-white/90">Historique Data Complet</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Export CSV pour les analystes</span>
+                        <span className="text-white/90">30+ Skins Exclusifs</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Visualisations uniques</span>
                       </div>
                     </li>
                     <li className="flex items-start gap-3 text-sm text-white/70">
                       <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <span className="text-white/90">Skins & Customisation</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Visualisations exclusives</span>
+                        <span className="text-white/90">Historique Illimité</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Export CSV pour les analystes</span>
                       </div>
                     </li>
                     <li className="flex items-start gap-3 text-sm text-white/70">
