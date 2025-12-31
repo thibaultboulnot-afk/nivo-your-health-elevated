@@ -1,14 +1,17 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ArrowRight, Check, Zap, TrendingDown, AlertTriangle, Activity, Brain, Timer, Sparkles, Cpu, BarChart3, Clock, Target } from 'lucide-react';
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
+import { 
+  ArrowRight, Check, Lock, Shield, Zap, Eye, Volume2, 
+  Cpu, FileCode, Flame, Trophy, Sparkles, AlertTriangle,
+  Briefcase, Activity, Microscope
+} from 'lucide-react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import HeroDeviceMockup from '@/components/HeroDeviceMockup';
 
-// Scroll reveal animation wrapper - simplified for performance
+// Scroll reveal animation wrapper
 const ScrollReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
@@ -26,7 +29,7 @@ const ScrollReveal = ({ children, delay = 0 }: { children: React.ReactNode; dela
   );
 };
 
-// Animation variants with proper typing
+// Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -50,7 +53,7 @@ const itemVariants = {
   }
 };
 
-// Static orb component - no animations on mobile, CSS-only on desktop
+// Static orb component
 const StaticOrb = ({ 
   className, 
   color,
@@ -69,73 +72,14 @@ const StaticOrb = ({
   />
 );
 
-// Parallax wrapper - disabled on mobile for performance
-const ParallaxCard = ({ 
-  children, 
-  delay = 0, 
-  offsetY = 50,
-  className = "",
-  isMobile = false
-}: { 
-  children: React.ReactNode; 
-  delay?: number;
-  offsetY?: number;
-  className?: string;
-  isMobile?: boolean;
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-  const y = useTransform(scrollYProgress, [0, 1], [offsetY, -offsetY]);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  
-  // Disable parallax on mobile
-  if (isMobile) {
-    return (
-      <motion.div
-        ref={ref}
-        className={className}
-        initial={{ opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        transition={{ duration: 0.4, delay, ease: "easeOut" }}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-  
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={{ y, willChange: 'transform' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.4, delay, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
 export default function Landing() {
   const isMobile = useIsMobile();
-  
-  // Scroll animations for dashboard mockup with parallax - only on desktop
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
     offset: ["start end", "end start"]
   });
 
-  // Enhanced parallax: dashboard moves slower than content - disabled on mobile
-  const dashboardRotateX = useTransform(heroScrollProgress, [0, 0.5], isMobile ? [0, 0] : [12, 0]);
-  const dashboardY = useTransform(heroScrollProgress, [0, 1], isMobile ? [0, 0] : [60, -30]);
-  const dashboardOpacity = useTransform(heroScrollProgress, [0, 0.3], [0.5, 1]);
-
-  // Text parallax - disabled on mobile for native scroll
   const textY = useTransform(heroScrollProgress, [0, 1], isMobile ? [0, 0] : [0, 60]);
 
   return (
@@ -153,21 +97,18 @@ export default function Landing() {
         }}
       />
       
-      {/* ===== STATIC LIGHT ORBS - Performance optimized ===== */}
+      {/* ===== STATIC LIGHT ORBS ===== */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Primary orb - top left */}
         <StaticOrb
           className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[100px]"
           color="radial-gradient(circle, rgba(255,107,74,0.12) 0%, transparent 70%)"
           isMobile={isMobile}
         />
-        {/* Secondary orb - right */}
         <StaticOrb
           className="absolute top-1/3 -right-60 w-[500px] h-[500px] rounded-full blur-[100px]"
           color="radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)"
           isMobile={isMobile}
         />
-        {/* Third orb - bottom */}
         <StaticOrb
           className="absolute -bottom-60 left-1/3 w-[600px] h-[400px] rounded-full blur-[100px]"
           color="radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%)"
@@ -200,8 +141,8 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ===== 1. HERO SECTION ===== */}
-      <section className="pt-32 md:pt-44 pb-12 md:pb-20 px-4 md:px-6 relative z-10">
+      {/* ===== BLOC 1: HERO & PRIVACY ===== */}
+      <section className="pt-32 md:pt-44 pb-12 md:pb-20 px-4 md:px-6 relative z-10" ref={heroRef}>
         <div className="container mx-auto text-center max-w-5xl">
           <motion.div
             variants={containerVariants}
@@ -209,7 +150,7 @@ export default function Landing() {
             animate="visible"
             style={isMobile ? {} : { y: textY }}
           >
-            {/* System Badge - CSS animation only */}
+            {/* System Badge */}
             <motion.div variants={itemVariants} className="mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/60">
                 <span className="relative flex h-2 w-2">
@@ -222,7 +163,7 @@ export default function Landing() {
               </div>
             </motion.div>
 
-            {/* Headline - MASSIVE with tight leading */}
+            {/* Headline */}
             <motion.h1 
               variants={itemVariants}
               className="font-sans text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[0.95] tracking-tighter"
@@ -234,411 +175,292 @@ export default function Landing() {
               </span>
             </motion.h1>
 
-            {/* Sub-headline with relaxed leading */}
+            {/* Sub-headline */}
             <motion.p 
               variants={itemVariants}
-              className="text-base md:text-lg text-muted-foreground font-normal mb-12 max-w-2xl mx-auto leading-relaxed"
+              className="text-base md:text-lg text-muted-foreground font-normal mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Quantifiez votre santé dorsale. Optimisez votre posture. 
+              Optimisez votre machine. <span className="text-white/80 font-medium">8 minutes par jour</span> pour effacer 
               <br className="hidden md:block" />
-              Une boucle d'entretien quotidienne de <span className="text-white/80 font-medium">8 minutes</span> basée sur vos données.
+              la dette technique de la sédentarité.
             </motion.p>
 
-            {/* CTAs */}
-            <motion.div 
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
+            {/* CTA */}
+            <motion.div variants={itemVariants} className="mb-8">
               <Link to="/onboarding">
                 <Button 
                   size="lg" 
                   className="relative overflow-hidden bg-primary hover:bg-primary/90 text-white h-14 px-8 text-lg rounded-full font-semibold transition-all shadow-[0_0_40px_rgba(255,107,74,0.4)]"
                 >
                   <span className="relative z-10 flex items-center">
-                    Lancer mon Scan (Gratuit)
+                    Lancer le Scan Gratuit (30s)
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="h-14 px-8 rounded-full border-white/5 bg-black/60 hover:bg-white/10 hover:border-white/10 text-white/80"
-                >
-                  Connexion
-                </Button>
-              </Link>
+            </motion.div>
+
+            {/* PRIVACY TRUST BADGES - CRITICAL */}
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm text-white/50"
+            >
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] backdrop-blur-sm">
+                <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="font-mono">Analyse Locale (On-Device)</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] backdrop-blur-sm">
+                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="font-mono">Zéro Image Stockée</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] backdrop-blur-sm">
+                <FileCode className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="font-mono">Open Source Engine</span>
+              </div>
             </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* ===== DEVICE MOCKUP VISUALIZATION ===== */}
-      <section className="py-12 md:py-20 px-4 md:px-6 relative z-10" ref={heroRef}>
+      {/* ===== DEVICE MOCKUP ===== */}
+      <section className="py-12 md:py-20 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-6xl">
           <HeroDeviceMockup />
         </div>
       </section>
 
-      {/* ===== 2. PROBLÉMATIQUE SECTION ===== */}
+      {/* ===== BLOC 2: ARCHITECTURE DU SYSTÈME ===== */}
       <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-5xl">
           <ScrollReveal>
             <div className="text-center mb-16">
               <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
-                // LE PROBLÈME
+                // ARCHITECTURE
               </span>
               <h2 className="font-sans text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                La Sédentarité est une
+                Comment fonctionne le
                 <br />
                 <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
-                  Dette Technique.
+                  moteur NIVO ?
                 </span>
               </h2>
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-            {/* Card 1 - Compression */}
-            <ScrollReveal delay={0.1}>
-              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
-                />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(255,107,74,0.3)] transition-shadow">
-                    <TrendingDown className="w-6 h-6 text-primary" />
+          {/* 3 Connected Glass Cards */}
+          <div className="relative">
+            {/* Connection Lines (Desktop) */}
+            <div className="hidden md:block absolute top-1/2 left-[16%] right-[16%] h-px bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
+            
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+              {/* Card 1 - Acquisition */}
+              <ScrollReveal delay={0.1}>
+                <div className="nivo-glass group relative rounded-2xl p-8 transition-all duration-500 hover:border-primary/30">
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                    style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.15) 0%, transparent 60%)' }} 
+                  />
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(255,107,74,0.3)] transition-shadow">
+                      <Eye className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="font-mono text-xs text-primary/60 uppercase tracking-wider mb-2">01 // ACQUISITION</div>
+                    <h3 className="font-sans text-xl font-semibold mb-3">Scan Biométrique</h3>
+                    <p className="text-white/40 text-sm leading-relaxed">
+                      Analyse de <span className="text-white/70 font-medium">35 points</span> en temps réel via votre webcam. Précision clinique.
+                    </p>
                   </div>
-                  <h3 className="font-sans text-xl font-semibold mb-3">Compression</h3>
-                  <p className="text-white/40 text-sm leading-relaxed">
-                    Vos disques intervertébraux s'écrasent après 4h assis. Pression constante, usure silencieuse.
-                  </p>
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
 
-            {/* Card 2 - Atrophie */}
-            <ScrollReveal delay={0.2}>
-              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
-                />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(255,107,74,0.3)] transition-shadow">
-                    <Zap className="w-6 h-6 text-primary" />
+              {/* Card 2 - Traitement Local */}
+              <ScrollReveal delay={0.2}>
+                <div className="nivo-glass group relative rounded-2xl p-8 transition-all duration-500 hover:border-primary/30">
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                    style={{ background: 'radial-gradient(circle at 50% 0%, rgba(34,197,94,0.15) 0%, transparent 60%)' }} 
+                  />
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-shadow">
+                      <Cpu className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div className="font-mono text-xs text-emerald-400/60 uppercase tracking-wider mb-2">02 // TRAITEMENT LOCAL</div>
+                    <h3 className="font-sans text-xl font-semibold mb-3">Calcul On-Device</h3>
+                    <p className="text-white/40 text-sm leading-relaxed">
+                      Angles et tensions calculés localement. <span className="text-emerald-400/80 font-medium">Vos données ne quittent pas votre navigateur.</span>
+                    </p>
                   </div>
-                  <h3 className="font-sans text-xl font-semibold mb-3">Atrophie</h3>
-                  <p className="text-white/40 text-sm leading-relaxed">
-                    Vos muscles stabilisateurs s'éteignent progressivement. Moins de support, plus de vulnérabilité.
-                  </p>
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
 
-            {/* Card 3 - Douleur */}
-            <ScrollReveal delay={0.3}>
-              <div className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
-                />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(255,107,74,0.3)] transition-shadow">
-                    <AlertTriangle className="w-6 h-6 text-primary" />
+              {/* Card 3 - Output Audio */}
+              <ScrollReveal delay={0.3}>
+                <div className="nivo-glass group relative rounded-2xl p-8 transition-all duration-500 hover:border-primary/30">
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+                    style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 60%)' }} 
+                  />
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-shadow">
+                      <Volume2 className="w-6 h-6 text-violet-400" />
+                    </div>
+                    <div className="font-mono text-xs text-violet-400/60 uppercase tracking-wider mb-2">03 // OUTPUT</div>
+                    <h3 className="font-sans text-xl font-semibold mb-3">Protocole Audio</h3>
+                    <p className="text-white/40 text-sm leading-relaxed">
+                      Guidance vocale générée. <span className="text-white/70 font-medium">Fermez les yeux, exécutez.</span>
+                    </p>
                   </div>
-                  <h3 className="font-sans text-xl font-semibold mb-3">Douleur</h3>
-                  <p className="text-white/40 text-sm leading-relaxed">
-                    Le signal d'alarme du système. Quand ça fait mal, c'est que la dette est déjà accumulée.
-                  </p>
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
+            </div>
           </div>
+
+          {/* Console Output */}
+          <ScrollReveal delay={0.4}>
+            <div className="mt-12 rounded-xl border border-white/5 bg-[#0a0a0a] p-4 font-mono text-xs max-w-2xl mx-auto">
+              <div className="text-white/30 mb-2">$ nivo --architecture</div>
+              <div className="text-emerald-400">&gt; PRIVACY_MODE: LOCAL_ONLY</div>
+              <div className="text-violet-400">&gt; DATA_TRANSFER: NONE</div>
+              <div className="text-primary">&gt; STATUS: SECURE ✓</div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* ===== 3. SOLUTION - LE MOTEUR NIVO (RADAR SCAN) ===== */}
+      {/* ===== BLOC 3: GAMIFICATION ===== */}
       <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-6xl">
           <ScrollReveal>
             <div className="text-center mb-16">
               <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
-                // LE MOTEUR
+                // BIO-HACKING
               </span>
-              <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                Le NIVO Score :
-                <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent"> votre métrique.</span>
+              <h2 className="font-sans text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+                Transformez votre dos en
+                <br />
+                <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+                  Arbre de Compétences.
+                </span>
               </h2>
-              <p className="text-white/40 max-w-2xl mx-auto text-lg">
-                Un algorithme propriétaire qui combine ressenti, mobilité et charge de travail.
+              <p className="text-white/40 text-lg max-w-2xl mx-auto">
+                Chaque session vous rapporte de l'XP. Débloquez des visualisations exclusives. 
+                <span className="text-white/70"> Dominez le leaderboard.</span>
               </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Radar Scan Visualization */}
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            {/* Gamification UI Mockup */}
             <ScrollReveal delay={0.1}>
-              <div className="relative aspect-square max-w-md mx-auto">
-                {/* Pulsing glow effect */}
-                <motion.div 
-                  className="absolute inset-0 rounded-full blur-[80px] bg-primary/30"
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    opacity: [0.2, 0.35, 0.2]
-                  }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                
-                {/* Radar container */}
-                <div className="relative w-full h-full rounded-full border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-xl overflow-hidden">
-                  
-                  {/* Propagating waves - multiple rings expanding outward */}
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={`wave-${i}`}
-                      className="absolute inset-0 rounded-full border border-primary/30"
-                      initial={{ scale: 0.1, opacity: 0.8 }}
-                      animate={{ 
-                        scale: [0.1, 1.2],
-                        opacity: [0.6, 0]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: i * 1,
-                        ease: "easeOut"
-                      }}
+              <div className="nivo-glass-intense rounded-2xl p-6 md:p-8">
+                {/* XP Bar */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <Trophy className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="font-mono text-sm text-white/60">NIVEAU 9</span>
+                    </div>
+                    <span className="font-mono text-xs text-white/40">2,450 / 3,000 XP</span>
+                  </div>
+                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '82%' }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
                     />
-                  ))}
-                  
-                  {/* Radar grid SVG */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
-                    {/* Concentric circles */}
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    {/* Cross lines */}
-                    <line x1="100" y1="10" x2="100" y2="190" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-                    <line x1="29" y1="29" x2="171" y2="171" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-                    <line x1="171" y1="29" x2="29" y2="171" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-                    
-                    {/* Data polygon with animated opacity */}
-                    <motion.polygon 
-                      points="100,35 155,75 145,140 55,140 45,75" 
-                      fill="rgba(255,107,74,0.1)" 
-                      stroke="rgba(255,107,74,0.6)" 
-                      strokeWidth="1.5"
-                      style={{ filter: 'drop-shadow(0 0 8px rgba(255,107,74,0.4))' }}
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    
-                    {/* Data points with pulse */}
-                    {[
-                      { cx: 100, cy: 35 },
-                      { cx: 155, cy: 75 },
-                      { cx: 145, cy: 140 },
-                      { cx: 55, cy: 140 },
-                      { cx: 45, cy: 75 }
-                    ].map((point, i) => (
-                      <g key={`point-${i}`}>
-                        <motion.circle 
-                          cx={point.cx} 
-                          cy={point.cy} 
-                          r="8" 
-                          fill="rgba(255,107,74,0.2)"
-                          animate={{ 
-                            r: [4, 10, 4],
-                            opacity: [0.4, 0.1, 0.4]
-                          }}
-                          transition={{ 
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: i * 0.2
-                          }}
-                        />
-                        <circle 
-                          cx={point.cx} 
-                          cy={point.cy} 
-                          r="4" 
-                          fill="#ff6b4a" 
-                          style={{ filter: 'drop-shadow(0 0 6px rgba(255,107,74,0.8))' }} 
-                        />
-                      </g>
-                    ))}
-                  </svg>
-                  
-                  {/* Scanning sweep - cone shape */}
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 w-1/2 h-1/2 origin-top-left"
-                    style={{ 
-                      background: 'conic-gradient(from 0deg, rgba(255,107,74,0.4) 0deg, rgba(255,107,74,0.1) 30deg, transparent 60deg)',
-                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ 
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                  />
-                  
-                  {/* Scanning line */}
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 w-1/2 h-0.5 origin-left"
-                    style={{ 
-                      background: 'linear-gradient(90deg, rgba(255,107,74,1) 0%, rgba(255,107,74,0.5) 50%, transparent 100%)',
-                      boxShadow: '0 0 10px rgba(255,107,74,0.8), 0 0 20px rgba(255,107,74,0.4)'
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ 
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                  />
-                  
-                  {/* Floating particles */}
-                  {[...Array(12)].map((_, i) => {
-                    const angle = (i / 12) * Math.PI * 2;
-                    const radius = 25 + Math.random() * 55;
-                    const x = 50 + Math.cos(angle) * radius;
-                    const y = 50 + Math.sin(angle) * radius;
-                    return (
-                      <motion.div
-                        key={`particle-${i}`}
-                        className="absolute w-1 h-1 rounded-full bg-primary"
-                        style={{ 
-                          left: `${x}%`, 
-                          top: `${y}%`,
-                          boxShadow: '0 0 4px rgba(255,107,74,0.8)'
-                        }}
-                        animate={{ 
-                          opacity: [0, 1, 0],
-                          scale: [0.5, 1.5, 0.5],
-                          x: [0, (Math.random() - 0.5) * 20],
-                          y: [0, (Math.random() - 0.5) * 20]
-                        }}
-                        transition={{ 
-                          duration: 2 + Math.random() * 2,
-                          repeat: Infinity,
-                          delay: i * 0.3,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    );
-                  })}
-                  
-                  {/* Center score */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                    <motion.span 
-                      className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-1"
-                      animate={{ opacity: [0.3, 0.8, 0.3] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      ANALYSE
-                    </motion.span>
-                    <span className="text-4xl md:text-5xl font-bold text-white">85</span>
-                    <span className="font-mono text-xs text-primary mt-1">SCORE</span>
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="font-mono text-[10px] text-white/30">LVL 9</span>
+                    <span className="font-mono text-[10px] text-primary">→ LVL 10</span>
                   </div>
                 </div>
-                
-                {/* Status labels with subtle animation */}
-                <motion.div 
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider"
-                  animate={{ opacity: [0.4, 0.7, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                >
-                  SUBJECTIF: 45%
-                </motion.div>
-                <motion.div 
-                  className="absolute top-1/2 -right-4 -translate-y-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider rotate-90 origin-center"
-                  animate={{ opacity: [0.4, 0.7, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                >
-                  FONCTIONNEL: 30%
-                </motion.div>
-                <motion.div 
-                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/40 uppercase tracking-wider"
-                  animate={{ opacity: [0.4, 0.7, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                >
-                  CHARGE: 25%
-                </motion.div>
+
+                {/* Streak */}
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/5 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <motion.div 
+                        className="absolute inset-0 rounded-full bg-orange-500/30 blur-lg"
+                        animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                        <Flame className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-xs text-white/40 uppercase">Série Active</div>
+                      <div className="font-bold text-xl text-white">12 Jours 🔥</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-xs text-emerald-400">+200 XP Bonus</div>
+                  </div>
+                </div>
+
+                {/* Unlocked Skin Card */}
+                <div className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
+                      <motion.div
+                        animate={{ rotate: [0, 5, -5, 0] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-8 h-8 text-cyan-400" />
+                      </motion.div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-xs text-cyan-400 uppercase mb-1">Nouveau Skin Débloqué</div>
+                      <div className="font-semibold text-white">Cyber-Skeleton</div>
+                      <div className="font-mono text-xs text-white/40 mt-1">Visualisation Néon Bleu</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </ScrollReveal>
-            
-            {/* Technical Specs */}
+
+            {/* Features List */}
             <ScrollReveal delay={0.2}>
               <div className="space-y-6">
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="font-mono text-xs text-primary uppercase tracking-wider">INDEX_01</div>
-                    <div className="flex-1 h-px bg-white/10" />
-                    <div className="font-mono text-xs text-white/40">45%</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-5 h-5 text-primary" />
                   </div>
-                  <h4 className="font-semibold text-lg mb-2">Index Subjectif</h4>
-                  <p className="text-white/40 text-sm">Douleur VAS, fatigue perçue, raideur matinale. Auto-évaluation quotidienne.</p>
-                  <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full"
-                      initial={{ width: 0 }}
-                      whileInView={{ width: '45%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.3 }}
-                    />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">+100 XP par Session Audio</h4>
+                    <p className="text-white/40 text-sm">Chaque routine complétée vous rapproche du niveau suivant.</p>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="font-mono text-xs text-primary uppercase tracking-wider">INDEX_02</div>
-                    <div className="flex-1 h-px bg-white/10" />
-                    <div className="font-mono text-xs text-white/40">30%</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Eye className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <h4 className="font-semibold text-lg mb-2">Index Fonctionnel</h4>
-                  <p className="text-white/40 text-sm">Tests de mobilité McGill, flexion, extension. Mesures objectives du mouvement.</p>
-                  <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full"
-                      initial={{ width: 0 }}
-                      whileInView={{ width: '30%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.4 }}
-                    />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">+50 XP par Scan Webcam</h4>
+                    <p className="text-white/40 text-sm">Analysez votre posture et gagnez de l'expérience.</p>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="font-mono text-xs text-primary uppercase tracking-wider">INDEX_03</div>
-                    <div className="flex-1 h-px bg-white/10" />
-                    <div className="font-mono text-xs text-white/40">25%</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                    <Flame className="w-5 h-5 text-orange-400" />
                   </div>
-                  <h4 className="font-semibold text-lg mb-2">Index de Charge</h4>
-                  <p className="text-white/40 text-sm">Heures assis, niveau de stress, activité physique. Facteurs de charge quotidiens.</p>
-                  <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full"
-                      initial={{ width: 0 }}
-                      whileInView={{ width: '25%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                    />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Double Session = Joker</h4>
+                    <p className="text-white/40 text-sm">Matin + Soir = +200 XP bonus + 1 Streak Freeze (Protection).</p>
                   </div>
                 </div>
 
-                {/* Console output */}
-                <div className="rounded-xl border border-white/5 bg-[#0a0a0a] p-4 font-mono text-xs">
-                  <div className="text-white/30 mb-2">$ nivo --calculate-score</div>
-                  <div className="text-emerald-400">&gt; LOAD: 42% | PROCESS: COMPLETE</div>
-                  <div className="text-primary">&gt; SCORE_OUTPUT: 85/100</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                    <Trophy className="w-5 h-5 text-violet-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Skins Exclusifs</h4>
+                    <p className="text-white/40 text-sm">Débloquez des visualisations uniques pour le scanner.</p>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>
@@ -646,204 +468,62 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== 4. BENTO GRID - FEATURES ===== */}
-      <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
-        <div className="container mx-auto max-w-6xl">
+      {/* ===== BLOC 4: SCIENCE & SÉCURITÉ ===== */}
+      <section className="py-24 md:py-32 px-4 md:px-6 relative z-10 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
+        <div className="container mx-auto max-w-4xl">
           <ScrollReveal>
-            <div className="text-center mb-16">
-              <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
-                // LE PROTOCOLE
-              </span>
-              <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight mb-4">
-                La Boucle Quotidienne :
-                <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent"> 8 minutes.</span>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] mb-6">
+                <Microscope className="w-4 h-4 text-white/60" />
+                <span className="font-mono text-xs text-white/60 uppercase tracking-wider">Approche Validée</span>
+              </div>
+              <h2 className="font-sans text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Une approche responsable
+                <br />
+                <span className="text-white/60">de la mobilité.</span>
               </h2>
-              <p className="text-white/40 text-lg">
-                Pas du yoga. <span className="text-white/80">De l'ingénierie corporelle.</span>
-              </p>
             </div>
           </ScrollReveal>
 
-          {/* Bento Grid - Mobile-first responsive with parallax stagger */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-            {/* Large Card - Algorithm - faster parallax */}
-            <ParallaxCard delay={0.1} offsetY={30} className="md:col-span-2 md:row-span-2">
-              <div className="h-full group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-8 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
-                  style={{ background: 'radial-gradient(circle at 30% 30%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
-                />
-                <div className="relative h-full flex flex-col">
-                  <div className="flex items-center gap-3 mb-4 md:mb-6">
-                    <motion.div 
-                      className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center"
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <Cpu className="w-5 h-5 text-primary" />
-                    </motion.div>
-                    <span className="font-mono text-xs text-white/30 uppercase tracking-wider">MOTEUR CENTRAL</span>
-                  </div>
-                  <h3 className="font-sans text-xl md:text-3xl font-bold tracking-tight mb-3 md:mb-4">L'Algorithme Adaptatif</h3>
-                  <p className="text-white/40 text-sm leading-relaxed mb-4 md:mb-6 break-words whitespace-normal">
-                    Le système analyse vos données quotidiennes et ajuste le protocole en temps réel. Plus vous l'utilisez, plus il devient précis.
-                  </p>
-                  <div className="mt-auto grid grid-cols-3 gap-4 pt-4 md:pt-6 border-t border-white/5">
-                    <div>
-                      <motion.div 
-                        className="text-xl md:text-2xl font-bold text-primary"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                      >3</motion.div>
-                      <div className="font-mono text-[10px] text-white/30 uppercase">PHASES</div>
-                    </div>
-                    <div>
-                      <motion.div 
-                        className="text-xl md:text-2xl font-bold text-white"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                      >8</motion.div>
-                      <div className="font-mono text-[10px] text-white/30 uppercase">MINUTES</div>
-                    </div>
-                    <div>
-                      <motion.div 
-                        className="text-xl md:text-2xl font-bold text-emerald-400"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
-                      >∞</motion.div>
-                      <div className="font-mono text-[10px] text-white/30 uppercase">SCANS</div>
-                    </div>
-                  </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <ScrollReveal delay={0.1}>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <Activity className="w-5 h-5 text-emerald-400" />
+                  <span className="font-mono text-xs text-white/40 uppercase">Biomécanique</span>
                 </div>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  Basé sur les principes de <span className="text-white/90">biomécanique</span> et de <span className="text-white/90">décompression vertébrale</span>. Protocoles McGill et McKenzie.
+                </p>
               </div>
-            </ParallaxCard>
+            </ScrollReveal>
 
-            {/* Small Card - Check-in - slower parallax (odd column) */}
-            <ParallaxCard delay={0.2} offsetY={60}>
-              <div className="h-full group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
-                />
-                <div className="relative">
-                  <motion.div
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Clock className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  </motion.div>
-                  <h4 className="font-semibold mb-2 tracking-tight">Bilan 60s</h4>
-                  <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Évaluez votre état en moins d'une minute.</p>
+            <ScrollReveal delay={0.2}>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <Volume2 className="w-5 h-5 text-violet-400" />
+                  <span className="font-mono text-xs text-white/40 uppercase">Audio Précis</span>
                 </div>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  <span className="text-white/90">Guidance Audio Précise</span> : Conçu pour être fait les yeux fermés, en toute sécurité. Pas d'écran.
+                </p>
               </div>
-            </ParallaxCard>
-
-            {/* Small Card - NASA - faster parallax */}
-            <ParallaxCard delay={0.25} offsetY={40}>
-              <div className="h-full group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
-                />
-                <div className="relative">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  </motion.div>
-                  <h4 className="font-semibold mb-2 tracking-tight">Protocole NASA</h4>
-                  <p className="text-white/40 text-xs leading-relaxed break-words whitespace-normal">Basé sur les contre-mesures spatiales.</p>
-                </div>
-              </div>
-            </ParallaxCard>
-
-            {/* Tall Card - History - slower parallax (odd column) */}
-            <ParallaxCard delay={0.3} offsetY={70} className="md:row-span-2">
-              <div className="h-full group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 50%)' }} 
-                />
-                <div className="relative h-full flex flex-col">
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <BarChart3 className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  </motion.div>
-                  <h4 className="font-semibold mb-2 tracking-tight">Suivi Historique</h4>
-                  <p className="text-white/40 text-xs leading-relaxed mb-4 break-words whitespace-normal">Visualisez l'évolution de votre score sur 30, 90, 365 jours.</p>
-                  {/* Mini chart visualization with animation */}
-                  <div className="mt-auto flex items-end gap-1 h-16 md:h-20">
-                    {[40, 55, 45, 60, 70, 65, 75, 80, 72, 85].map((h, i) => (
-                      <motion.div 
-                        key={i}
-                        className="flex-1 bg-gradient-to-t from-primary/60 to-primary rounded-sm"
-                        initial={{ height: 0 }}
-                        whileInView={{ height: `${h}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.05 }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </ParallaxCard>
-
-            {/* Wide Card - 3 Steps - faster parallax */}
-            <ParallaxCard delay={0.35} offsetY={35}>
-              <div className="h-full group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04]">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" 
-                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.1) 0%, transparent 60%)' }} 
-                />
-                <div className="relative">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Target className="w-6 h-6 text-primary mb-3 md:mb-4" />
-                  </motion.div>
-                  <h4 className="font-semibold mb-2 tracking-tight">3 Phases</h4>
-                  <div className="flex flex-wrap gap-2 text-[10px] font-mono text-white/40">
-                    <motion.span 
-                      className="px-2 py-1 rounded bg-white/5"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                    >DÉCOMPRESSION</motion.span>
-                    <motion.span 
-                      className="px-2 py-1 rounded bg-white/5"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                    >MOBILISATION</motion.span>
-                    <motion.span 
-                      className="px-2 py-1 rounded bg-white/5"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
-                    >STABILISATION</motion.span>
-                  </div>
-                </div>
-              </div>
-            </ParallaxCard>
+            </ScrollReveal>
           </div>
 
-          {/* Scientific Sources */}
-          <ScrollReveal delay={0.4}>
-            <div className="flex flex-wrap justify-center gap-4 mt-12 text-xs text-white/30">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/5 bg-white/[0.02]">
-                <Brain className="w-4 h-4" />
-                <span className="font-mono">McGill Protocol</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/5 bg-white/[0.02]">
-                <Activity className="w-4 h-4" />
-                <span className="font-mono">McKenzie Method</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/5 bg-white/[0.02]">
-                <Sparkles className="w-4 h-4" />
-                <span className="font-mono">NASA Countermeasures</span>
-              </div>
+          {/* Medical Disclaimer */}
+          <ScrollReveal delay={0.3}>
+            <div className="mt-8 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-amber-200/80 text-sm">
+                <strong>Important :</strong> NIVO est un outil de maintenance et de bien-être. En cas de douleur aiguë ou de hernie, consultez un médecin.
+              </p>
             </div>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* ===== 5. PRICING ===== */}
+      {/* ===== BLOC 5: PRICING COMPARATIF ===== */}
       <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <ScrollReveal>
@@ -852,36 +532,38 @@ export default function Landing() {
                 // PRICING
               </span>
               <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight">
-                Choisissez votre niveau.
+                Investissez dans votre
+                <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent"> structure.</span>
               </h2>
             </div>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Starter - Free */}
+            {/* FREE */}
             <ScrollReveal delay={0.1}>
-              <motion.div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm">
+              <div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm h-full">
                 <div className="mb-6">
-                  <h3 className="font-sans text-xl font-semibold mb-1">Essentiel</h3>
-                  <p className="text-white/40 text-sm">Pour surveiller vos signes vitaux.</p>
+                  <span className="font-mono text-xs text-white/40 uppercase tracking-wider">L'ESSAI</span>
+                  <h3 className="font-sans text-2xl font-bold mt-1">Gratuit</h3>
                 </div>
                 
                 <div className="mb-8">
-                  <span className="text-4xl font-bold">Gratuit</span>
+                  <span className="text-4xl font-bold">0€</span>
+                  <span className="text-white/40">/mois</span>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3 text-sm text-white/70">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Scan illimité</span>
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>Scan Illimité</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm text-white/70">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Score du jour</span>
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>Séance du Jour (Reset 24h)</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm text-white/70">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Routine de maintenance</span>
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>Score NIVO basique</span>
                   </li>
                 </ul>
 
@@ -890,19 +572,18 @@ export default function Landing() {
                     Commencer gratuitement
                   </Button>
                 </Link>
-              </motion.div>
+              </div>
             </ScrollReveal>
 
-            {/* NIVO PRO */}
+            {/* PRO */}
             <ScrollReveal delay={0.2}>
               <motion.div 
-                className="relative rounded-2xl border border-primary/30 bg-primary/5 p-8 backdrop-blur-sm overflow-hidden"
+                className="relative rounded-2xl border border-primary/30 bg-primary/5 p-8 backdrop-blur-sm overflow-hidden h-full"
                 animate={{
                   borderColor: ['rgba(255,107,74,0.3)', 'rgba(255,107,74,0.6)', 'rgba(255,107,74,0.3)'],
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                {/* Glow effect - animated */}
                 <motion.div 
                   className="absolute inset-0" 
                   style={{ background: 'radial-gradient(circle at 50% 0%, rgba(255,107,74,0.3) 0%, transparent 60%)' }}
@@ -910,7 +591,7 @@ export default function Landing() {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 />
                 
-                {/* Badge 7 jours - pulsing */}
+                {/* Badge */}
                 <div className="absolute -top-px left-1/2 -translate-x-1/2">
                   <motion.div 
                     className="px-4 py-1.5 bg-primary text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
@@ -923,15 +604,14 @@ export default function Landing() {
                     }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Timer className="w-3 h-3 inline mr-1" />
-                    7 jours gratuits
+                    Le Choix Smart
                   </motion.div>
                 </div>
 
                 <div className="relative">
                   <div className="mb-6 pt-4">
-                    <h3 className="font-sans text-xl font-semibold mb-1">NIVO PRO</h3>
-                    <p className="text-white/40 text-sm">Pour optimiser la machine.</p>
+                    <span className="font-mono text-xs text-primary/80 uppercase tracking-wider">NIVO PRO</span>
+                    <h3 className="font-sans text-2xl font-bold mt-1">Pro</h3>
                   </div>
                   
                   <div className="mb-8">
@@ -939,22 +619,34 @@ export default function Landing() {
                     <span className="text-white/40">/mois</span>
                   </div>
 
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>Tout Essentiel</span>
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-white/90">Historique Data Complet</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Export CSV pour les analystes</span>
+                      </div>
                     </li>
-                    <li className="flex items-center gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>Protocoles Douleur (Sciatique, Cou...)</span>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-white/90">Skins & Customisation</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Visualisations exclusives</span>
+                      </div>
                     </li>
-                    <li className="flex items-center gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>Historique complet</span>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-white/90">Mode Focus Audio</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Sessions optimisées pour le travail</span>
+                      </div>
                     </li>
-                    <li className="flex items-center gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>Mode Concentration</span>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-white/90">Protocoles Douleur</span>
+                        <span className="block text-xs text-white/40 mt-0.5">Sciatique, Cou, Lombaires...</span>
+                      </div>
                     </li>
                   </ul>
 
@@ -971,7 +663,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== FAQ SECTION ===== */}
+      {/* ===== BLOC 6: FAQ RAPIDE ===== */}
       <section className="py-24 md:py-32 px-4 md:px-6 relative z-10">
         <div className="container mx-auto max-w-3xl">
           <ScrollReveal>
@@ -979,7 +671,7 @@ export default function Landing() {
               <span className="font-mono text-xs text-white/30 uppercase tracking-[0.2em] mb-4 block">
                 // FAQ
               </span>
-              <h2 className="font-sans text-3xl md:text-5xl font-bold tracking-tight">
+              <h2 className="font-sans text-3xl md:text-4xl font-bold tracking-tight">
                 Questions Fréquentes
               </h2>
             </div>
@@ -992,10 +684,13 @@ export default function Landing() {
                 className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
               >
                 <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
-                  Est-ce que ça remplace mon kiné ?
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="w-4 h-4 text-primary" />
+                    <span>Puis-je le faire au bureau ?</span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
-                  Non. NIVO est un outil de maintenance proactive. En cas de pathologie ou douleur aiguë, consultez un médecin.
+                  <strong className="text-white/70">Oui.</strong> Mouvements discrets, sans transpiration. Idéal entre deux réunions.
                 </AccordionContent>
               </AccordionItem>
 
@@ -1004,10 +699,13 @@ export default function Landing() {
                 className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
               >
                 <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
-                  J'ai peu de temps, combien ça dure ?
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span>Est-ce risqué ?</span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
-                  Le check-in prend 60 secondes. La routine quotidienne dure 8 minutes. Conçu pour les agendas chargés.
+                  <strong className="text-white/70">Non.</strong> Les mouvements sont doux et progressifs. Guidés par audio, ils sont conçus pour être exécutés en toute sécurité.
                 </AccordionContent>
               </AccordionItem>
 
@@ -1016,10 +714,13 @@ export default function Landing() {
                 className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
               >
                 <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
-                  Ai-je besoin de matériel ?
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-4 h-4 text-primary" />
+                    <span>Mes données sont-elles privées ?</span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
-                  Non. Un mur et le sol suffisent. Idéal pour le bureau ou en déplacement.
+                  <strong className="text-white/70">100% locales.</strong> L'analyse webcam se fait dans votre navigateur. Aucune image n'est stockée ou envoyée sur un serveur.
                 </AccordionContent>
               </AccordionItem>
 
@@ -1028,10 +729,13 @@ export default function Landing() {
                 className="rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-sm px-6 data-[state=open]:border-primary/30"
               >
                 <AccordionTrigger className="text-left text-white/90 hover:text-white hover:no-underline py-5 text-sm md:text-base font-medium">
-                  Puis-je annuler ?
+                  <div className="flex items-center gap-3">
+                    <Activity className="w-4 h-4 text-primary" />
+                    <span>Puis-je annuler mon abonnement ?</span>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/50 text-sm leading-relaxed pb-5">
-                  Oui, à tout moment depuis votre espace membre.
+                  <strong className="text-white/70">Oui.</strong> À tout moment depuis votre espace membre. Sans engagement.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -1039,11 +743,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== 6. FOOTER ===== */}
+      {/* ===== FOOTER ===== */}
       <footer className="py-12 px-4 md:px-6 border-t border-white/5 relative z-10">
         <div className="container mx-auto max-w-5xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.3)]">
                 <span className="font-sans text-white font-bold text-lg">N</span>
@@ -1051,14 +754,12 @@ export default function Landing() {
               <span className="font-sans text-lg font-semibold tracking-tight">NIVO</span>
             </div>
 
-            {/* Legal Links */}
             <div className="flex items-center gap-6 text-sm text-white/30">
               <Link to="/cgv" className="hover:text-white/60 transition-colors font-mono text-xs">CGV</Link>
               <Link to="/confidentialite" className="hover:text-white/60 transition-colors font-mono text-xs">Confidentialité</Link>
               <Link to="/mentions-legales" className="hover:text-white/60 transition-colors font-mono text-xs">Mentions légales</Link>
             </div>
 
-            {/* Copyright */}
             <p className="text-xs text-white/20 font-mono">
               © {new Date().getFullYear()} NIVO
             </p>
