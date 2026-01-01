@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SKINS_REGISTRY, isSkinUnlocked, getSubscriberBadge, type SubscriberBadge } from '@/lib/gamificationData';
 
 export interface GamificationState {
   xp: number;
@@ -9,7 +10,9 @@ export interface GamificationState {
   currentStreak: number;
   streakFreezes: number;
   unlockedSkins: string[];
+  equippedSkin: string;
   subscriptionTier: 'free' | 'pro_monthly' | 'pro_yearly';
+  subscriptionStartDate: string | null;
   lastActivityDate: string | null;
   isLoading: boolean;
 }
@@ -26,7 +29,17 @@ const LEVEL_THRESHOLDS = [
   9000,   // Level 8
   12000,  // Level 9
   16000,  // Level 10
-  21000,  // Level 11+
+  21000,  // Level 11
+  27000,  // Level 12
+  34000,  // Level 13
+  42000,  // Level 14
+  51000,  // Level 15
+  61000,  // Level 16
+  72000,  // Level 17
+  84000,  // Level 18
+  97000,  // Level 19
+  111000, // Level 20
+  126000, // Level 21+
 ];
 
 export function calculateLevel(xp: number): number {
@@ -40,7 +53,7 @@ export function calculateLevel(xp: number): number {
 
 export function getXpForNextLevel(level: number): number {
   if (level >= LEVEL_THRESHOLDS.length) {
-    return LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + (level - LEVEL_THRESHOLDS.length + 1) * 5000;
+    return LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + (level - LEVEL_THRESHOLDS.length + 1) * 15000;
   }
   return LEVEL_THRESHOLDS[level] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
 }
@@ -60,7 +73,9 @@ export function useGamification() {
     currentStreak: 0,
     streakFreezes: 0,
     unlockedSkins: ['standard'],
+    equippedSkin: 'standard',
     subscriptionTier: 'free',
+    subscriptionStartDate: null,
     lastActivityDate: null,
     isLoading: true,
   });
@@ -74,7 +89,7 @@ export function useGamification() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('xp, level, current_streak, streak_freezes, unlocked_skins, subscription_tier, last_activity_date')
+        .select('xp, level, current_streak, streak_freezes, unlocked_skins, equipped_skin, subscription_tier, subscription_start_date, last_activity_date')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -87,7 +102,9 @@ export function useGamification() {
           currentStreak: data.current_streak || 0,
           streakFreezes: data.streak_freezes || 0,
           unlockedSkins: data.unlocked_skins || ['standard'],
+          equippedSkin: data.equipped_skin || 'standard',
           subscriptionTier: (data.subscription_tier as 'free' | 'pro_monthly' | 'pro_yearly') || 'free',
+          subscriptionStartDate: data.subscription_start_date,
           lastActivityDate: data.last_activity_date,
           isLoading: false,
         });
@@ -103,6 +120,81 @@ export function useGamification() {
   useEffect(() => {
     fetchGamificationData();
   }, [fetchGamificationData]);
+
+  // Check and unlock skins based on current stats
+  const checkUnlockables = useCallback(async () => {
+    if (!user) return;
+
+    const isPro = state.subscriptionTier !== 'free';
+    const newUnlocks: string[] = [];
+
+    for (const skin of SKINS_REGISTRY) {
+      const shouldBeUnlocked = isSkinUnlocked(skin, state.level, state.currentStreak, isPro, state.unlockedSkins);
+      
+      if (shouldBeUnlocked && !state.unlockedSkins.includes(skin.id)) {
+        newUnlocks.push(skin.id);
+      }
+    }
+
+    if (newUnlocks.length > 0) {
+      const updatedSkins = [...state.unlockedSkins, ...newUnlocks];
+
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ unlocked_skins: updatedSkins })
+          .eq('id', user.id);
+
+        if (error) throw error;
+
+        setState(prev => ({ ...prev, unlockedSkins: updatedSkins }));
+
+        // Show notification for each new skin
+        for (const skinId of newUnlocks) {
+          const skin = SKINS_REGISTRY.find(s => s.id === skinId);
+          if (skin) {
+            toast.success(`🎨 Nouveau Skin Débloqué !`, {
+              description: `${skin.name} - ${skin.description}`,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('[useGamification] Error unlocking skins');
+      }
+    }
+  }, [user, state.level, state.currentStreak, state.subscriptionTier, state.unlockedSkins]);
+
+  // Run checkUnlockables when stats change
+  useEffect(() => {
+    if (!state.isLoading && user) {
+      checkUnlockables();
+    }
+  }, [state.level, state.currentStreak, state.subscriptionTier, state.isLoading, checkUnlockables, user]);
+
+  // Equip a skin
+  const equipSkin = useCallback(async (skinId: string) => {
+    if (!user) return;
+    if (!state.unlockedSkins.includes(skinId)) {
+      toast.error('Ce skin n\'est pas débloqué');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ equipped_skin: skinId })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setState(prev => ({ ...prev, equippedSkin: skinId }));
+      
+      const skin = SKINS_REGISTRY.find(s => s.id === skinId);
+      toast.success(`Skin équipé : ${skin?.name || skinId}`);
+    } catch (error) {
+      console.error('[useGamification] Error equipping skin');
+    }
+  }, [user, state.unlockedSkins]);
 
   // Award XP and check for level up
   const awardXp = useCallback(async (amount: number, reason: string) => {
@@ -126,22 +218,13 @@ export function useGamification() {
 
       setState(prev => ({ ...prev, xp: newXp, level: newLevel }));
 
-      // Notification style "Ingénierie Corporelle"
       toast.success(`+${amount} XP • ${reason}`, {
         description: leveledUp ? `Calibration Niveau ${newLevel} atteinte` : undefined,
       });
-
-      // Check for skin unlocks
-      if (newLevel >= 10 && !state.unlockedSkins.includes('xray')) {
-        await unlockSkin('xray');
-        toast.success('Skin X-Ray déverrouillé', {
-          description: 'Module optique débloqué au Niveau 10',
-        });
-      }
     } catch (error) {
       console.error('[useGamification] Error awarding XP');
     }
-  }, [user, state.xp, state.level, state.unlockedSkins]);
+  }, [user, state.xp, state.level]);
 
   // Update streak logic
   const updateStreak = useCallback(async () => {
@@ -155,7 +238,6 @@ export function useGamification() {
     let streakLost = false;
 
     if (!lastActivity) {
-      // First activity
       newStreak = 1;
     } else {
       const lastDate = new Date(lastActivity);
@@ -163,19 +245,16 @@ export function useGamification() {
       const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 0) {
-        // Same day, no change
         return;
       } else if (diffDays === 1) {
-        // Consecutive day
         newStreak = state.currentStreak + 1;
       } else if (diffDays > 1) {
-        // Missed days - check for streak freeze
         if (state.streakFreezes > 0) {
           usedFreeze = true;
-          newStreak = state.currentStreak; // Keep streak
+          newStreak = state.currentStreak;
         } else {
           streakLost = true;
-          newStreak = 1; // Reset
+          newStreak = 1;
         }
       }
     }
@@ -218,7 +297,7 @@ export function useGamification() {
     }
   }, [user, state.lastActivityDate, state.currentStreak, state.streakFreezes]);
 
-  // Award streak freeze (double session bonus)
+  // Award streak freeze
   const awardStreakFreeze = useCallback(async () => {
     if (!user) return;
 
@@ -240,7 +319,7 @@ export function useGamification() {
     }
   }, [user, state.streakFreezes]);
 
-  // Unlock skin
+  // Unlock skin (manual)
   const unlockSkin = useCallback(async (skinId: string) => {
     if (!user || state.unlockedSkins.includes(skinId)) return;
 
@@ -260,7 +339,7 @@ export function useGamification() {
     }
   }, [user, state.unlockedSkins]);
 
-  // Check if today had morning + evening session (double session)
+  // Check if today had morning + evening session
   const checkDoubleSession = useCallback(async () => {
     if (!user) return false;
 
@@ -275,7 +354,6 @@ export function useGamification() {
 
     if (error || !data) return false;
 
-    // Check if there's a morning (before 12:00) and evening (after 12:00) session
     const morningSession = data.some(s => new Date(s.created_at).getHours() < 12);
     const eveningSession = data.some(s => new Date(s.created_at).getHours() >= 12);
 
@@ -287,7 +365,6 @@ export function useGamification() {
     await updateStreak();
     await awardXp(100, 'Séance Audio complétée');
 
-    // Check for double session bonus
     const isDoubleSession = await checkDoubleSession();
     if (isDoubleSession) {
       await awardXp(200, 'Double Session (Matin + Soir)');
@@ -300,14 +377,20 @@ export function useGamification() {
     await awardXp(50, 'Scan Webcam effectué');
   }, [awardXp]);
 
+  // Get subscriber badge
+  const subscriberBadge: SubscriberBadge | null = getSubscriberBadge(state.subscriptionStartDate);
+
   return {
     ...state,
     xpProgress: getXpProgress(state.xp, state.level),
     xpForNextLevel: getXpForNextLevel(state.level),
+    subscriberBadge,
     awardXp,
     updateStreak,
     awardStreakFreeze,
     unlockSkin,
+    equipSkin,
+    checkUnlockables,
     completeAudioSession,
     completeScan,
     refetch: fetchGamificationData,

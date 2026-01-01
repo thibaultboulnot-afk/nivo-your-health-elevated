@@ -135,6 +135,7 @@ export type Database = {
           created_at: string
           current_streak: number | null
           email: string | null
+          equipped_skin: string | null
           first_name: string | null
           id: string
           last_activity_date: string | null
@@ -142,6 +143,7 @@ export type Database = {
           level: number | null
           objective: string | null
           streak_freezes: number | null
+          subscription_start_date: string | null
           subscription_tier: string | null
           unlocked_skins: string[] | null
           xp: number | null
@@ -150,6 +152,7 @@ export type Database = {
           created_at?: string
           current_streak?: number | null
           email?: string | null
+          equipped_skin?: string | null
           first_name?: string | null
           id: string
           last_activity_date?: string | null
@@ -157,6 +160,7 @@ export type Database = {
           level?: number | null
           objective?: string | null
           streak_freezes?: number | null
+          subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
           xp?: number | null
@@ -165,6 +169,7 @@ export type Database = {
           created_at?: string
           current_streak?: number | null
           email?: string | null
+          equipped_skin?: string | null
           first_name?: string | null
           id?: string
           last_activity_date?: string | null
@@ -172,6 +177,7 @@ export type Database = {
           level?: number | null
           objective?: string | null
           streak_freezes?: number | null
+          subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
           xp?: number | null
