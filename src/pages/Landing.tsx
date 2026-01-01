@@ -724,7 +724,10 @@ export default function Landing() {
                     </li>
                   </ul>
 
-                  <Link to="/onboarding" className="block">
+                  <Link 
+                    to={`/onboarding?plan=${isAnnual ? 'yearly' : 'monthly'}`} 
+                    className="block"
+                  >
                     <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_rgba(255,107,74,0.4)]">
                       Essayer 7 jours gratuit
                       <ArrowRight className="ml-2 h-4 w-4" />

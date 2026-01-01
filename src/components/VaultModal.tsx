@@ -7,10 +7,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Lock, Check, Crown, Zap, Sparkles } from 'lucide-react';
+import { Lock, Check, Crown, Sparkles, Trophy, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGamification } from '@/hooks/useGamification';
 import { UpgradeModal } from './UpgradeModal';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface VaultModalProps {
   isOpen: boolean;
@@ -25,7 +27,8 @@ interface Skin {
   description: string;
   color: string;
   glowColor: string;
-  requirement: 'free' | 'level10' | 'pro';
+  requirement: 'free' | 'level10' | 'top100' | 'pro';
+  requirementLabel: string;
   icon: React.ReactNode;
   hasliquidEffect?: boolean;
 }
@@ -34,55 +37,95 @@ const SKINS: Skin[] = [
   {
     id: 'standard',
     name: 'Standard',
-    description: 'Module de base - Vert néon classique',
+    description: 'Module de base - Vert NIVO classique',
     color: 'from-green-500 to-emerald-500',
     glowColor: 'rgba(34, 197, 94, 0.4)',
     requirement: 'free',
-    icon: <div className="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-emerald-600" />,
+    requirementLabel: 'Débloqué',
+    icon: (
+      <div className="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+        <div className="w-3/4 h-3/4 border-2 border-green-300/50 rounded-full" />
+      </div>
+    ),
   },
   {
-    id: 'xray',
-    name: 'X-Ray',
-    description: 'Vision radiographique - Déverrouillé Niveau 10',
-    color: 'from-blue-400 to-cyan-400',
-    glowColor: 'rgba(56, 189, 248, 0.4)',
+    id: 'cyber-samurai',
+    name: 'Cyber-Samurai',
+    description: 'Néon Rouge/Bleu - Style Cyberpunk',
+    color: 'from-red-500 via-purple-500 to-blue-500',
+    glowColor: 'rgba(239, 68, 68, 0.4)',
     requirement: 'level10',
-    icon: <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 animate-pulse" />,
+    requirementLabel: 'Niveau 10',
+    icon: (
+      <div className="w-full h-full rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-cyan-400 animate-pulse flex items-center justify-center">
+        <Flame className="w-5 h-5 text-white/80" />
+      </div>
+    ),
   },
   {
-    id: 'titanium',
-    name: 'Titanium',
-    description: 'Alliage premium - Exclusif PRO',
-    color: 'from-amber-400 to-yellow-500',
-    glowColor: 'rgba(251, 191, 36, 0.4)',
+    id: 'golden-god',
+    name: 'Golden God',
+    description: 'Or Métallique - Élite PRO',
+    color: 'from-amber-400 via-yellow-300 to-amber-600',
+    glowColor: 'rgba(251, 191, 36, 0.5)',
     requirement: 'pro',
-    icon: <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600" />,
+    requirementLabel: 'PRO / Top 100',
+    icon: (
+      <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 flex items-center justify-center">
+        <Trophy className="w-5 h-5 text-amber-900" />
+      </div>
+    ),
     hasliquidEffect: true,
   },
 ];
 
 export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'standard' }: VaultModalProps) {
-  const { level, unlockedSkins, isPro, subscriptionTier } = useGamification();
+  const { level, unlockedSkins, isPro, subscriptionTier, unlockSkin } = useGamification();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [equippingSkin, setEquippingSkin] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const isSkinUnlocked = (skin: Skin): boolean => {
     if (skin.requirement === 'free') return true;
     if (skin.requirement === 'level10') return level >= 10 || unlockedSkins.includes(skin.id);
+    if (skin.requirement === 'top100') return isPro || unlockedSkins.includes(skin.id);
     if (skin.requirement === 'pro') return isPro;
     return false;
   };
 
   const getRequirementLabel = (skin: Skin): string => {
     if (skin.requirement === 'free') return 'Débloqué';
-    if (skin.requirement === 'level10') return `Niveau 10 requis (actuel: ${level})`;
-    if (skin.requirement === 'pro') return 'PRO requis';
+    if (skin.requirement === 'level10') return `🔒 Niveau 10 (actuel: ${level})`;
+    if (skin.requirement === 'top100') return '🔒 Top 100 / PRO';
+    if (skin.requirement === 'pro') return '🔒 PRO requis';
     return '';
   };
 
-  const handleSkinClick = (skin: Skin) => {
+  const handleSkinClick = async (skin: Skin) => {
     if (isSkinUnlocked(skin)) {
+      setEquippingSkin(skin.id);
+      
+      // Update in Supabase
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase
+            .from('profiles')
+            .update({ unlocked_skins: [...new Set([...unlockedSkins, skin.id])] })
+            .eq('id', user.id);
+        }
+      } catch (error) {
+        console.error('Error updating skin:', error);
+      }
+      
       onSelectSkin?.(skin.id);
-    } else if (skin.requirement === 'pro') {
+      setEquippingSkin(null);
+      
+      toast({
+        title: "Skin équipé",
+        description: `${skin.name} est maintenant actif.`,
+      });
+    } else if (skin.requirement === 'pro' || skin.requirement === 'top100') {
       setShowUpgradeModal(true);
     }
   };
@@ -116,6 +159,7 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
               {SKINS.map((skin, index) => {
                 const unlocked = isSkinUnlocked(skin);
                 const isSelected = selectedSkin === skin.id;
+                const isEquipping = equippingSkin === skin.id;
 
                 return (
                   <motion.button
@@ -124,13 +168,13 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     onClick={() => handleSkinClick(skin)}
-                    disabled={!unlocked && skin.requirement !== 'pro'}
+                    disabled={isEquipping || (!unlocked && skin.requirement !== 'pro' && skin.requirement !== 'top100')}
                     className={`
                       w-full p-4 rounded-xl transition-all duration-300 text-left relative overflow-hidden
                       ${isSelected 
                         ? 'vitrine-glass shadow-[0_0_30px_rgba(74,222,128,0.2)]' 
                         : unlocked 
-                          ? 'vitrine-glass' 
+                          ? 'vitrine-glass hover:border-white/20' 
                           : 'vitrine-glass opacity-60'
                       }
                       ${isSelected ? 'ring-1 ring-emerald-500/50' : ''}
@@ -139,7 +183,7 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                       borderColor: isSelected ? 'rgba(74, 222, 128, 0.3)' : undefined,
                     }}
                   >
-                    {/* Liquid Refraction for Titanium */}
+                    {/* Liquid Refraction for Golden God */}
                     {skin.hasliquidEffect && unlocked && (
                       <div className="liquid-refraction absolute inset-0 pointer-events-none" />
                     )}
@@ -157,7 +201,7 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                         {/* Lock Overlay */}
                         {!unlocked && (
                           <div className="absolute inset-0 rounded-lg bg-black/70 backdrop-blur-sm flex items-center justify-center">
-                            {skin.requirement === 'pro' ? (
+                            {skin.requirement === 'pro' || skin.requirement === 'top100' ? (
                               <Crown className="w-5 h-5 text-amber-400" />
                             ) : (
                               <Lock className="w-4 h-4 text-white/50" />
@@ -175,6 +219,11 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                           {isSelected && (
                             <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">
                               Actif
+                            </span>
+                          )}
+                          {unlocked && !isSelected && (
+                            <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-white/5 text-white/40 rounded border border-white/10">
+                              Débloqué
                             </span>
                           )}
                         </div>
@@ -196,9 +245,9 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                               <Check className="w-3.5 h-3.5 text-white" />
                             </div>
                           ) : (
-                            <div className="w-6 h-6 rounded-full border border-white/20 nivo-glass-static" />
+                            <div className="w-6 h-6 rounded-full border border-white/20 nivo-glass-static hover:border-emerald-400/50 transition-colors" />
                           )
-                        ) : skin.requirement === 'pro' ? (
+                        ) : (skin.requirement === 'pro' || skin.requirement === 'top100') ? (
                           <Button
                             size="sm"
                             variant="outline"
@@ -229,6 +278,11 @@ export function VaultModal({ isOpen, onClose, onSelectSkin, selectedSkin = 'stan
                 </span>
               </div>
             </div>
+
+            {/* Gallery hint */}
+            <p className="text-center font-mono text-[10px] text-foreground/30 mt-4">
+              Plus de skins à venir...
+            </p>
           </div>
         </DialogContent>
       </Dialog>
