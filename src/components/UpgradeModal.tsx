@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,24 +17,54 @@ import { safeStripeRedirect } from '@/lib/url-validator';
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultBillingCycle?: 'monthly' | 'yearly';
 }
 
-// Stripe Price IDs
+// Stripe Price IDs - Placeholders to be configured in .env
 const PRICE_IDS = {
   monthly: 'price_1SjzmGJZ4N5U4jZsYBcSCSoo',
   yearly: 'price_1Sjzn6JZ4N5U4jZsu2S22ZCf',
 };
 
-export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+export function UpgradeModal({ isOpen, onClose, defaultBillingCycle }: UpgradeModalProps) {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const { toast } = useToast();
+
+  // Determine initial billing cycle from: prop > URL param > localStorage > default yearly
+  const getInitialBillingCycle = (): 'monthly' | 'yearly' => {
+    if (defaultBillingCycle) return defaultBillingCycle;
+    
+    const urlPlan = searchParams.get('plan');
+    if (urlPlan === 'monthly' || urlPlan === 'yearly') return urlPlan;
+    
+    const storedPlan = localStorage.getItem('nivo_preferred_plan');
+    if (storedPlan === 'monthly' || storedPlan === 'yearly') return storedPlan;
+    
+    return 'yearly';
+  };
+
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>(getInitialBillingCycle);
+
+  // Update billing cycle when URL param changes
+  useEffect(() => {
+    const urlPlan = searchParams.get('plan');
+    if (urlPlan === 'monthly' || urlPlan === 'yearly') {
+      setBillingCycle(urlPlan);
+    }
+  }, [searchParams]);
+
+  // Store preference when changed
+  const handleBillingCycleChange = (cycle: 'monthly' | 'yearly') => {
+    setBillingCycle(cycle);
+    localStorage.setItem('nivo_preferred_plan', cycle);
+  };
 
   const features = [
     { icon: Headphones, text: 'Protocoles ciblés (Sciatique, Cou Texto...)' },
     { icon: Zap, text: 'Programmes pilotes de 6+ semaines' },
     { icon: Shield, text: 'Algorithme personnalisé NIVO' },
-    { icon: Crown, text: 'Skin Titanium exclusif (Scanner)' },
+    { icon: Crown, text: '30+ Skins Exclusifs (Scanner)' },
   ];
 
   const pricing = {
@@ -100,7 +131,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
           <div className="flex justify-center mb-6">
             <div className="inline-flex p-1 bg-white/5 rounded-lg border border-white/10">
               <button
-                onClick={() => setBillingCycle('monthly')}
+                onClick={() => handleBillingCycleChange('monthly')}
                 className={`
                   px-4 py-2 rounded-md font-mono text-xs transition-all
                   ${billingCycle === 'monthly' 
@@ -112,7 +143,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 Mensuel
               </button>
               <button
-                onClick={() => setBillingCycle('yearly')}
+                onClick={() => handleBillingCycleChange('yearly')}
                 className={`
                   px-4 py-2 rounded-md font-mono text-xs transition-all relative
                   ${billingCycle === 'yearly' 
