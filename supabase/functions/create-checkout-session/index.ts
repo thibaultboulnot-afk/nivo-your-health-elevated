@@ -37,12 +37,15 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     logStep("Stripe key verified");
 
-    // Get subscription price ID from environment
-    const priceId = Deno.env.get("STRIPE_PRICE_ID");
+    // Parse request body to get priceId
+    const { priceId: requestedPriceId } = await req.json().catch(() => ({}));
+    
+    // Use provided priceId or fall back to env variable
+    const priceId = requestedPriceId || Deno.env.get("STRIPE_PRICE_ID");
     if (!priceId) {
-      throw new Error("STRIPE_PRICE_ID environment variable is not configured. Please set it in Supabase Edge Function secrets.");
+      throw new Error("No price ID provided and STRIPE_PRICE_ID environment variable is not configured.");
     }
-    logStep("Subscription price ID resolved", { priceId });
+    logStep("Price ID resolved", { priceId });
 
     // Create Supabase client
     const supabaseClient = createClient(
