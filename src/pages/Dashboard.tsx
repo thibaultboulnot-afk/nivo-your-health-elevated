@@ -1,98 +1,94 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useAccess } from '@/hooks/useAccess';
 import { useGamification } from '@/hooks/useGamification';
+import { useRankSystem } from '@/hooks/useRankSystem';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { VaultModal } from '@/components/VaultModal';
+import { SpineHologram } from '@/components/SpineHologram';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Settings,
-  Activity,
-  Zap,
-  Shield,
-  Clock,
-  Headphones,
-  Lock,
-  Play,
-  User,
-  Battery,
-  AlertTriangle,
-  ArrowRight,
-  ChevronUp,
-  Crown,
-  TrendingUp,
-  Download,
   Flame,
   Sparkles,
+  Crown,
+  Play,
+  User,
+  ChevronUp,
+  Crosshair,
+  Shield,
+  Zap,
+  Lock,
+  Terminal,
+  Activity,
+  Cpu,
 } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
-import { DAILY_ROUTINE, SPECIFIC_PROTOCOLS, PILOT_PROGRAMS, type Protocol, type PilotProgram } from '@/data/programs';
-import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { DownloadReportButton } from '@/components/DownloadReportButton';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface PostureHistoryItem {
-  date: string;
-  score: number;
-  formattedDate: string;
-}
+// Terminal log messages
+const TERMINAL_LOGS = [
+  '> SYSTÈME EN LIGNE...',
+  '> Connexion sécurisée établie',
+  '> Chargement des modules vertébraux...',
+  '> Calibration des capteurs...',
+  '> Analyse structurelle en cours...',
+  '> Protocoles de maintenance activés',
+  '> Scan biométrique OK',
+  '> Interface opérateur prête',
+];
 
 export default function Dashboard() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { stats, isLoading } = useUserStats();
-  const { isPro, accessLevel } = useAccess();
-  const { xp, level, currentStreak: streak, streakFreezes } = useGamification();
-  const getXpForNextLevel = (lvl: number) => lvl * 500;
-  const xpProgress = xp / getXpForNextLevel(level);
+  const { isPro } = useAccess();
+  const { 
+    xp, 
+    level, 
+    currentStreak: streak, 
+    streakFreezes,
+    subscriptionStartDate,
+    xpProgress,
+    xpForNextLevel,
+  } = useGamification();
+  
+  const { currentRank, nextRank, monthsToNextRank } = useRankSystem(subscriptionStartDate);
+  
   const [isMobile, setIsMobile] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showVaultModal, setShowVaultModal] = useState(false);
-  const [postureHistory, setPostureHistory] = useState<PostureHistoryItem[]>([]);
-  const [loadingPosture, setLoadingPosture] = useState(true);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [currentLogIndex, setCurrentLogIndex] = useState(0);
 
-  // Fetch posture history from physical_tests
+  // Calculate structural integrity from NIVO score
+  const structuralIntegrity = stats?.nivoScore ?? 100;
+
+  // Terminal log animation
   useEffect(() => {
-    const fetchPostureHistory = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('physical_tests')
-          .select('test_date, wall_angel_contacts')
-          .eq('user_id', user.id)
-          .order('test_date', { ascending: true })
-          .limit(30);
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          const formattedData: PostureHistoryItem[] = data
-            .filter(item => item.wall_angel_contacts !== null)
-            .map(item => ({
-              date: item.test_date,
-              // Convert wall_angel_contacts (0-3) to percentage score (0-100)
-              score: Math.round((item.wall_angel_contacts! / 3) * 100),
-              formattedDate: format(new Date(item.test_date), 'dd/MM', { locale: fr })
-            }));
-          setPostureHistory(formattedData);
-        }
-      } catch (error) {
-        console.error('Error fetching posture history:', error);
-      } finally {
-        setLoadingPosture(false);
-      }
-    };
+    if (currentLogIndex >= TERMINAL_LOGS.length) return;
+    
+    const timer = setTimeout(() => {
+      setTerminalLogs(prev => [...prev, TERMINAL_LOGS[currentLogIndex]]);
+      setCurrentLogIndex(prev => prev + 1);
+    }, 800 + Math.random() * 400);
 
-    fetchPostureHistory();
-  }, [user?.id]);
+    return () => clearTimeout(timer);
+  }, [currentLogIndex]);
+
+  // Add integrity log after initial logs
+  useEffect(() => {
+    if (currentLogIndex === TERMINAL_LOGS.length && stats?.nivoScore !== undefined) {
+      const timer = setTimeout(() => {
+        setTerminalLogs(prev => [...prev, `> INTÉGRITÉ STRUCTURELLE: ${stats.nivoScore}%`]);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentLogIndex, stats?.nivoScore]);
 
   // Check for mobile
   useEffect(() => {
@@ -115,141 +111,17 @@ export default function Dashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Determine status based on NIVO score
-  const getStatusConfig = () => {
-    if (!stats?.nivoScore) {
-      return {
-        text: 'FAIRE VOTRE CHECK-IN QUOTIDIEN',
-        color: 'text-foreground/50',
-        bgColor: 'bg-white/5',
-        borderColor: 'border-white/10',
-      };
-    }
-    if (stats.nivoScore < 40) {
-      return {
-        text: 'SYSTÈME CRITIQUE. ROUTINE D\'URGENCE RECOMMANDÉE.',
-        color: 'text-red-400',
-        bgColor: 'bg-red-500/10',
-        borderColor: 'border-red-500/30',
-      };
-    }
-    if (stats.nivoScore < 60) {
-      return {
-        text: 'TENSIONS DÉTECTÉES. ROUTINE RECOMMANDÉE.',
-        color: 'text-primary',
-        bgColor: 'bg-primary/10',
-        borderColor: 'border-primary/30',
-      };
-    }
-    if (stats.nivoScore >= 80) {
-      return {
-        text: 'SYSTÈME OPTIMAL. MODE MAINTENANCE.',
-        color: 'text-emerald-400',
-        bgColor: 'bg-emerald-500/10',
-        borderColor: 'border-emerald-500/30',
-      };
-    }
-    return {
-      text: 'SYSTÈME STABLE. CONTINUEZ AINSI.',
-      color: 'text-amber-400',
-      bgColor: 'bg-amber-500/10',
-      borderColor: 'border-amber-500/30',
-    };
-  };
-
-  const statusConfig = getStatusConfig();
-
-  // Calculate SVG circle parameters
-  const circleRadius = 90;
-  const circumference = 2 * Math.PI * circleRadius;
-  const displayScore = stats?.nivoScore ?? 0;
-  const strokeDashoffset = circumference - (displayScore / 100) * circumference;
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050510] relative overflow-hidden">
-        {/* Background Effects */}
+      <div className="min-h-screen bg-[#050510] relative overflow-hidden flex items-center justify-center">
         <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
         <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
-
-        {/* Header Skeleton */}
-        <header className="relative z-20 border-b border-white/5 bg-[#050510]/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Skeleton className="w-10 h-10 rounded-lg bg-white/10" />
-                <Skeleton className="w-16 h-5 rounded bg-white/10" />
-              </div>
-              <div className="flex items-center gap-4">
-                <Skeleton className="w-10 h-10 rounded-lg bg-white/10" />
-                <Skeleton className="w-10 h-10 rounded-full bg-white/10" />
-              </div>
-            </div>
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center animate-pulse">
+            <Cpu className="w-8 h-8 text-primary" />
           </div>
-        </header>
-
-        {/* Main Content Skeleton */}
-        <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
-          {/* Hero Score Skeleton */}
-          <div className="mb-6 md:mb-10">
-            <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-4 md:p-8">
-              <div className="flex flex-col items-center gap-6 md:gap-8">
-                {/* Circle Skeleton */}
-                <Skeleton className="w-36 h-36 md:w-52 md:h-52 rounded-full bg-white/10" />
-                
-                {/* Status Skeleton */}
-                <div className="w-full text-center">
-                  <Skeleton className="w-64 h-10 rounded-lg bg-white/10 mx-auto mb-6" />
-                  
-                  {/* Stats Grid Skeleton */}
-                  <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
-                    <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4">
-                      <Skeleton className="w-16 h-3 rounded bg-white/10 mb-2" />
-                      <Skeleton className="w-12 h-8 rounded bg-white/10" />
-                    </div>
-                    <div className="bg-white/5 border border-white/10 rounded-lg md:rounded-xl p-3 md:p-4">
-                      <Skeleton className="w-16 h-3 rounded bg-white/10 mb-2" />
-                      <Skeleton className="w-12 h-8 rounded bg-white/10" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left Column Skeleton */}
-            <div className="lg:col-span-2">
-              <div className="bg-black/60 rounded-xl md:rounded-2xl border border-white/10 p-5 md:p-8">
-                <Skeleton className="w-40 h-4 rounded bg-white/10 mb-4" />
-                <Skeleton className="w-64 h-8 rounded bg-white/10 mb-2" />
-                <Skeleton className="w-48 h-4 rounded bg-white/10 mb-6" />
-                <Skeleton className="w-full h-20 rounded-lg bg-white/10 mb-6" />
-                <Skeleton className="w-full h-14 rounded-lg bg-primary/20" />
-              </div>
-            </div>
-
-            {/* Right Column Skeleton */}
-            <div className="space-y-4">
-              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
-                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-3" />
-                <Skeleton className="w-full h-2 rounded bg-white/10" />
-              </div>
-              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
-                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-3" />
-                <Skeleton className="w-24 h-6 rounded bg-white/10" />
-              </div>
-              <div className="bg-black/60 rounded-xl border border-white/10 p-6">
-                <Skeleton className="w-32 h-3 rounded bg-white/10 mb-4" />
-                <div className="space-y-3">
-                  <Skeleton className="w-full h-4 rounded bg-white/10" />
-                  <Skeleton className="w-full h-4 rounded bg-white/10" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+          <p className="font-mono text-xs text-foreground/50">INITIALISATION DU SYSTÈME...</p>
+        </div>
       </div>
     );
   }
@@ -268,16 +140,38 @@ export default function Dashboard() {
         }}
       />
 
-      {/* Header with Gamification */}
+      {/* XP Progress Bar (Top) */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-black/50 z-50">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400"
+          initial={{ width: 0 }}
+          animate={{ width: `${xpProgress * 100}%` }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        />
+      </div>
+
+      {/* Header HUD */}
       <header className="relative z-20 border-b border-white/5 nivo-glass-static">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Left - Logo */}
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,74,0.4)]">
-                <span className="font-bold text-black text-base md:text-lg">N</span>
+            {/* Left - Rank Badge & Level */}
+            <div className="flex items-center gap-3">
+              {/* Rank Badge */}
+              <div className={`px-3 py-1.5 rounded-lg border font-mono text-xs uppercase tracking-wider ${currentRank.badgeClass}`}>
+                {currentRank.name}
               </div>
-              <span className="font-bold text-foreground text-base md:text-lg">NIVO</span>
+              
+              {/* Level */}
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span className="font-mono text-sm font-bold text-foreground">NIV. {level}</span>
+              </div>
+
+              {/* XP Info (Desktop) */}
+              <div className="hidden md:block font-mono text-[10px] text-foreground/40">
+                {xp} / {xpForNextLevel} XP
+              </div>
+
               {isPro && (
                 <span className="px-2 py-0.5 bg-primary/20 border border-primary/30 rounded-full font-mono text-[10px] text-primary flex items-center gap-1">
                   <Crown className="w-3 h-3" />
@@ -286,31 +180,23 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Center - XP Bar (Desktop) */}
-            <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span className="font-mono text-[10px] text-foreground/50">LVL {level}</span>
-              </div>
-              <div className="flex-1 h-1.5 xp-bar-inset rounded-full overflow-hidden">
-                <motion.div 
-                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
-                  initial={{ width: 0 }}
-                animate={{ width: `${xpProgress * 100}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                />
-              </div>
-              <span className="font-mono text-[10px] text-foreground/40">
-                {xp} / {getXpForNextLevel(level)} XP
-              </span>
-            </div>
-
             {/* Right - Streak, Vault & Settings */}
             <div className="flex items-center gap-2 md:gap-3">
-              {/* Streak Flame */}
-              <div className="nivo-glass-static rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
-                <Flame className="h-4 w-4 text-orange-400 flame-glow" />
+              {/* Streak Counter */}
+              <div className="nivo-glass-static rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <div className="relative">
+                  <Flame className="h-4 w-4 text-orange-400" />
+                  <motion.div
+                    className="absolute inset-0 bg-orange-400 blur-md opacity-50"
+                    animate={{ 
+                      scale: [1, 1.3, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </div>
                 <span className="font-mono text-sm font-bold text-foreground">{streak}</span>
+                <span className="font-mono text-[10px] text-foreground/40 hidden sm:inline">JOURS</span>
                 {streakFreezes > 0 && (
                   <span className="ml-1 px-1 py-0.5 bg-blue-500/20 rounded text-[8px] font-mono text-blue-400">
                     🛡️{streakFreezes}
@@ -332,483 +218,248 @@ export default function Dashboard() {
               >
                 <Settings className="h-4 w-4 md:h-5 md:w-5 text-foreground/60" />
               </Link>
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-                <User className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+
+              {/* Rank Icon instead of Avatar */}
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border ${currentRank.badgeClass}`}>
+                {currentRank.id === 'titan' ? (
+                  <Crown className="h-4 w-4 md:h-5 md:w-5" />
+                ) : currentRank.id === 'architect' ? (
+                  <Cpu className="h-4 w-4 md:h-5 md:w-5" />
+                ) : currentRank.id === 'operator' ? (
+                  <Shield className="h-4 w-4 md:h-5 md:w-5" />
+                ) : (
+                  <User className="h-4 w-4 md:h-5 md:w-5" />
+                )}
               </div>
             </div>
-          </div>
-
-          {/* Mobile XP Bar */}
-          <div className="md:hidden mt-3 flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-emerald-400" />
-              <span className="font-mono text-[9px] text-foreground/50">LVL {level}</span>
-            </div>
-            <div className="flex-1 h-1 xp-bar-inset rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${xpProgress * 100}%` }}
-              />
-            </div>
-            <span className="font-mono text-[9px] text-foreground/40">{xp} XP</span>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-10 container mx-auto px-4 md:px-6 py-4 md:py-8">
-        {/* Hero - NIVO Score */}
-        <section className="mb-6 md:mb-10 animate-fade-in">
-          <div className="nivo-glass rounded-xl md:rounded-2xl p-4 md:p-8 relative overflow-hidden">
-            {/* Subtle glow effect */}
+      {/* Main HUD Content */}
+      <main className="relative z-10 container mx-auto px-4 md:px-6 py-6 md:py-10">
+        {/* Central Hologram Section */}
+        <section className="mb-8 animate-fade-in">
+          <div className="nivo-glass-intense rounded-2xl md:rounded-3xl p-6 md:p-10 relative overflow-hidden">
+            {/* Background glow */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center gap-6 md:gap-8">
-              {/* Score Circle */}
-              <div className="relative">
-                <svg className="w-36 h-36 md:w-52 md:h-52 -rotate-90" viewBox="0 0 200 200">
-                  {/* Background circle */}
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r={circleRadius}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="8"
-                  />
-                  {/* Progress circle */}
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r={circleRadius}
-                    fill="none"
-                    stroke="url(#scoreGradient)"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    className="transition-all duration-1000 ease-out"
-                  />
-                  <defs>
-                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" />
-                      <stop offset="100%" stopColor="#ff8a6a" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                {/* Score Text */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-mono text-3xl md:text-5xl font-bold text-foreground">
-                    {stats?.nivoScore ? `${stats.nivoScore}` : 'N/A'}
-                  </span>
-                  <span className="font-mono text-[10px] md:text-xs text-foreground/40 mt-1">NIVO SCORE</span>
-                </div>
-                {/* Download Report Button */}
-                <div className="absolute top-2 right-2">
-                  <DownloadReportButton 
-                    nivoScore={stats?.nivoScore ?? null} 
-                    postureHistory={postureHistory}
-                  />
-                </div>
-              </div>
-
-              {/* Status & Stats */}
-              <div className="flex-1 text-center w-full">
-                <div className={`inline-block px-3 md:px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor} mb-4 md:mb-6`}>
-                  <p className={`font-mono text-xs md:text-sm ${statusConfig.color}`}>{statusConfig.text}</p>
-                </div>
-
-                {/* No Score CTA */}
-                {!stats?.nivoScore && (
-                  <div className="mb-4 md:mb-6">
-                    <Link to="/diagnostic">
-                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        FAIRE MON CHECK-IN
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-
-                {/* Stats Widgets */}
-                <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto">
-                  {/* Streak */}
-                  <div className="nivo-glass rounded-lg md:rounded-xl p-3 md:p-4">
-                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                      <Flame className="h-3 w-3 md:h-4 md:w-4 text-orange-400" />
-                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SÉRIE</span>
-                    </div>
-                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{streak || 0} <span className="text-xs md:text-sm text-foreground/40">J</span></p>
-                  </div>
-                  {/* Total Sessions */}
-                  <div className="nivo-glass rounded-lg md:rounded-xl p-3 md:p-4">
-                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                      <Activity className="h-3 w-3 md:h-4 md:w-4 text-foreground/40" />
-                      <span className="font-mono text-[8px] md:text-[10px] text-foreground/40">SESSIONS</span>
-                    </div>
-                    <p className="font-mono text-xl md:text-2xl font-bold text-foreground">{stats?.totalSessions || 0}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Posture Evolution Chart */}
-        <section className="mb-6 md:mb-10 animate-fade-in" style={{ animationDelay: '0.15s' }}>
-          <div className="nivo-glass rounded-xl md:rounded-2xl p-4 md:p-6 relative overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <span className="font-mono text-xs text-foreground/40">ÉVOLUTION_ALIGNEMENT //</span>
-            </div>
-            
-            {loadingPosture ? (
-              <div className="h-48 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              </div>
-            ) : postureHistory.length === 0 ? (
-              <div className="h-48 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
-                  <TrendingUp className="w-6 h-6 text-foreground/30" />
-                </div>
-                <p className="font-mono text-sm text-foreground/40 mb-2">Aucune donnée d'alignement</p>
-                <p className="font-mono text-xs text-foreground/30">Faites un bilan pour voir votre évolution</p>
-              </div>
-            ) : (
-              <div className="h-48 md:h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={postureHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="postureGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#4ADE80" stopOpacity={0.4} />
-                        <stop offset="100%" stopColor="#4ADE80" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis 
-                      dataKey="formattedDate" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'monospace' }}
-                    />
-                    <YAxis 
-                      domain={[0, 100]}
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'monospace' }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(0,0,0,0.9)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        fontFamily: 'monospace',
-                        fontSize: '12px'
-                      }}
-                      labelStyle={{ color: 'rgba(255,255,255,0.6)' }}
-                      formatter={(value: number) => [`${value}%`, 'Score']}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="score" 
-                      stroke="#4ADE80" 
-                      strokeWidth={2}
-                      fill="url(#postureGradient)"
-                      dot={postureHistory.length === 1 ? { fill: '#4ADE80', strokeWidth: 2, r: 6 } : false}
-                      activeDot={{ fill: '#4ADE80', strokeWidth: 2, r: 6 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Left Column - Daily Loop (FREE) */}
-          <section className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="nivo-glass-intense rounded-xl md:rounded-2xl p-5 md:p-8 relative overflow-hidden group" style={{ borderColor: 'rgba(255, 107, 74, 0.2)' }}>
-              {/* Glow effect */}
-              <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-              </div>
-
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3 md:mb-4">
-                  <div className="flex items-center gap-2">
-                    <Headphones className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                    <span className="font-mono text-[11px] md:text-xs text-primary">ROUTINE QUOTIDIENNE</span>
-                  </div>
-                  <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full font-mono text-[10px] text-emerald-400">
-                    GRATUIT
-                  </span>
-                </div>
-
-                <h2 className="font-heading text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">
-                  Boucle Quotidienne
-                </h2>
-                <p className="font-mono text-xs md:text-sm text-foreground/50 mb-4 md:mb-6">
-                  {DAILY_ROUTINE.duration_minutes} min :: {DAILY_ROUTINE.steps.length} exercices // Entretien
-                </p>
-
-                {/* Daily Loop Steps Preview */}
-                <div className="nivo-glass-static rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6">
-                  <p className="font-mono text-[10px] md:text-xs text-foreground/40 mb-2">SÉQUENCE</p>
-                  <div className="flex flex-wrap gap-2">
-                    {DAILY_ROUTINE.steps.map((step, index) => (
-                      <span key={index} className="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[10px] text-foreground/60">
-                        {step.exercise.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Launch Button */}
-                <Link to="/session/daily_loop" className="block">
-                  <Button className="w-full h-12 md:h-14 min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base md:text-lg shadow-[0_0_30px_rgba(255,107,74,0.4)] hover:shadow-[0_0_50px_rgba(255,107,74,0.6)] transition-all duration-300">
-                    <Play className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                    LANCER LA ROUTINE
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Right Column - System Stats */}
-          <section className="space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {/* Upgrade to Pro CTA (Free users only) */}
-            {!isPro && (
-              <div className="nivo-glass-intense rounded-xl p-6 relative overflow-hidden" style={{ borderColor: 'rgba(255, 107, 74, 0.3)' }}>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute -top-16 -right-16 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between gap-4 mb-3">
-                    <div>
-                      <p className="font-mono text-[10px] text-primary uppercase tracking-widest">NIVO PRO</p>
-                      <p className="font-heading text-lg font-semibold text-foreground mt-1">
-                        Débloquez les protocoles ciblés
-                      </p>
-                    </div>
-                    <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center">
-                      <Crown className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-
-                  <Link to="/checkout" className="block">
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-                      <ArrowRight className="h-4 w-4 mr-2" />
-                      DEVENIR PRO
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {/* Energy Level */}
-            <div className="nivo-glass rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Battery className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ÉNERGIE</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all"
-                    style={{ width: `${displayScore}%` }}
-                  />
-                </div>
-                <span className="font-mono text-sm text-foreground">{displayScore}%</span>
-              </div>
-            </div>
-
-            {/* Access Level */}
-            <div className="nivo-glass rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">NIVEAU D'ACCÈS</span>
-              </div>
-              <p className="font-mono text-lg font-semibold text-foreground flex items-center gap-2">
-                {isPro ? (
-                  <>
-                    <Crown className="h-4 w-4 text-primary" />
-                    NIVO PRO
-                  </>
-                ) : (
-                  'GRATUIT'
-                )}
-              </p>
-              <p className="font-mono text-xs text-foreground/40">
-                {isPro ? 'Accès complet aux protocoles' : 'Routine quotidienne uniquement'}
-              </p>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="nivo-glass rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-4 w-4 text-foreground/40" />
-                <span className="font-mono text-[10px] text-foreground/40">MÉTRIQUES</span>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="font-mono text-xs text-foreground/40">SESSIONS</span>
-                  <span className="font-mono text-sm text-foreground">{stats?.totalSessions || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono text-xs text-foreground/40">SÉRIE</span>
-                  <span className="font-mono text-sm text-emerald-400">{stats?.streak || 0} jours</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono text-xs text-foreground/40">STATUT</span>
-                  <span className="font-mono text-sm text-emerald-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    ACTIF
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* Pro Protocols Section */}
-        <section className="mt-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-foreground/40">PROTOCOLES_CIBLÉS //</span>
-            <div className="flex-1 h-px bg-white/10" />
-            {!isPro && (
-              <span className="px-2 py-1 bg-primary/10 border border-primary/20 rounded font-mono text-[10px] text-primary">
-                PRO REQUIS
-              </span>
-            )}
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            {SPECIFIC_PROTOCOLS.map((protocol: Protocol) => (
               <div 
-                key={protocol.id}
-                onClick={() => !isPro && setShowUpgradeModal(true)}
-                className={`relative nivo-glass rounded-xl p-6 transition-all duration-300 ${
-                  isPro 
-                    ? 'cursor-pointer' 
-                    : 'opacity-70 cursor-pointer hover:opacity-80'
-                }`}
-              >
-                {/* Lock Badge & Blur Overlay */}
-                {!isPro && (
-                  <>
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] rounded-xl" />
-                    <div className="absolute top-4 right-4 z-10">
-                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                        <Lock className="h-4 w-4 text-foreground/50" />
-                      </div>
-                    </div>
-                  </>
-                )}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-20"
+                style={{
+                  backgroundColor: structuralIntegrity >= 80 
+                    ? 'rgba(16, 185, 129, 0.4)' 
+                    : structuralIntegrity >= 50 
+                      ? 'rgba(245, 158, 11, 0.4)' 
+                      : 'rgba(239, 68, 68, 0.4)',
+                }}
+              />
+            </div>
 
-                <div className={!isPro ? 'relative z-10' : ''}>
-                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/60'}`}>
-                    {protocol.name}
-                  </h3>
-                  <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/40'}`}>
-                    {protocol.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-mono text-foreground/40">{protocol.duration_minutes} min</span>
-                    <span className="text-foreground/20">•</span>
-                    <span className="font-mono text-primary/60">{protocol.target_symptom}</span>
+            <div className="relative z-10 grid md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-10 items-center">
+              {/* Left Panel - System Info */}
+              <div className="order-2 md:order-1 space-y-4">
+                {/* Rank Progress */}
+                <div className="nivo-glass rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield className="h-4 w-4 text-foreground/40" />
+                    <span className="font-mono text-[10px] text-foreground/40 uppercase">Rang Actuel</span>
                   </div>
-
-                  {isPro ? (
-                    <Link to={`/session/${protocol.routines[0]?.id}`} className="block mt-4" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
-                        <Play className="h-3 w-3 mr-2" />
-                        LANCER
-                      </Button>
-                    </Link>
-                  ) : (
-                    <div className="mt-4 flex items-center gap-2">
-                      <Lock className="h-3 w-3 text-primary/60" />
-                      <span className="font-mono text-[10px] text-primary/60">{protocol.locked_label}</span>
-                    </div>
+                  <p className={`font-mono text-lg font-bold ${currentRank.colorClass}`}>
+                    {currentRank.name.toUpperCase()}
+                  </p>
+                  {nextRank && (
+                    <p className="font-mono text-[10px] text-foreground/40 mt-1">
+                      → {nextRank.name} dans {monthsToNextRank} mois
+                    </p>
                   )}
                 </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="nivo-glass rounded-lg p-3">
+                    <span className="font-mono text-[8px] text-foreground/40 block mb-1">SESSIONS</span>
+                    <span className="font-mono text-xl font-bold text-foreground">{stats?.totalSessions || 0}</span>
+                  </div>
+                  <div className="nivo-glass rounded-lg p-3">
+                    <span className="font-mono text-[8px] text-foreground/40 block mb-1">SÉQUENCE</span>
+                    <span className="font-mono text-xl font-bold text-orange-400">{streak}J</span>
+                  </div>
+                </div>
+
+                {/* Upgrade CTA (Free users) */}
+                {!isPro && (
+                  <button 
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="w-full nivo-glass rounded-xl p-4 text-left hover:border-primary/30 transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center group-hover:bg-primary/20 transition-all">
+                        <Crown className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-mono text-xs text-primary">UPGRADE</p>
+                        <p className="font-mono text-sm font-bold text-foreground">Débloquer PRO</p>
+                      </div>
+                    </div>
+                  </button>
+                )}
               </div>
-            ))}
+
+              {/* Center - Spine Hologram */}
+              <div className="order-1 md:order-2 flex flex-col items-center">
+                <div className="w-48 h-72 md:w-56 md:h-80">
+                  <SpineHologram integrity={structuralIntegrity} className="w-full h-full" />
+                </div>
+                
+                {/* Integrity Score */}
+                <div className="mt-4 text-center">
+                  <p className="font-mono text-[10px] text-foreground/40 uppercase tracking-widest mb-1">
+                    Intégrité Structurelle
+                  </p>
+                  <p className={`font-mono text-4xl md:text-5xl font-bold ${
+                    structuralIntegrity >= 80 ? 'text-emerald-400' :
+                    structuralIntegrity >= 50 ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {structuralIntegrity}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Panel - Terminal */}
+              <div className="order-3 space-y-4">
+                {/* Terminal Log */}
+                <div className="nivo-glass rounded-xl p-4 h-64 overflow-hidden">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Terminal className="h-4 w-4 text-emerald-400" />
+                    <span className="font-mono text-[10px] text-emerald-400">CONSOLE_SYSTÈME</span>
+                    <motion.div 
+                      className="w-2 h-2 rounded-full bg-emerald-400"
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1 font-mono text-[11px] text-emerald-400/70 overflow-y-auto h-48">
+                    <AnimatePresence>
+                      {terminalLogs.map((log, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {log}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    
+                    {/* Blinking cursor */}
+                    <motion.span
+                      animate={{ opacity: [1, 0, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                      className="inline-block"
+                    >
+                      █
+                    </motion.span>
+                  </div>
+                </div>
+
+                {/* Status Indicators */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="nivo-glass rounded-lg p-3">
+                    <span className="font-mono text-[8px] text-foreground/40 block mb-1">NIVEAU</span>
+                    <span className="font-mono text-xl font-bold text-emerald-400">{level}</span>
+                  </div>
+                  <div className="nivo-glass rounded-lg p-3">
+                    <span className="font-mono text-[8px] text-foreground/40 block mb-1">XP</span>
+                    <span className="font-mono text-lg font-bold text-cyan-400">{xp}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Action Button */}
+            <div className="relative z-10 mt-8 flex justify-center">
+              <Link to="/diagnostic" className="w-full max-w-md">
+                <Button 
+                  size="lg"
+                  className="w-full h-16 md:h-20 bg-gradient-to-r from-primary via-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-primary-foreground font-bold text-lg md:text-xl shadow-[0_0_40px_rgba(255,107,74,0.5)] hover:shadow-[0_0_60px_rgba(255,107,74,0.7)] transition-all duration-300 rounded-xl border border-primary/50"
+                >
+                  <Crosshair className="h-6 w-6 md:h-7 md:w-7 mr-3" />
+                  LANCER CALIBRATION
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* Pilot Programs Section */}
-        <section className="mt-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-xs text-foreground/40">PROGRAMMES_PILOTES //</span>
-            <div className="flex-1 h-px bg-white/10" />
-            {!isPro && (
-              <span className="px-2 py-1 bg-primary/10 border border-primary/20 rounded font-mono text-[10px] text-primary">
-                PRO REQUIS
-              </span>
-            )}
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            {PILOT_PROGRAMS.map((program: PilotProgram) => (
-              <div 
-                key={program.id}
-                onClick={() => !isPro && setShowUpgradeModal(true)}
-                className={`relative nivo-glass rounded-xl p-6 transition-all duration-300 ${
-                  isPro 
-                    ? 'cursor-pointer' 
-                    : 'opacity-70 cursor-pointer hover:opacity-80'
-                }`}
-              >
-                {/* Lock Badge & Blur Overlay */}
-                {!isPro && (
-                  <>
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] rounded-xl" />
-                    <div className="absolute top-4 right-4 z-10">
-                      <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                        <Lock className="h-4 w-4 text-foreground/50" />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div className={!isPro ? 'relative z-10' : ''}>
-                  <h3 className={`font-heading text-lg font-semibold mb-2 ${isPro ? 'text-foreground' : 'text-foreground/60'}`}>
-                    {program.name}
-                  </h3>
-                  <p className={`font-mono text-xs mb-3 ${isPro ? 'text-foreground/50' : 'text-foreground/40'}`}>
-                    {program.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs">
-                    {program.duration_weeks > 0 && (
-                      <>
-                        <span className="font-mono text-foreground/40">{program.duration_weeks} semaines</span>
-                        <span className="text-foreground/20">•</span>
-                      </>
-                    )}
-                    <span className="font-mono text-primary/60">{program.focus}</span>
-                  </div>
-
-                  {isPro ? (
-                    <div className="mt-4">
-                      <Button variant="outline" size="sm" className="w-full border-primary/30 text-primary hover:bg-primary/10">
-                        <Play className="h-3 w-3 mr-2" />
-                        VOIR LE PROGRAMME
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="mt-4 flex items-center gap-2">
-                      <Lock className="h-3 w-3 text-primary/60" />
-                      <span className="font-mono text-[10px] text-primary/60">{program.locked_label}</span>
-                    </div>
-                  )}
+        {/* Quick Actions Grid */}
+        <section className="grid md:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          {/* Daily Routine */}
+          <Link to="/session/daily_loop" className="block">
+            <div className="nivo-glass rounded-xl p-6 h-full hover:border-emerald-500/30 transition-all group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] text-emerald-400">ROUTINE QUOTIDIENNE</p>
+                  <p className="font-mono text-sm font-bold text-foreground">Boucle Maintenance</p>
                 </div>
               </div>
-            ))}
+              <p className="font-mono text-xs text-foreground/50 mb-4">8 min :: Entretien structurel quotidien</p>
+              <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs">
+                <Play className="w-4 h-4" />
+                LANCER
+              </div>
+            </div>
+          </Link>
+
+          {/* Vault */}
+          <button onClick={() => setShowVaultModal(true)} className="text-left">
+            <div className="nivo-glass rounded-xl p-6 h-full hover:border-purple-500/30 transition-all group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-purple-500/15 border border-purple-500/25 flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
+                  <Sparkles className="h-5 w-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] text-purple-400">ARMURERIE</p>
+                  <p className="font-mono text-sm font-bold text-foreground">Modules Visuels</p>
+                </div>
+              </div>
+              <p className="font-mono text-xs text-foreground/50 mb-4">30+ skins à débloquer par progression</p>
+              <div className="flex items-center gap-2 text-purple-400 font-mono text-xs">
+                <Sparkles className="w-4 h-4" />
+                OUVRIR
+              </div>
+            </div>
+          </button>
+
+          {/* Pro Protocols */}
+          <div 
+            onClick={() => isPro ? navigate('/session/cervical_release') : setShowUpgradeModal(true)}
+            className="cursor-pointer"
+          >
+            <div className={`nivo-glass rounded-xl p-6 h-full transition-all group ${
+              isPro ? 'hover:border-primary/30' : 'opacity-80 hover:border-primary/20'
+            }`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center group-hover:bg-primary/20 transition-all">
+                  {isPro ? <Zap className="h-5 w-5 text-primary" /> : <Lock className="h-5 w-5 text-primary/60" />}
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] text-primary">PROTOCOLES CIBLÉS</p>
+                  <p className="font-mono text-sm font-bold text-foreground">Sessions PRO</p>
+                </div>
+              </div>
+              <p className="font-mono text-xs text-foreground/50 mb-4">
+                {isPro ? 'Cervicales, Lombaires, Sciatique...' : 'Accès réservé aux opérateurs PRO'}
+              </p>
+              <div className="flex items-center gap-2 font-mono text-xs text-primary">
+                {isPro ? <Play className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
+                {isPro ? 'ACCÉDER' : 'UPGRADE'}
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -831,10 +482,8 @@ export default function Dashboard() {
         </motion.button>
       )}
 
-      {/* Upgrade Modal */}
+      {/* Modals */}
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-
-      {/* Vault Modal */}
       <VaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
     </div>
   );
