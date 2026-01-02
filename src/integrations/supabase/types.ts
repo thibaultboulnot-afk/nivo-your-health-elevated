@@ -132,6 +132,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio_rank: string | null
           created_at: string
           current_streak: number | null
           email: string | null
@@ -143,12 +144,14 @@ export type Database = {
           level: number | null
           objective: string | null
           streak_freezes: number | null
+          structural_integrity: number | null
           subscription_start_date: string | null
           subscription_tier: string | null
           unlocked_skins: string[] | null
           xp: number | null
         }
         Insert: {
+          bio_rank?: string | null
           created_at?: string
           current_streak?: number | null
           email?: string | null
@@ -160,12 +163,14 @@ export type Database = {
           level?: number | null
           objective?: string | null
           streak_freezes?: number | null
+          structural_integrity?: number | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
           xp?: number | null
         }
         Update: {
+          bio_rank?: string | null
           created_at?: string
           current_streak?: number | null
           email?: string | null
@@ -177,6 +182,7 @@ export type Database = {
           level?: number | null
           objective?: string | null
           streak_freezes?: number | null
+          structural_integrity?: number | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
