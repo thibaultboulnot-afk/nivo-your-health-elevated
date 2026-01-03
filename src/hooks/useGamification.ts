@@ -1,8 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SKINS_REGISTRY, isSkinUnlocked, getSubscriberBadge, type SubscriberBadge } from '@/lib/gamificationData';
+
+// XP Cap: 500 XP per 24 hours
+const DAILY_XP_CAP = 500;
 
 export interface GamificationState {
   xp: number;
@@ -15,6 +18,10 @@ export interface GamificationState {
   subscriptionStartDate: string | null;
   lastActivityDate: string | null;
   isLoading: boolean;
+  weeklyXp: number;
+  victoryTokens: number;
+  apexTier: number;
+  dailyXpEarned: number;
 }
 
 // XP thresholds for levels
@@ -67,6 +74,8 @@ export function getXpProgress(xp: number, level: number): number {
 
 export function useGamification() {
   const { user } = useAuth();
+  const dailyXpRef = useRef<{ date: string; amount: number }>({ date: '', amount: 0 });
+  
   const [state, setState] = useState<GamificationState>({
     xp: 0,
     level: 1,
@@ -78,6 +87,10 @@ export function useGamification() {
     subscriptionStartDate: null,
     lastActivityDate: null,
     isLoading: true,
+    weeklyXp: 0,
+    victoryTokens: 0,
+    apexTier: 0,
+    dailyXpEarned: 0,
   });
 
   const fetchGamificationData = useCallback(async () => {
@@ -89,13 +102,19 @@ export function useGamification() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('xp, level, current_streak, streak_freezes, unlocked_skins, equipped_skin, subscription_tier, subscription_start_date, last_activity_date')
+        .select('xp, level, current_streak, streak_freezes, unlocked_skins, equipped_skin, subscription_tier, subscription_start_date, last_activity_date, weekly_xp, victory_tokens, apex_tier')
         .eq('id', user.id)
         .maybeSingle();
 
       if (error) throw error;
 
       if (data) {
+        // Calculate daily XP earned today
+        const today = new Date().toISOString().split('T')[0];
+        if (dailyXpRef.current.date !== today) {
+          dailyXpRef.current = { date: today, amount: 0 };
+        }
+        
         setState({
           xp: data.xp || 0,
           level: data.level || 1,
@@ -107,6 +126,10 @@ export function useGamification() {
           subscriptionStartDate: data.subscription_start_date,
           lastActivityDate: data.last_activity_date,
           isLoading: false,
+          weeklyXp: data.weekly_xp || 0,
+          victoryTokens: data.victory_tokens || 0,
+          apexTier: data.apex_tier || 0,
+          dailyXpEarned: dailyXpRef.current.amount,
         });
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
@@ -196,11 +219,28 @@ export function useGamification() {
     }
   }, [user, state.unlockedSkins]);
 
-  // Award XP and check for level up
+  // Award XP and check for level up (with Anti-Cheat XP Cap)
   const awardXp = useCallback(async (amount: number, reason: string) => {
     if (!user) return;
 
-    const newXp = state.xp + amount;
+    // Anti-Cheat: Check daily XP cap
+    const today = new Date().toISOString().split('T')[0];
+    if (dailyXpRef.current.date !== today) {
+      dailyXpRef.current = { date: today, amount: 0 };
+    }
+
+    if (dailyXpRef.current.amount >= DAILY_XP_CAP) {
+      toast.warning('CAPACITÉ JOURNALIÈRE ATTEINTE', {
+        description: `Maximum ${DAILY_XP_CAP} XP par jour. Revenez demain.`,
+      });
+      return;
+    }
+
+    // Cap the amount if it would exceed daily limit
+    const allowedAmount = Math.min(amount, DAILY_XP_CAP - dailyXpRef.current.amount);
+    
+    const newXp = state.xp + allowedAmount;
+    const newWeeklyXp = state.weeklyXp + allowedAmount;
     const newLevel = calculateLevel(newXp);
     const leveledUp = newLevel > state.level;
 
@@ -210,15 +250,25 @@ export function useGamification() {
         .update({ 
           xp: newXp, 
           level: newLevel,
-          last_activity_date: new Date().toISOString().split('T')[0]
+          weekly_xp: newWeeklyXp,
+          last_activity_date: today
         })
         .eq('id', user.id);
 
       if (error) throw error;
 
-      setState(prev => ({ ...prev, xp: newXp, level: newLevel }));
+      // Update daily tracking
+      dailyXpRef.current.amount += allowedAmount;
 
-      toast.success(`+${amount} XP • ${reason}`, {
+      setState(prev => ({ 
+        ...prev, 
+        xp: newXp, 
+        level: newLevel, 
+        weeklyXp: newWeeklyXp,
+        dailyXpEarned: dailyXpRef.current.amount 
+      }));
+
+      toast.success(`+${allowedAmount} XP • ${reason}`, {
         description: leveledUp ? `Calibration Niveau ${newLevel} atteinte` : undefined,
       });
     } catch (error) {
@@ -380,6 +430,43 @@ export function useGamification() {
   // Get subscriber badge
   const subscriberBadge: SubscriberBadge | null = getSubscriberBadge(state.subscriptionStartDate);
 
+  // Forge Apex tier
+  const forgeApexTier = useCallback(async (newTier: number) => {
+    if (!user) return;
+    
+    const tierCosts = [0, 1, 5, 20];
+    const cost = tierCosts[newTier] || 0;
+    
+    if (state.victoryTokens < cost) {
+      toast.error('Jetons insuffisants');
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          apex_tier: newTier,
+          victory_tokens: state.victoryTokens - cost
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setState(prev => ({ 
+        ...prev, 
+        apexTier: newTier, 
+        victoryTokens: prev.victoryTokens - cost 
+      }));
+      
+      toast.success('AMÉLIORATION FORGÉE !', {
+        description: `Armure Apex Tier ${newTier} débloquée`,
+      });
+    } catch (error) {
+      console.error('[useGamification] Error forging apex');
+    }
+  }, [user, state.victoryTokens]);
+
   return {
     ...state,
     xpProgress: getXpProgress(state.xp, state.level),
@@ -395,5 +482,8 @@ export function useGamification() {
     completeScan,
     refetch: fetchGamificationData,
     isPro: state.subscriptionTier !== 'free',
+    forgeApexTier,
+    dailyXpCap: DAILY_XP_CAP,
+    dailyXpRemaining: Math.max(0, DAILY_XP_CAP - state.dailyXpEarned),
   };
 }

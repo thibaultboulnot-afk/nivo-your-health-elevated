@@ -1,7 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Radio, Waves, CheckCircle2, Sparkles } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Radio, Waves, CheckCircle2, Sparkles, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { ValidationModal } from '@/components/ValidationModal';
 
 type SessionState = 'idle' | 'playing' | 'completed';
 
@@ -14,6 +16,7 @@ interface AudioCommandCenterProps {
   onTimerToggle: () => void;
   isTimerActive: boolean;
   onSessionComplete?: () => void;
+  audioDuration?: number; // Expected duration in seconds
 }
 
 export function AudioCommandCenter({
@@ -25,12 +28,17 @@ export function AudioCommandCenter({
   onTimerToggle,
   isTimerActive,
   onSessionComplete,
+  audioDuration = 300, // Default 5 minutes
 }: AudioCommandCenterProps) {
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
   const [sessionState, setSessionState] = useState<SessionState>('idle');
   const [showXpGain, setShowXpGain] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [timeLockValid, setTimeLockValid] = useState(false);
+  
   const audioRef = useRef<HTMLAudioElement>(null);
+  const sessionStartTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -42,6 +50,10 @@ export function AudioCommandCenter({
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.play().catch(() => {});
+        // Record start time when playing begins
+        if (!sessionStartTimeRef.current) {
+          sessionStartTimeRef.current = Date.now();
+        }
       } else {
         audioRef.current.pause();
       }
@@ -52,13 +64,50 @@ export function AudioCommandCenter({
   useEffect(() => {
     if (isTimerActive && sessionState === 'idle') {
       setSessionState('playing');
+      sessionStartTimeRef.current = Date.now();
     }
   }, [isTimerActive, sessionState]);
 
-  // Handle session completion
-  const handleCompleteSession = () => {
+  // Anti-Cheat: Time-Lock Verification
+  const verifyTimeLock = (): boolean => {
+    if (!sessionStartTimeRef.current) {
+      return false;
+    }
+
+    const realDuration = (Date.now() - sessionStartTimeRef.current) / 1000;
+    const minimumRequired = audioDuration * 0.90; // 90% of expected duration
+
+    if (realDuration < minimumRequired) {
+      toast.error('ERREUR DE SYNCHRONISATION', {
+        description: 'Calibration trop rapide. Session non validée.',
+        icon: <AlertTriangle className="w-5 h-5 text-red-400" />,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle attempt to complete session
+  const handleAttemptComplete = () => {
+    const isValid = verifyTimeLock();
+    setTimeLockValid(isValid);
+    
+    if (isValid) {
+      // Show validation modal for user confirmation
+      setShowValidationModal(true);
+    }
+    // If not valid, error toast already shown by verifyTimeLock
+  };
+
+  // Handle confirmed session completion
+  const handleConfirmedComplete = () => {
+    setShowValidationModal(false);
     setSessionState('completed');
     setShowXpGain(true);
+    
+    // Reset start time for next session
+    sessionStartTimeRef.current = null;
     
     // Trigger XP animation
     setTimeout(() => {
@@ -121,6 +170,13 @@ export function AudioCommandCenter({
     <div className="w-full max-w-lg mx-auto">
       {/* Hidden Audio Element */}
       <audio ref={audioRef} src={audioUrl} preload="metadata" loop />
+
+      {/* Validation Modal */}
+      <ValidationModal
+        isOpen={showValidationModal}
+        onClose={() => setShowValidationModal(false)}
+        onConfirm={handleConfirmedComplete}
+      />
 
       {/* XP Gain Animation Overlay */}
       <AnimatePresence>
@@ -240,7 +296,7 @@ export function AudioCommandCenter({
           <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[rgba(8,8,12,0.75)] to-transparent pointer-events-none" />
         </div>
 
-        {/* Timer Display */}
+        {/* Timer Display - Progress bar locked (no interaction) */}
         <motion.div 
           className="text-center mb-8"
           animate={sessionState === 'playing' ? { scale: [1, 1.01, 1] } : {}}
@@ -251,7 +307,8 @@ export function AudioCommandCenter({
               {sessionState === 'completed' ? '00:00' : timerDisplay}
             </span>
           </div>
-          <div className="mt-4 mx-auto max-w-xs h-1.5 xp-bar-inset rounded-full overflow-hidden">
+          {/* Progress bar - pointer-events-none to prevent seeking */}
+          <div className="mt-4 mx-auto max-w-xs h-1.5 xp-bar-inset rounded-full overflow-hidden pointer-events-none select-none">
             <motion.div 
               className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
               style={{ width: sessionState === 'completed' ? '100%' : `${timerProgress * 100}%` }}
@@ -273,8 +330,13 @@ export function AudioCommandCenter({
 
           {/* Main Button - Changes based on state */}
           {sessionState === 'completed' ? (
+            <div className="h-24 px-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 text-emerald-400 mr-2" />
+              <span className="font-mono text-sm text-emerald-400">Validé</span>
+            </div>
+          ) : timerProgress >= 0.95 && sessionState === 'playing' ? (
             <Button
-              onClick={handleCompleteSession}
+              onClick={handleAttemptComplete}
               size="lg"
               className="h-24 px-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white btn-refraction shadow-[0_0_50px_rgba(74,222,128,0.4)] hover:shadow-[0_0_70px_rgba(74,222,128,0.6)] transition-all duration-300 border border-emerald-400/30"
             >
