@@ -132,6 +132,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          apex_tier: number | null
           bio_rank: string | null
           created_at: string
           current_streak: number | null
@@ -148,9 +149,12 @@ export type Database = {
           subscription_start_date: string | null
           subscription_tier: string | null
           unlocked_skins: string[] | null
+          victory_tokens: number | null
+          weekly_xp: number | null
           xp: number | null
         }
         Insert: {
+          apex_tier?: number | null
           bio_rank?: string | null
           created_at?: string
           current_streak?: number | null
@@ -167,9 +171,12 @@ export type Database = {
           subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
+          victory_tokens?: number | null
+          weekly_xp?: number | null
           xp?: number | null
         }
         Update: {
+          apex_tier?: number | null
           bio_rank?: string | null
           created_at?: string
           current_streak?: number | null
@@ -186,6 +193,8 @@ export type Database = {
           subscription_start_date?: string | null
           subscription_tier?: string | null
           unlocked_skins?: string[] | null
+          victory_tokens?: number | null
+          weekly_xp?: number | null
           xp?: number | null
         }
         Relationships: []
