@@ -181,16 +181,15 @@ export default function Session() {
         // Boost today's score (capped at 100)
         const boostedScore = Math.min(100, existingScore.total_score + (routine.score_boost || 0));
         
-        // We can't update nivo_scores due to RLS, so we insert a new boosted score
-        await supabase.from('nivo_scores').insert({
-          user_id: user.id,
-          total_score: boostedScore,
-          subjective_index: existingScore.subjective_index,
-          functional_index: existingScore.functional_index,
-          load_index: existingScore.load_index,
-          score_date: today,
-          decay_applied: false
-        });
+        // Update existing score with boosted value
+        await supabase
+          .from('nivo_scores')
+          .update({
+            total_score: boostedScore,
+            decay_applied: false
+          })
+          .eq('user_id', user.id)
+          .eq('score_date', today);
       }
 
       // Award XP via gamification
