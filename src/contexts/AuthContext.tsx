@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 interface AuthContextType {
   user: User | null;
@@ -57,27 +58,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Schema for validating pending diagnostic data from localStorage
+const PendingDiagnosticSchema = z.object({
+  healthScore: z.number().min(0).max(100),
+  answers: z.record(z.any()),
+});
+
 // Save pending diagnostic from localStorage to Supabase
 async function savePendingDiagnostic(userId: string) {
   const pendingDiagnostic = localStorage.getItem('pending_diagnostic');
   if (!pendingDiagnostic) return;
 
   try {
-    const { healthScore, answers } = JSON.parse(pendingDiagnostic);
+    const parsed = JSON.parse(pendingDiagnostic);
+    const validated = PendingDiagnosticSchema.parse(parsed);
     
     const { error } = await supabase
       .from('user_diagnostics')
       .insert({
         user_id: userId,
-        health_score: healthScore,
-        answers: answers,
+        health_score: validated.healthScore,
+        answers: validated.answers,
       });
 
     if (!error) {
       localStorage.removeItem('pending_diagnostic');
     }
   } catch (e) {
-    console.error('Failed to save pending diagnostic:', e);
+    // Clear invalid localStorage data to prevent repeated failures
+    localStorage.removeItem('pending_diagnostic');
   }
 }
 
