@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Fingerprint, Lock, ShieldCheck, Terminal, AlertCircle } from "lucide-react";
+import { ArrowLeft, Fingerprint, Lock, ShieldCheck, Terminal, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const runBootSequence = async (success: boolean) => {
     setPhase('booting');
@@ -238,16 +239,30 @@ const Login = () => {
                       {/* Password Input */}
                       <div className="space-y-2">
                         <label className="font-mono text-xs text-white/50 flex items-center gap-2">
-                          <Lock className="w-3 h-3" />
+                          <Lock className="w-3 h-3" strokeWidth={1.5} />
                           MOT DE PASSE &gt;
                         </label>
-                        <input
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••••••"
-                          className="w-full bg-transparent border-0 border-b border-white/20 focus:border-primary px-0 py-4 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••••••"
+                            className="w-full bg-transparent border-0 border-b border-white/20 focus:border-primary px-0 py-4 pr-10 font-mono text-white placeholder:text-white/20 outline-none transition-colors"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white/60 transition-colors"
+                            aria-label={showPassword ? "Masquer" : "Afficher"}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="w-4 h-4" strokeWidth={1.5} />
+                            ) : (
+                              <Eye className="w-4 h-4" strokeWidth={1.5} />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Error Message */}

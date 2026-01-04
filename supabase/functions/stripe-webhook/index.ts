@@ -62,7 +62,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Handle checkout session completed - subscription purchase
+    // Handle checkout session completed - subscription or one-time payment
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Checkout session completed", { 
@@ -71,15 +71,8 @@ serve(async (req) => {
         mode: session.mode
       });
 
-      // Only process subscription checkouts
-      if (session.mode !== 'subscription') {
-        logStep("Not a subscription checkout, skipping");
-        return new Response(JSON.stringify({ received: true }), { status: 200 });
-      }
-
       const userId = session.client_reference_id;
       const customerEmail = session.customer_email || session.customer_details?.email;
-      const subscriptionId = session.subscription as string;
       const customerId = session.customer as string;
 
       let targetUserId = userId;
@@ -104,7 +97,54 @@ serve(async (req) => {
         }
       }
 
-      if (targetUserId) {
+      if (!targetUserId) {
+        logStep("No user found to update for");
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
+
+      // Handle LIFETIME / One-time payment
+      if (session.mode === 'payment') {
+        logStep("Processing lifetime/one-time payment");
+        
+        // Update profiles with lifetime access
+        const { error: profileError } = await supabaseAdmin
+          .from("profiles")
+          .update({
+            subscription_tier: 'lifetime',
+            is_lifetime: true,
+            subscription_start_date: new Date().toISOString(),
+          })
+          .eq("id", targetUserId);
+
+        if (profileError) {
+          logStep("Error updating profile for lifetime", { error: profileError.message });
+        } else {
+          logStep("Profile updated with lifetime access");
+        }
+
+        // Update subscriptions table for lifetime
+        const { error: subError } = await supabaseAdmin
+          .from("subscriptions")
+          .upsert({
+            user_id: targetUserId,
+            status: 'lifetime',
+            stripe_customer_id: customerId,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+
+        if (subError) {
+          logStep("Error updating subscriptions for lifetime", { error: subError.message });
+        } else {
+          logStep("Subscriptions table updated for lifetime");
+        }
+
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
+
+      // Handle subscription checkout
+      if (session.mode === 'subscription') {
+        const subscriptionId = session.subscription as string;
+        
         // Get subscription details for period info
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0]?.price.id;
@@ -119,6 +159,7 @@ serve(async (req) => {
           .update({
             subscription_tier: subscriptionTier,
             subscription_start_date: new Date().toISOString(),
+            is_lifetime: false,
           })
           .eq("id", targetUserId);
 
@@ -146,8 +187,6 @@ serve(async (req) => {
         } else {
           logStep("Subscriptions table updated", { subscriptionId });
         }
-      } else {
-        logStep("No user found to update subscription for");
       }
     }
 

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Loader2, Terminal, User, Target, ArrowRight, Lock, CheckCircle2, Rocket } from 'lucide-react';
+import { Loader2, Terminal, User, Target, ArrowRight, Lock, CheckCircle2, Rocket, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Turnstile } from "@marsidev/react-turnstile";
@@ -52,6 +52,9 @@ export default function Onboarding() {
   
   // Captcha token
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  
+  // Password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // Check auth state and set appropriate step
   useEffect(() => {
@@ -296,15 +299,29 @@ export default function Onboarding() {
                     <label className="font-mono text-xs text-foreground/60 block mb-2">
                       Mot de passe *
                     </label>
-                    <Input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 focus:border-primary focus-visible:ring-0 font-mono placeholder:text-foreground/20"
-                      required
-                      minLength={6}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 pr-10 focus:border-primary focus-visible:ring-0 font-mono placeholder:text-foreground/20"
+                        required
+                        minLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-foreground/40 hover:text-foreground/60 transition-colors"
+                        aria-label={showPassword ? "Masquer" : "Afficher"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" strokeWidth={1.5} />
+                        ) : (
+                          <Eye className="w-4 h-4" strokeWidth={1.5} />
+                        )}
+                      </button>
+                    </div>
                     <p className="font-mono text-[10px] text-foreground/30 mt-1">
                       Minimum 6 caractères
                     </p>

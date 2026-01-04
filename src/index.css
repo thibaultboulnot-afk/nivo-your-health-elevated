@@ -151,6 +151,24 @@
   }
 
   /* ============================================
+     OBSIDIAN GLASS - V1.0 Design System
+     ============================================ */
+  .nivo-glass {
+    @apply bg-zinc-950/70 backdrop-blur-2xl border border-white/5;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  }
+
+  .nivo-glass-static {
+    @apply bg-zinc-950/70 backdrop-blur-2xl border border-white/5;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  }
+
+  .nivo-glass-intense {
+    @apply bg-zinc-950/80 backdrop-blur-2xl border border-white/5;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  /* ============================================
      DEEP DARK BACKGROUNDS - Premium Gradients
      ============================================ */
   .bg-deep-dark {

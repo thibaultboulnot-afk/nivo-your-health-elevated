@@ -139,11 +139,15 @@ export type Database = {
           email: string | null
           equipped_skin: string | null
           first_name: string | null
+          has_seen_tutorial: boolean | null
           id: string
+          is_lifetime: boolean | null
           last_activity_date: string | null
+          last_calibration_date: string | null
           last_name: string | null
           level: number | null
           objective: string | null
+          referral_count: number | null
           streak_freezes: number | null
           structural_integrity: number | null
           subscription_start_date: string | null
@@ -161,11 +165,15 @@ export type Database = {
           email?: string | null
           equipped_skin?: string | null
           first_name?: string | null
+          has_seen_tutorial?: boolean | null
           id: string
+          is_lifetime?: boolean | null
           last_activity_date?: string | null
+          last_calibration_date?: string | null
           last_name?: string | null
           level?: number | null
           objective?: string | null
+          referral_count?: number | null
           streak_freezes?: number | null
           structural_integrity?: number | null
           subscription_start_date?: string | null
@@ -183,11 +191,15 @@ export type Database = {
           email?: string | null
           equipped_skin?: string | null
           first_name?: string | null
+          has_seen_tutorial?: boolean | null
           id?: string
+          is_lifetime?: boolean | null
           last_activity_date?: string | null
+          last_calibration_date?: string | null
           last_name?: string | null
           level?: number | null
           objective?: string | null
+          referral_count?: number | null
           streak_freezes?: number | null
           structural_integrity?: number | null
           subscription_start_date?: string | null
