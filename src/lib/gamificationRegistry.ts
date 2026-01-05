@@ -8,7 +8,7 @@ import type { LucideIcon } from 'lucide-react';
 // === TYPES ===
 export type SkinRarity = 'common' | 'rare' | 'epic' | 'legendary';
 export type SkinCategory = 'level' | 'streak' | 'pro' | 'special';
-export type RequirementType = 'free' | 'level' | 'streak' | 'pro' | 'top100';
+export type RequirementType = 'free' | 'level' | 'streak' | 'pro' | 'top100' | 'referral';
 
 export interface SkinRequirement {
   type: RequirementType;
@@ -380,6 +380,19 @@ export const SKINS_REGISTRY: ArmorSkin[] = [
     iconName: 'Crosshair',
   },
 
+  // === SKIN PARRAINAGE ===
+  {
+    id: 'quantum-link',
+    name: 'Lien Quantique',
+    description: 'Module expérimental. Invitez 1 pilote pour déverrouiller.',
+    rarity: 'legendary',
+    category: 'special',
+    requirement: { type: 'referral' as RequirementType, value: 1 },
+    visualClass: 'bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500',
+    glowColor: 'rgba(168, 85, 247, 0.7)',
+    iconName: 'Link',
+  },
+
   // === SKINS SUPPLÉMENTAIRES (Variété) ===
   {
     id: 'cristal-glace',
@@ -469,7 +482,8 @@ export function isSkinUnlocked(
   userLevel: number,
   userStreak: number,
   isPro: boolean,
-  unlockedSkins: string[]
+  unlockedSkins: string[],
+  referralCount: number = 0
 ): boolean {
   if (unlockedSkins.includes(skin.id)) return true;
   
@@ -486,12 +500,14 @@ export function isSkinUnlocked(
       return isPro;
     case 'top100':
       return isPro; // Simplified: PRO users get top100 access
+    case 'referral':
+      return referralCount >= (value || 1);
     default:
       return false;
   }
 }
 
-export function getRequirementLabel(skin: ArmorSkin, userLevel: number, userStreak: number): string {
+export function getRequirementLabel(skin: ArmorSkin, userLevel: number, userStreak: number, referralCount: number = 0): string {
   const { type, value } = skin.requirement;
   
   switch (type) {
@@ -505,6 +521,8 @@ export function getRequirementLabel(skin: ArmorSkin, userLevel: number, userStre
       return 'ACCÈS PRO REQUIS';
     case 'top100':
       return 'CLASSEMENT TOP 100';
+    case 'referral':
+      return `INVITEZ ${value} PILOTE${(value || 1) > 1 ? 'S' : ''} (actuel: ${referralCount})`;
     default:
       return '';
   }

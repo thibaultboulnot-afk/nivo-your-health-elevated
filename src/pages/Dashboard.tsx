@@ -7,9 +7,11 @@ import { useGamification } from '@/hooks/useGamification';
 import { useRankSystem } from '@/hooks/useRankSystem';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { VaultModal } from '@/components/VaultModal';
+import { TutorialModal } from '@/components/TutorialModal';
+import { VIPLoadingOverlay } from '@/components/VIPLoadingOverlay';
 import { SpineHologram } from '@/components/SpineHologram';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Settings,
@@ -26,6 +28,7 @@ import {
   Terminal,
   Activity,
   Cpu,
+  BarChart3,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -62,8 +65,50 @@ export default function Dashboard() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showVaultModal, setShowVaultModal] = useState(false);
+  const [showTutorialModal, setShowTutorialModal] = useState(false);
+  const [showVIPLoading, setShowVIPLoading] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [currentLogIndex, setCurrentLogIndex] = useState(0);
+  const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean | null>(null);
+
+  // Fetch tutorial status
+  useEffect(() => {
+    if (!user) return;
+    
+    const checkTutorial = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('has_seen_tutorial')
+        .eq('id', user.id)
+        .single();
+      
+      if (data && data.has_seen_tutorial === false) {
+        setShowTutorialModal(true);
+      }
+      setHasSeenTutorial(data?.has_seen_tutorial ?? true);
+    };
+    
+    checkTutorial();
+  }, [user]);
+
+  // VIP loading sequence for premium users
+  useEffect(() => {
+    if (isPro && hasSeenTutorial && !isLoading) {
+      setShowVIPLoading(true);
+      const timer = setTimeout(() => setShowVIPLoading(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isPro, hasSeenTutorial, isLoading]);
+
+  const handleTutorialComplete = async () => {
+    setShowTutorialModal(false);
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ has_seen_tutorial: true })
+        .eq('id', user.id);
+    }
+  };
 
   // Calculate structural integrity from NIVO score
   const structuralIntegrity = stats?.nivoScore ?? 100;
@@ -113,12 +158,10 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050510] relative overflow-hidden flex items-center justify-center">
-        <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
-        <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
+      <div className="min-h-screen bg-nivo-bg relative overflow-hidden flex items-center justify-center">
         <div className="relative z-10 flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center animate-pulse">
-            <Cpu className="w-8 h-8 text-primary" />
+            <Cpu className="w-8 h-8 text-primary" strokeWidth={1.5} />
           </div>
           <p className="font-mono text-xs text-foreground/50">INITIALISATION DU SYSTÈME...</p>
         </div>
@@ -127,31 +170,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050510] relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
-      <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
+    <>
+      <VIPLoadingOverlay isVisible={showVIPLoading} />
+      <TutorialModal isOpen={showTutorialModal} onComplete={handleTutorialComplete} />
       
-      {/* Noise Texture */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.015]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-      />
+      <div className="min-h-screen bg-nivo-bg relative overflow-hidden">
+        {/* XP Progress Bar (Top) */}
+        <div className="fixed top-0 left-0 right-0 h-1 bg-black/50 z-50">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400"
+            initial={{ width: 0 }}
+            animate={{ width: `${xpProgress * 100}%` }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+        </div>
 
-      {/* XP Progress Bar (Top) */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-black/50 z-50">
-        <motion.div 
-          className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400"
-          initial={{ width: 0 }}
-          animate={{ width: `${xpProgress * 100}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        />
-      </div>
-
-      {/* Header HUD */}
-      <header className="relative z-20 border-b border-white/5 nivo-glass-static">
+        {/* Header HUD */}
+        <header className="relative z-20 border-b border-white/5 bg-nivo-surface/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Left - Rank Badge & Level */}
@@ -482,9 +517,10 @@ export default function Dashboard() {
         </motion.button>
       )}
 
-      {/* Modals */}
-      <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-      <VaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
-    </div>
+        {/* Modals */}
+        <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+        <VaultModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
+      </div>
+    </>
   );
 }

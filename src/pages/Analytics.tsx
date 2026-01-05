@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccess } from '@/hooks/useAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { GlassCard, GlassStatCard } from '@/components/ui/GlassCard';
+import { NeonChart } from '@/components/NeonChart';
 import { UpgradeModal } from '@/components/UpgradeModal';
-import { ArrowLeft, Lock, TrendingUp, Calendar, Activity, Crown } from 'lucide-react';
+import { ArrowLeft, Lock, TrendingUp, Activity, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface ScoreData {
@@ -20,12 +21,13 @@ interface ScoreData {
 export default function Analytics() {
   const { user } = useAuth();
   const { isPro, isLoading: accessLoading } = useAccess();
-  const navigate = useNavigate();
   const [scores, setScores] = useState<ScoreData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [averageScore, setAverageScore] = useState<number | null>(null);
   const [trend, setTrend] = useState<'up' | 'down' | 'stable'>('stable');
+  const [bestScore, setBestScore] = useState<number | null>(null);
+  const [worstScore, setWorstScore] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -33,13 +35,11 @@ export default function Analytics() {
     const fetchScores = async () => {
       setIsLoading(true);
       
-      const thirtyDaysAgo = subDays(new Date(), 30).toISOString().split('T')[0];
-      
+      // Fetch ALL calibration history (not just 30 days)
       const { data, error } = await supabase
         .from('nivo_scores')
         .select('score_date, total_score')
         .eq('user_id', user.id)
-        .gte('score_date', thirtyDaysAgo)
         .order('score_date', { ascending: true });
 
       if (!error && data) {
@@ -51,10 +51,13 @@ export default function Analytics() {
         
         setScores(formattedData);
 
-        // Calculate average
+        // Calculate stats
         if (formattedData.length > 0) {
-          const avg = Math.round(formattedData.reduce((acc, curr) => acc + curr.score, 0) / formattedData.length);
+          const allScores = formattedData.map(d => d.score);
+          const avg = Math.round(allScores.reduce((acc, curr) => acc + curr, 0) / allScores.length);
           setAverageScore(avg);
+          setBestScore(Math.max(...allScores));
+          setWorstScore(Math.min(...allScores));
 
           // Calculate trend (compare last 7 days vs previous 7 days)
           if (formattedData.length >= 7) {
@@ -82,13 +85,9 @@ export default function Analytics() {
   // Show locked state for non-PRO users
   if (!accessLoading && !isPro) {
     return (
-      <div className="min-h-screen bg-[#050510] relative overflow-hidden text-foreground">
-        {/* Background */}
-        <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
-        <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
-
+      <div className="min-h-screen bg-nivo-bg relative overflow-hidden text-foreground">
         {/* Nav */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/70 backdrop-blur-2xl border-b border-white/5">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-nivo-surface/50 backdrop-blur-xl border-b border-white/[0.06]">
           <div className="container mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
             <Link to="/dashboard" className="flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors">
               <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
@@ -104,7 +103,7 @@ export default function Analytics() {
             className="text-center max-w-md"
           >
             {/* Lock icon */}
-            <div className="mx-auto mb-6 w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="mx-auto mb-6 w-24 h-24 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center">
               <Lock className="w-12 h-12 text-foreground/30" strokeWidth={1.5} />
             </div>
 
@@ -131,13 +130,9 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050510] relative overflow-hidden text-foreground">
-      {/* Background */}
-      <div className="aurora absolute inset-0 pointer-events-none opacity-30" />
-      <div className="grid-background absolute inset-0 pointer-events-none opacity-10" />
-
+    <div className="min-h-screen bg-nivo-bg relative overflow-hidden text-foreground">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/70 backdrop-blur-2xl border-b border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-nivo-surface/50 backdrop-blur-xl border-b border-white/[0.06] shadow-deep-glass">
         <div className="container mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
@@ -156,123 +151,124 @@ export default function Analytics() {
             Évolution du Score
           </h1>
           <p className="font-mono text-xs text-foreground/40">
-            30 derniers jours de calibration
+            Historique complet de vos calibrations
           </p>
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-zinc-950/70 backdrop-blur-2xl border border-white/5 rounded-xl p-4 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]"
           >
-            <span className="font-mono text-[10px] text-foreground/40 block mb-1">MOYENNE</span>
-            <span className="font-mono text-2xl font-bold text-emerald-400">
-              {averageScore ?? '--'}%
-            </span>
+            <GlassStatCard 
+              label="MOYENNE" 
+              value={averageScore !== null ? `${averageScore}%` : '--'} 
+              valueColor="text-emerald-400"
+            />
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-zinc-950/70 backdrop-blur-2xl border border-white/5 rounded-xl p-4 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]"
           >
-            <span className="font-mono text-[10px] text-foreground/40 block mb-1">TENDANCE</span>
-            <span className={`font-mono text-2xl font-bold ${
-              trend === 'up' ? 'text-emerald-400' : 
-              trend === 'down' ? 'text-red-400' : 'text-foreground/60'
-            }`}>
-              {trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'}
-            </span>
+            <GlassStatCard 
+              label="TENDANCE" 
+              value={trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'} 
+              valueColor={trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-foreground/60'}
+            />
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-zinc-950/70 backdrop-blur-2xl border border-white/5 rounded-xl p-4 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]"
           >
-            <span className="font-mono text-[10px] text-foreground/40 block mb-1">SCANS</span>
-            <span className="font-mono text-2xl font-bold text-cyan-400">
-              {scores.length}
-            </span>
+            <GlassStatCard 
+              label="MEILLEUR" 
+              value={bestScore !== null ? `${bestScore}%` : '--'} 
+              valueColor="text-cyan-400"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <GlassStatCard 
+              label="SCANS" 
+              value={scores.length} 
+              valueColor="text-purple-400"
+            />
           </motion.div>
         </div>
 
-        {/* Chart */}
+        {/* Main Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-zinc-950/70 backdrop-blur-2xl border border-white/5 rounded-2xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]"
+          transition={{ delay: 0.4 }}
         >
-          <div className="flex items-center gap-2 mb-6">
-            <Activity className="w-4 h-4 text-primary" strokeWidth={1.5} />
-            <span className="font-mono text-xs text-primary uppercase">Score NIVO</span>
-          </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity className="w-4 h-4 text-primary" strokeWidth={1.5} />
+              <span className="font-mono text-xs text-primary uppercase">Score NIVO - Courbe Néon</span>
+            </div>
 
-          {isLoading ? (
-            <div className="h-64 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : scores.length === 0 ? (
-            <div className="h-64 flex items-center justify-center">
-              <p className="font-mono text-sm text-foreground/40">
-                Aucune donnée de calibration disponible
-              </p>
-            </div>
-          ) : (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={scores}>
-                  <defs>
-                    <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis 
-                    dataKey="displayDate" 
-                    stroke="rgba(255,255,255,0.3)"
-                    fontSize={10}
-                    fontFamily="monospace"
-                    tick={{ fill: 'rgba(255,255,255,0.4)' }}
-                  />
-                  <YAxis 
-                    domain={[0, 100]}
-                    stroke="rgba(255,255,255,0.3)"
-                    fontSize={10}
-                    fontFamily="monospace"
-                    tick={{ fill: 'rgba(255,255,255,0.4)' }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(10, 10, 18, 0.95)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      fontFamily: 'monospace',
-                      fontSize: '12px',
-                    }}
-                    labelStyle={{ color: 'rgba(255,255,255,0.6)' }}
-                    itemStyle={{ color: 'hsl(var(--primary))' }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#scoreGradient)"
-                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 4 }}
-                    activeDot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, stroke: '#fff', r: 6 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+            {isLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <NeonChart 
+                data={scores} 
+                height={280}
+                color="#ff6b4a"
+                glowColor="rgba(255, 107, 74, 0.6)"
+              />
+            )}
+          </GlassCard>
         </motion.div>
+
+        {/* Trend Insight */}
+        {scores.length > 7 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6"
+          >
+            <GlassCard className="p-5">
+              <div className="flex items-start gap-4">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  trend === 'up' ? 'bg-emerald-500/20 border border-emerald-500/30' :
+                  trend === 'down' ? 'bg-red-500/20 border border-red-500/30' :
+                  'bg-foreground/10 border border-foreground/20'
+                }`}>
+                  <TrendingUp className={`w-5 h-5 ${
+                    trend === 'up' ? 'text-emerald-400' :
+                    trend === 'down' ? 'text-red-400 rotate-180' :
+                    'text-foreground/60'
+                  }`} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="font-mono text-sm font-medium text-foreground mb-1">
+                    {trend === 'up' ? 'Progression détectée' :
+                     trend === 'down' ? 'Légère régression' :
+                     'Score stable'}
+                  </p>
+                  <p className="font-mono text-xs text-foreground/50">
+                    {trend === 'up' ? 'Votre intégrité structurelle s\'améliore sur les 7 derniers jours.' :
+                     trend === 'down' ? 'Maintenez vos routines pour inverser la tendance.' :
+                     'Continuez vos routines pour maintenir votre niveau.'}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
       </main>
     </div>
   );

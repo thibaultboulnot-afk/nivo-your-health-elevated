@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -60,8 +60,43 @@ export default function Diagnostic() {
   const [computingLine, setComputingLine] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [functionalMode, setFunctionalMode] = useState<FunctionalMode>('scanner');
+  const [cooldownHours, setCooldownHours] = useState<number | null>(null);
+  const [isCheckingCooldown, setIsCheckingCooldown] = useState(true);
+
+  // Check 24h calibration cooldown
+  useEffect(() => {
+    if (!user) {
+      setIsCheckingCooldown(false);
+      return;
+    }
+
+    const checkCooldown = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('last_calibration_date')
+        .eq('id', user.id)
+        .single();
+
+      if (data?.last_calibration_date) {
+        const lastCal = new Date(data.last_calibration_date);
+        const now = new Date();
+        const hoursSince = (now.getTime() - lastCal.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSince < 24) {
+          setCooldownHours(Math.ceil(24 - hoursSince));
+        }
+      }
+      setIsCheckingCooldown(false);
+    };
+
+    checkCooldown();
+  }, [user]);
 
   const handleStartScan = () => {
+    if (cooldownHours !== null) {
+      toast.error(`Système en refroidissement. Disponible dans ${cooldownHours}h.`);
+      return;
+    }
     setStep('SUBJECTIVE');
   };
 
@@ -174,6 +209,12 @@ export default function Diagnostic() {
         throw scoreError;
       }
 
+      // 5. Update last calibration date
+      await supabase
+        .from('profiles')
+        .update({ last_calibration_date: today })
+        .eq('id', user.id);
+
       setStep('COMPLETE');
       toast.success('Scan terminé avec succès !');
       
@@ -251,11 +292,23 @@ export default function Diagnostic() {
                 </p>
               </div>
 
+              {/* Cooldown Warning */}
+              {cooldownHours !== null && (
+                <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <div className="flex items-center justify-center gap-3">
+                    <Clock className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
+                    <p className="font-mono text-sm text-amber-400">
+                      SYSTÈME EN REFROIDISSEMENT. Disponible dans {cooldownHours}h.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* System Check Card */}
-              <div className="p-8 rounded-3xl glass-card mb-8">
+              <div className="p-8 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] mb-8">
                 <div className="flex items-center justify-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <Activity className="w-8 h-8 text-primary" />
+                    <Activity className="w-8 h-8 text-primary" strokeWidth={1.5} />
                   </div>
                 </div>
                 <div className="font-mono text-sm text-muted-foreground space-y-1">
@@ -267,11 +320,12 @@ export default function Diagnostic() {
 
               <Button
                 onClick={handleStartScan}
+                disabled={cooldownHours !== null || isCheckingCooldown}
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-radioactive shimmer-btn group"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-radioactive group disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Lancer le Scan
+                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                {cooldownHours !== null ? `Disponible dans ${cooldownHours}h` : 'Lancer le Scan'}
               </Button>
             </motion.div>
           )}
