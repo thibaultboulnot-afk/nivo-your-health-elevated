@@ -572,21 +572,21 @@ export default function Landing() {
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* FREE */}
             <ScrollReveal delay={0.1}>
-              <div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm h-full">
-                <div className="mb-6">
+              <div className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm h-full">
+                <div className="mb-4">
                   <span className="font-mono text-xs text-white/40 uppercase tracking-wider">L'ESSAI</span>
-                  <h3 className="font-sans text-2xl font-bold mt-1">Gratuit</h3>
+                  <h3 className="font-sans text-xl font-bold mt-1">Gratuit</h3>
                 </div>
                 
-                <div className="mb-8">
-                  <span className="text-4xl font-bold">0€</span>
+                <div className="mb-6">
+                  <span className="text-3xl font-bold">0€</span>
                   <span className="text-white/40">/mois</span>
                 </div>
 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-3 text-sm text-white/70">
                     <Check className="w-4 h-4 text-primary flex-shrink-0" />
                     <span>Scan Illimité</span>
@@ -602,7 +602,7 @@ export default function Landing() {
                 </ul>
 
                 <Link to="/onboarding" className="block">
-                  <Button variant="outline" className="w-full h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white">
+                  <Button variant="outline" className="w-full h-11 border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm">
                     Commencer gratuitement
                   </Button>
                 </Link>
@@ -612,7 +612,7 @@ export default function Landing() {
             {/* PRO */}
             <ScrollReveal delay={0.2}>
               <motion.div 
-                className="relative rounded-2xl border border-primary/30 bg-primary/5 p-8 backdrop-blur-sm overflow-hidden h-full"
+                className="relative rounded-2xl border border-primary/30 bg-primary/5 p-6 backdrop-blur-sm overflow-hidden h-full"
                 animate={{
                   borderColor: ['rgba(255,107,74,0.3)', 'rgba(255,107,74,0.6)', 'rgba(255,107,74,0.3)'],
                 }}
@@ -625,11 +625,11 @@ export default function Landing() {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 />
                 
-                {/* Badge - Contextual */}
+                {/* Badge */}
                 <div className="absolute -top-px left-1/2 -translate-x-1/2">
                   {isAnnual ? (
                     <motion.div 
-                      className="px-4 py-1.5 bg-emerald-500 text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
+                      className="px-3 py-1 bg-emerald-500 text-white font-mono text-[10px] uppercase tracking-wider rounded-b-lg"
                       animate={{
                         boxShadow: [
                           '0 0 20px rgba(34,197,94,0.4)',
@@ -643,7 +643,7 @@ export default function Landing() {
                     </motion.div>
                   ) : (
                     <motion.div 
-                      className="px-4 py-1.5 bg-primary text-white font-mono text-xs uppercase tracking-wider rounded-b-lg"
+                      className="px-3 py-1 bg-primary text-white font-mono text-[10px] uppercase tracking-wider rounded-b-lg"
                       animate={{
                         boxShadow: [
                           '0 0 20px rgba(255,107,74,0.4)',
@@ -653,74 +653,51 @@ export default function Landing() {
                       }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     >
-                      Offre Pionnier
+                      Populaire
                     </motion.div>
                   )}
                 </div>
 
                 <div className="relative">
-                  <div className="mb-6 pt-4">
+                  <div className="mb-4 pt-4">
                     <span className="font-mono text-xs text-primary/80 uppercase tracking-wider">NIVO PRO</span>
-                    <h3 className="font-sans text-2xl font-bold mt-1">Pro</h3>
+                    <h3 className="font-sans text-xl font-bold mt-1">Pro</h3>
                   </div>
                   
-                  {/* Scarcity Badge (Monthly only) */}
-                  {!isAnnual && (
-                    <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03]">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                      </span>
-                      <span className="font-mono text-[10px] text-white/50">82/100 places prises</span>
-                    </div>
-                  )}
-                  
                   {/* Dynamic Pricing */}
-                  <div className="mb-8">
+                  <div className="mb-6">
                     {isAnnual ? (
                       <>
-                        <span className="text-4xl font-bold">99€</span>
+                        <span className="text-3xl font-bold">99€</span>
                         <span className="text-white/40"> / an</span>
-                        <div className="text-sm text-white/50 font-mono mt-1">
+                        <div className="text-xs text-white/50 font-mono mt-1">
                           soit <span className="text-emerald-400">8.25€/mois</span>
                         </div>
                       </>
                     ) : (
                       <>
-                        <span className="text-4xl font-bold">9.90€</span>
+                        <span className="text-3xl font-bold">9.90€</span>
                         <span className="text-white/40"> / mois</span>
                       </>
                     )}
                   </div>
 
-                  <ul className="space-y-4 mb-8">
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-white/90">30+ Skins Exclusifs</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Visualisations uniques</span>
-                      </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center gap-2 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>30+ Skins Exclusifs</span>
                     </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-white/90">Historique Illimité</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Export CSV pour les analystes</span>
-                      </div>
+                    <li className="flex items-center gap-2 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Historique Illimité</span>
                     </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-white/90">Mode Focus Audio</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Sessions optimisées pour le travail</span>
-                      </div>
+                    <li className="flex items-center gap-2 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Mode Focus Audio</span>
                     </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-white/90">Protocoles Douleur</span>
-                        <span className="block text-xs text-white/40 mt-0.5">Sciatique, Cou, Lombaires...</span>
-                      </div>
+                    <li className="flex items-center gap-2 text-sm text-white/70">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Protocoles Douleur</span>
                     </li>
                   </ul>
 
@@ -728,9 +705,102 @@ export default function Landing() {
                     to={`/onboarding?plan=${isAnnual ? 'yearly' : 'monthly'}`} 
                     className="block"
                   >
-                    <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_rgba(255,107,74,0.4)]">
+                    <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_rgba(255,107,74,0.4)] text-sm">
                       Essayer 7 jours gratuit
                       <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </ScrollReveal>
+
+            {/* LIFETIME FOUNDER */}
+            <ScrollReveal delay={0.3}>
+              <motion.div 
+                className="relative rounded-2xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-amber-500/5 p-6 backdrop-blur-sm overflow-hidden h-full"
+                animate={{
+                  borderColor: ['rgba(245,158,11,0.4)', 'rgba(245,158,11,0.7)', 'rgba(245,158,11,0.4)'],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                {/* Animated shine effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
+                  animate={{ x: ['0%', '200%'] }}
+                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                />
+                
+                <motion.div 
+                  className="absolute inset-0" 
+                  style={{ background: 'radial-gradient(circle at 50% 0%, rgba(245,158,11,0.3) 0%, transparent 60%)' }}
+                  animate={{ opacity: [0.3, 0.5, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                
+                {/* Badge Founder */}
+                <div className="absolute -top-px left-1/2 -translate-x-1/2">
+                  <motion.div 
+                    className="px-3 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-mono text-[10px] uppercase tracking-wider rounded-b-lg font-bold"
+                    animate={{
+                      boxShadow: [
+                        '0 0 20px rgba(245,158,11,0.4)',
+                        '0 0 40px rgba(245,158,11,0.6)',
+                        '0 0 20px rgba(245,158,11,0.4)',
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    🏆 Founder
+                  </motion.div>
+                </div>
+
+                <div className="relative">
+                  <div className="mb-4 pt-4">
+                    <span className="font-mono text-xs text-amber-400/80 uppercase tracking-wider">ÉDITION LIMITÉE</span>
+                    <h3 className="font-sans text-xl font-bold mt-1 text-amber-100">Lifetime</h3>
+                  </div>
+                  
+                  {/* Scarcity Badge */}
+                  <div className="mb-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                    </span>
+                    <span className="font-mono text-[10px] text-amber-300">🔥 Places limitées sur 100</span>
+                  </div>
+                  
+                  {/* Price */}
+                  <div className="mb-6">
+                    <span className="text-3xl font-bold text-amber-100">149€</span>
+                    <span className="text-amber-200/50"> une fois</span>
+                    <div className="text-xs text-amber-300/70 font-mono mt-1">
+                      Accès à vie • Jamais d'abonnement
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center gap-2 text-sm text-amber-100/80">
+                      <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span>Accès PRO à vie</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-sm text-amber-100/80">
+                      <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span>Badge Founder exclusif</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-sm text-amber-100/80">
+                      <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span>Futures fonctionnalités incluses</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-sm text-amber-100/80">
+                      <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span>Support prioritaire</span>
+                    </li>
+                  </ul>
+
+                  <Link to="/onboarding?plan=lifetime" className="block">
+                    <Button className="w-full h-11 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold shadow-[0_0_30px_rgba(245,158,11,0.4)] text-sm">
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Devenir Founder
                     </Button>
                   </Link>
                 </div>
