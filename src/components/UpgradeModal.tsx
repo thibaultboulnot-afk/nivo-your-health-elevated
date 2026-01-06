@@ -21,11 +21,12 @@ interface UpgradeModalProps {
   defaultBillingCycle?: 'monthly' | 'yearly' | 'lifetime';
 }
 
-// Stripe Price IDs
+// Stripe Price IDs (Production)
 const PRICE_IDS = {
-  monthly: 'price_1SjzmGJZ4N5U4jZsYBcSCSoo',
-  yearly: 'price_1Sjzn6JZ4N5U4jZsu2S22ZCf',
-  lifetime: 'price_lifetime_founder', // Placeholder - needs Stripe price ID
+  monthly: 'price_1SmXImJZ4N5U4jZszsdeJbcl',
+  yearly: 'price_1SmXIpJZ4N5U4jZsDpMNwyLR',
+  lifetime: 'price_1SmXIsJZ4N5U4jZsk4LlZSBE',
+  streak_freeze: 'price_1SmXIvJZ4N5U4jZsGPUx2lk7',
 };
 
 type PlanType = 'monthly' | 'yearly' | 'lifetime';

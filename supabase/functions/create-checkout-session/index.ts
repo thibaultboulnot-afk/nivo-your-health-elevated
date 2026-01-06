@@ -37,15 +37,19 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     logStep("Stripe key verified");
 
-    // Parse request body to get priceId
-    const { priceId: requestedPriceId } = await req.json().catch(() => ({}));
+    // Parse request body to get priceId and mode
+    const { priceId: requestedPriceId, mode: requestedMode } = await req.json().catch(() => ({}));
     
     // Use provided priceId or fall back to env variable
     const priceId = requestedPriceId || Deno.env.get("STRIPE_PRICE_ID");
     if (!priceId) {
       throw new Error("No price ID provided and STRIPE_PRICE_ID environment variable is not configured.");
     }
-    logStep("Price ID resolved", { priceId });
+    
+    // Determine mode: use requested mode, or default to 'subscription'
+    // Lifetime and Streak Freeze are one-time payments
+    const mode = requestedMode || 'subscription';
+    logStep("Checkout params resolved", { priceId, mode });
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -83,7 +87,7 @@ serve(async (req) => {
       }
     }
 
-    // Create a subscription session
+    // Create checkout session with dynamic mode
     const origin = req.headers.get("origin") || "https://lovable.dev";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -95,7 +99,7 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: "subscription",
+      mode: mode as "subscription" | "payment",
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,
     });
