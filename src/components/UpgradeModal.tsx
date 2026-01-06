@@ -8,12 +8,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2, Check, Sparkles, Building2 } from 'lucide-react';
+import { Crown, Zap, Shield, Headphones, ArrowRight, Loader2, Check, Sparkles, Building2, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { safeStripeRedirect } from '@/lib/url-validator';
 import { ExitIntentModal } from '@/components/ExitIntentModal';
+import { useLifetimeSpots } from '@/hooks/useLifetimeSpots';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -21,12 +22,12 @@ interface UpgradeModalProps {
   defaultBillingCycle?: 'monthly' | 'yearly' | 'lifetime';
 }
 
-// Stripe Price IDs (Production)
+// Stripe Price IDs (Production - Live Mode)
 const PRICE_IDS = {
-  monthly: 'price_1SmXImJZ4N5U4jZszsdeJbcl',
-  yearly: 'price_1SmXIpJZ4N5U4jZsDpMNwyLR',
-  lifetime: 'price_1SmXIsJZ4N5U4jZsk4LlZSBE',
-  streak_freeze: 'price_1SmXIvJZ4N5U4jZsGPUx2lk7',
+  monthly: 'price_1SmZUWJrA5Aa0I8Ot1XmbxYL',
+  yearly: 'price_1SmZUXJrA5Aa0I8Ofsj0zirW',
+  lifetime: 'price_1SmZUYJrA5Aa0I8Ox3c1mWdn',
+  streak_freeze: 'price_1SmZUYJrA5Aa0I8OKLKIUjyq',
 };
 
 type PlanType = 'monthly' | 'yearly' | 'lifetime';
@@ -37,7 +38,7 @@ export function UpgradeModal({ isOpen, onClose, defaultBillingCycle }: UpgradeMo
   const [loadingPlan, setLoadingPlan] = useState<PlanType | null>(null);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const { toast } = useToast();
-
+  const { spotsRemaining, loading: spotsLoading } = useLifetimeSpots();
   // Determine initial billing cycle from: prop > URL param > localStorage > default yearly
   const getInitialBillingCycle = (): PlanType => {
     if (defaultBillingCycle) return defaultBillingCycle;
@@ -208,9 +209,17 @@ export function UpgradeModal({ isOpen, onClose, defaultBillingCycle }: UpgradeMo
                   </p>
                 )}
                 {selectedPlan === 'lifetime' && (
-                  <p className="font-mono text-xs text-amber-400 mt-1">
-                    🏆 Accès illimité à vie • Badge Founder exclusif
-                  </p>
+                  <div className="mt-1 space-y-1">
+                    <p className="font-mono text-xs text-amber-400">
+                      🏆 Accès illimité à vie • Badge Founder exclusif
+                    </p>
+                    {!spotsLoading && spotsRemaining !== null && (
+                      <p className="font-mono text-xs text-red-400 flex items-center justify-center gap-1">
+                        <Flame className="w-3 h-3" />
+                        Seulement {spotsRemaining} places restantes sur 100
+                      </p>
+                    )}
+                  </div>
                 )}
               </motion.div>
             </AnimatePresence>

@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.create-portal-session]
 verify_jwt = true
+
+[functions.init-stripe-products]
+verify_jwt = false
+
+[functions.purchase-streak-freeze]
+verify_jwt = true

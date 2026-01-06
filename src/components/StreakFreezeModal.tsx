@@ -20,14 +20,8 @@ export function StreakFreezeModal({ isOpen, onClose, currentStreak }: StreakFree
   const handlePurchase = async () => {
     setIsLoading(true);
     try {
-      // Call Stripe checkout for streak freeze micro-transaction
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { 
-          priceId: 'price_streak_freeze', // Placeholder - needs Stripe price ID
-          mode: 'payment',
-          successUrl: `${window.location.origin}/dashboard?streak_restored=true`,
-        }
-      });
+      // Call dedicated streak freeze edge function
+      const { data, error } = await supabase.functions.invoke('purchase-streak-freeze');
 
       if (error) throw new Error(error.message);
 
