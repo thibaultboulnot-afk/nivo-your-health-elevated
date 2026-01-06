@@ -6,12 +6,32 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Product definitions
+// Product definitions - 4 products for NIVO
 const PRODUCTS = [
   {
+    name: "NIVO PRO - Mensuel",
+    description: "Abonnement mensuel à NIVO OS. Accès complet, annulable à tout moment.",
+    metadata: { type: "subscription_monthly", plan: "pro" },
+    price: {
+      unit_amount: 990, // 9.90€
+      currency: "eur",
+      recurring: { interval: "month" as const },
+    }
+  },
+  {
+    name: "NIVO PRO - Annuel",
+    description: "Abonnement annuel à NIVO OS. 12 mois au prix de 10 (2 mois offerts).",
+    metadata: { type: "subscription_yearly", plan: "pro" },
+    price: {
+      unit_amount: 9900, // 99€
+      currency: "eur",
+      recurring: { interval: "year" as const },
+    }
+  },
+  {
     name: "NIVO Lifetime Founder",
-    description: "Accès à vie à NIVO PRO - Édition Fondateur",
-    metadata: { type: "lifetime" },
+    description: "Accès à vie à NIVO PRO - Édition Fondateur (Offre limitée aux 100 premiers).",
+    metadata: { type: "lifetime", plan: "founder" },
     price: {
       unit_amount: 14900, // 149€
       currency: "eur",
@@ -19,7 +39,7 @@ const PRODUCTS = [
   },
   {
     name: "NIVO Streak Freeze",
-    description: "Module de Réparation Temporel - Restaure votre série",
+    description: "Module de Réparation Temporel - Restaure votre série de flammes.",
     metadata: { type: "streak_freeze" },
     price: {
       unit_amount: 299, // 2.99€
@@ -66,11 +86,18 @@ serve(async (req) => {
           price = prices.data[0];
         } else {
           // Create price if none exists
-          price = await stripe.prices.create({
+          const priceData: Stripe.PriceCreateParams = {
             product: product.id,
             unit_amount: productDef.price.unit_amount,
             currency: productDef.price.currency,
-          });
+          };
+          
+          // Add recurring if it's a subscription
+          if ('recurring' in productDef.price && productDef.price.recurring) {
+            priceData.recurring = productDef.price.recurring;
+          }
+          
+          price = await stripe.prices.create(priceData);
         }
       } else {
         // Create new product
@@ -82,20 +109,29 @@ serve(async (req) => {
         console.log(`[INIT] Created product: ${product.name} (${product.id})`);
 
         // Create price for the product
-        price = await stripe.prices.create({
+        const priceData: Stripe.PriceCreateParams = {
           product: product.id,
           unit_amount: productDef.price.unit_amount,
           currency: productDef.price.currency,
-        });
+        };
+        
+        // Add recurring if it's a subscription
+        if ('recurring' in productDef.price && productDef.price.recurring) {
+          priceData.recurring = productDef.price.recurring;
+        }
+        
+        price = await stripe.prices.create(priceData);
         console.log(`[INIT] Created price: ${price.id}`);
       }
 
       results.push({
         type: productDef.metadata.type,
+        name: productDef.name,
         product_id: product.id,
         price_id: price.id,
         amount: productDef.price.unit_amount,
         currency: productDef.price.currency,
+        recurring: 'recurring' in productDef.price ? productDef.price.recurring?.interval : null,
       });
     }
 
