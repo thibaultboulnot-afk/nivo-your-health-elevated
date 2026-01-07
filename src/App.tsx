@@ -29,24 +29,14 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        {/* Global Background with Orbs & Noise */}
-        <div className="fixed inset-0 bg-nivo-bg -z-10">
-          {/* Orb 1 - Purple */}
+        {/* Global Deep Space Background with subtle blue orb & Noise */}
+        <div className="fixed inset-0 bg-[#030305] -z-10">
+          {/* Single subtle blue orb for Bio-Signal accent */}
           <div 
-            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-orb-float"
+            className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/[0.08] rounded-full blur-[150px] animate-pulse-slow"
           />
-          {/* Orb 2 - Cobalt */}
-          <div 
-            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/15 rounded-full blur-[120px] animate-orb-float"
-            style={{ animationDelay: '-10s' }}
-          />
-          {/* Noise Texture */}
-          <div 
-            className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            }}
-          />
+          {/* Noise Texture - 3% opacity for anti-AI plasticity */}
+          <div className="noise-overlay" />
         </div>
         <Toaster />
         <Sonner />

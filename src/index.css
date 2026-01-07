@@ -2,91 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* NIVO Design System - High-End Tech Aesthetic */
-/* Dark Mode Deep (#030307), Clean Typography, Fluid Animations */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+/* ============================================
+   NIVO Design System v2.0 - Luxe & Science
+   Apple Elegance + Precision Engineering
+   ============================================ */
 
 @layer base {
   :root {
-    /* NIVO Dark Theme - Primary Colors */
-    --background: 240 20% 1.5%; /* #030307 */
+    /* Deep Space Background - #030305 */
+    --background: 240 14% 1%;
     --foreground: 0 0% 100%;
 
-    --card: 240 20% 4%;
+    /* Card surfaces */
+    --card: 240 14% 4%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 240 20% 4%;
+    --popover: 240 14% 4%;
     --popover-foreground: 0 0% 100%;
 
-    /* NIVO Orange - Primary Brand Color */
-    --primary: 11 100% 64%; /* #ff6b4a */
+    /* Bio-Signal Blue - Primary Accent #2E5CFF */
+    --primary: 223 100% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 10% 10%;
+    --secondary: 240 10% 8%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 10% 15%;
+    --muted: 240 10% 12%;
     --muted-foreground: 0 0% 50%;
 
-    --accent: 240 10% 12%;
+    --accent: 240 10% 10%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.05;
+    /* Cristal Engineering Borders */
+    --border: 0 0% 100% / 0.08;
     --input: 0 0% 100% / 0.1;
-    --ring: 11 100% 64%;
+    --ring: 223 100% 59%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Sidebar - Dark Variant */
-    --sidebar-background: 240 20% 3%;
+    /* Sidebar */
+    --sidebar-background: 240 14% 2%;
     --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 11 100% 64%;
+    --sidebar-primary: 223 100% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 10% 8%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.05;
-    --sidebar-ring: 11 100% 64%;
-
-    /* NIVO Custom Tokens */
-    --nivo-bg-deep: 240 20% 1.5%;
-    --nivo-bg-elevated: 240 20% 4%;
-    --nivo-surface: 0 0% 100% / 0.02;
-    --nivo-border-subtle: 0 0% 100% / 0.05;
-    --nivo-border-medium: 0 0% 100% / 0.1;
-    --nivo-text-primary: 0 0% 100%;
-    --nivo-text-secondary: 0 0% 50%;
-    --nivo-text-muted: 0 0% 30%;
-    
-    /* Status Colors */
-    --nivo-success: 142 76% 36%;
-    --nivo-warning: 38 92% 50%;
-    --nivo-error: 0 84% 60%;
+    --sidebar-ring: 223 100% 59%;
   }
 
   .dark {
-    --background: 240 20% 1.5%;
+    --background: 240 14% 1%;
     --foreground: 0 0% 100%;
-    --card: 240 20% 4%;
+    --card: 240 14% 4%;
     --card-foreground: 0 0% 100%;
-    --popover: 240 20% 4%;
+    --popover: 240 14% 4%;
     --popover-foreground: 0 0% 100%;
-    --primary: 11 100% 64%;
+    --primary: 223 100% 59%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 10% 10%;
+    --secondary: 240 10% 8%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 240 10% 15%;
+    --muted: 240 10% 12%;
     --muted-foreground: 0 0% 50%;
-    --accent: 240 10% 12%;
+    --accent: 240 10% 10%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100% / 0.05;
+    --border: 0 0% 100% / 0.08;
     --input: 0 0% 100% / 0.1;
-    --ring: 11 100% 64%;
+    --ring: 223 100% 59%;
   }
 }
 
@@ -96,144 +83,155 @@
   }
 
   html {
-    scroll-padding-top: 4rem; /* For fixed navbars */
+    scroll-padding-top: 4rem;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
   /* Typography Classes */
-  .font-display {
-    font-family: 'Instrument Serif', Georgia, serif;
+  .font-sans,
+  .font-heading,
+  .font-body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
-  .font-sans {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  .font-mono {
+  /* Data Typography - JetBrains Mono for numbers/scores/technical labels */
+  .font-mono,
+  .font-data {
     font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
   /* ============================================
-     GLASS EFFECTS - Premium Frosted Glass
+     NOISE TEXTURE OVERLAY - Anti-AI Plasticity
      ============================================ */
-  .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.03;
+    mix-blend-mode: overlay;
   }
 
-  .glass-border {
+  .noise-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* ============================================
+     CRISTAL ENGINEERING GLASS - New Glassmorphism
+     ============================================ */
+  .cristal-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-      0 8px 32px rgba(0, 0, 0, 0.3);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px 0 rgba(0, 0, 0, 0.4);
   }
 
+  .cristal-glass-hover:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Inner shadow for physical depth */
+  .cristal-inner-shadow {
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  /* ============================================
+     GLASS CARD VARIANTS
+     ============================================ */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl;
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 20px 50px -20px rgba(0, 0, 0, 0.5);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .glass-card:hover {
+    @apply bg-white/[0.05] border-white/[0.12];
+  }
+
+  .glass-card-static {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  /* Premium card with blue glow */
+  .glass-card-premium {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-primary/20 rounded-2xl;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      0 0 40px -10px rgba(46, 92, 255, 0.3);
   }
 
   /* ============================================
-     OBSIDIAN GLASS - V1.0 Design System
+     BENTO GRID SYSTEM - 24px Gap Standard
      ============================================ */
-  .nivo-glass {
-    @apply bg-zinc-950/70 backdrop-blur-2xl border border-white/5;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  .bento-grid {
+    display: grid;
+    gap: 24px;
   }
 
-  .nivo-glass-static {
-    @apply bg-zinc-950/70 backdrop-blur-2xl border border-white/5;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  .bento-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
 
-  .nivo-glass-intense {
-    @apply bg-zinc-950/80 backdrop-blur-2xl border border-white/5;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  .bento-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .bento-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .bento-grid-2,
+    .bento-grid-3,
+    .bento-grid-4 {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ============================================
-     DEEP DARK BACKGROUNDS - Premium Gradients
+     DEEP SPACE BACKGROUND
      ============================================ */
-  .bg-deep-dark {
-    background: 
-      radial-gradient(ellipse 80% 80% at 50% -20%, #0a0a0f 0%, #030307 100%);
+  .bg-deep-space {
+    background: #030305;
   }
 
   .bg-elevated {
-    background: 
-      linear-gradient(180deg, #0a0a12 0%, #050508 100%);
+    background: linear-gradient(180deg, #0a0a0c 0%, #030305 100%);
   }
 
   /* ============================================
-     AURORA EFFECT - Animated Color Clouds
-     ============================================ */
-  .aurora {
-    background: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 107, 74, 0.15), transparent),
-      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(255, 140, 100, 0.08), transparent),
-      radial-gradient(ellipse 50% 30% at 20% 80%, rgba(255, 107, 74, 0.1), transparent),
-      radial-gradient(ellipse 40% 40% at 50% 100%, rgba(255, 80, 60, 0.05), transparent);
-    animation: aurora-drift 15s ease-in-out infinite;
-  }
-
-  @keyframes aurora-drift {
-    0%, 100% {
-      opacity: 0.4;
-      filter: blur(60px);
-    }
-    50% {
-      opacity: 0.6;
-      filter: blur(80px);
-    }
-  }
-
-  /* ============================================
-     GRID BACKGROUND - Linear Style
-     ============================================ */
-  .grid-background {
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
-  }
-
-  /* ============================================
-     PREMIUM CARD STYLES
-     ============================================ */
-  .card-premium {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
-    transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-
-  .card-premium:hover {
-    @apply border-white/20;
-    transform: translateY(-2px);
-    box-shadow: 
-      0 20px 40px -20px rgba(0, 0, 0, 0.5),
-      0 0 40px -10px rgba(255, 107, 74, 0.1);
-  }
-
-  /* ============================================
-     GLOW EFFECTS - Primary & White
+     BIO-SIGNAL GLOW EFFECTS
      ============================================ */
   .glow-primary {
     box-shadow: 
@@ -252,25 +250,25 @@
       0 0 100px -20px hsl(var(--primary) / 0.2);
   }
 
-  /* Radioactive Shadow - Signature NIVO Effect */
-  .shadow-radioactive {
+  .glow-white {
     box-shadow: 
-      0 0 20px -5px hsl(var(--primary) / 0.4),
-      0 0 40px -10px hsl(var(--primary) / 0.25),
-      0 0 80px -20px hsl(var(--primary) / 0.15);
+      0 0 20px -5px rgba(255, 255, 255, 0.3),
+      0 0 40px -10px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Bio-Signal Pulse */
+  .bio-signal-pulse {
     animation: glow-pulse 3s ease-in-out infinite;
   }
 
   @keyframes glow-pulse {
     0%, 100% {
       box-shadow: 
-        0 0 20px -5px hsl(var(--primary) / 0.4),
-        0 0 40px -10px hsl(var(--primary) / 0.25);
+        0 0 20px -5px hsl(var(--primary) / 0.3);
     }
     50% {
       box-shadow: 
-        0 0 30px -5px hsl(var(--primary) / 0.5),
-        0 0 60px -10px hsl(var(--primary) / 0.35);
+        0 0 40px -5px hsl(var(--primary) / 0.5);
     }
   }
 
@@ -292,7 +290,7 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.1) 50%,
       transparent 100%
     );
     animation: shimmer 3s ease-in-out infinite;
@@ -332,7 +330,7 @@
     bottom: 0;
     background: radial-gradient(
       600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(255, 107, 74, 0.08),
+      rgba(46, 92, 255, 0.08),
       transparent 40%
     );
     pointer-events: none;
@@ -413,7 +411,7 @@
   }
 
   /* ============================================
-     SLOW PULSE FOR BACKGROUND ORBS - Performance Optimized
+     SLOW PULSE FOR BACKGROUND ELEMENTS
      ============================================ */
   .animate-pulse-slow {
     animation: pulse-slow 8s ease-in-out infinite;
@@ -426,218 +424,94 @@
   }
 
   /* ============================================
-     OBSIDIAN GLASS - Dark Sci-Fi Glass Effect
+     DATA DISPLAY UTILITIES
      ============================================ */
-  .nivo-glass {
-    background: rgba(13, 13, 13, 0.6);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 
-      0 4px 30px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  .data-value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
-  .nivo-glass:hover {
-    border-color: rgba(74, 222, 128, 0.3);
-    box-shadow: 
-      0 4px 40px rgba(0, 0, 0, 0.6),
-      0 0 20px rgba(74, 222, 128, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  .data-label {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
   }
 
-  .nivo-glass-static {
-    background: rgba(13, 13, 13, 0.6);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 
-      0 4px 30px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  }
-
-  /* Obsidian Glass Variants */
-  .nivo-glass-intense {
-    background: rgba(8, 8, 12, 0.75);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      0 8px 40px rgba(0, 0, 0, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-  }
-
-  .nivo-glass-intense:hover {
-    border-color: rgba(74, 222, 128, 0.4);
-    box-shadow: 
-      0 8px 50px rgba(0, 0, 0, 0.7),
-      0 0 30px rgba(74, 222, 128, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-
-  /* Waveform Glow Effect */
-  .waveform-glow {
-    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.6));
-  }
-
-  /* Play Button Refraction */
-  .btn-refraction {
+  /* ============================================
+     PREMIUM CARD SHINE
+     ============================================ */
+  .card-shine {
     position: relative;
     overflow: hidden;
   }
 
-  .btn-refraction::before {
+  .card-shine::before {
     content: '';
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
     background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      transparent 50%,
-      transparent 100%
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
     );
-    border-radius: inherit;
-    pointer-events: none;
+    transform: skewX(-15deg);
+    animation: card-shine 4s ease-in-out infinite;
   }
 
-  .btn-refraction::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    background: radial-gradient(
-      circle at 30% 30%,
-      rgba(255, 255, 255, 0.15) 0%,
-      transparent 50%
-    );
-    border-radius: inherit;
-    pointer-events: none;
+  @keyframes card-shine {
+    0% { left: -100%; }
+    50%, 100% { left: 150%; }
   }
 
-  /* Streak Flame Glow */
-  .flame-glow {
-    filter: drop-shadow(0 0 12px rgba(251, 146, 60, 0.6)) 
-            drop-shadow(0 0 24px rgba(239, 68, 68, 0.4));
+  /* ============================================
+     BREATHING BORDER - Premium Effect
+     ============================================ */
+  .breathe-border {
+    animation: breathe-border 4s ease-in-out infinite;
   }
 
-  /* XP Bar Glass Inset */
-  .xp-bar-inset {
-    background: rgba(0, 0, 0, 0.4);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-
-  /* Liquid Refraction for Titanium Skin */
-  .liquid-refraction {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .liquid-refraction::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      transparent 0%,
-      rgba(251, 191, 36, 0.15) 25%,
-      rgba(245, 158, 11, 0.2) 50%,
-      rgba(251, 191, 36, 0.15) 75%,
-      transparent 100%
-    );
-    animation: liquid-shift 4s ease-in-out infinite;
-  }
-
-  @keyframes liquid-shift {
-    0%, 100% {
-      transform: translateX(-100%) skewX(-15deg);
+  @keyframes breathe-border {
+    0%, 100% { 
+      border-color: rgba(46, 92, 255, 0.2);
+      box-shadow: 0 0 20px -5px rgba(46, 92, 255, 0.2);
     }
-    50% {
-      transform: translateX(100%) skewX(-15deg);
+    50% { 
+      border-color: rgba(46, 92, 255, 0.4);
+      box-shadow: 0 0 30px -5px rgba(46, 92, 255, 0.3);
     }
-  }
-
-  /* Vitrine Glass (Display Case) */
-  .vitrine-glass {
-    background: rgba(13, 13, 13, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      inset 0 0 30px rgba(0, 0, 0, 0.2);
-  }
-
-  .vitrine-glass:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 
-      0 8px 30px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 }
 
 @layer utilities {
-  /* Apple-like Easing */
-  .ease-apple {
-    transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
-  /* Selection Style */
-  ::selection {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
-
-  /* Custom Scrollbar - Minimal */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  /* Gradient Text - Hero Title */
-  .text-gradient-hero {
-    background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 50%, #606060 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Gradient Text */
+  /* Text gradient utility */
   .text-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(11 100% 75%));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Border Gradient */
-  .border-gradient-primary {
-    border: 1px solid transparent;
-    background: 
-      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
-      linear-gradient(135deg, hsl(var(--primary) / 0.5), transparent) border-box;
-  }
-
-  /* Glow effects for buttons */
-  .shadow-glow-primary {
-    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5), 0 0 60px -10px hsl(var(--primary) / 0.3);
-  }
-
-  .shadow-glow-white {
-    box-shadow: 0 0 30px -10px rgba(255, 255, 255, 0.3);
+  .text-gradient-white {
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
