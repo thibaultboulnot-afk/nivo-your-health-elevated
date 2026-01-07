@@ -49,7 +49,7 @@ serve(async (req) => {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-      logStep("Event verified", { type: event.type });
+      logStep("Event verified", { type: event.type, eventId: event.id });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logStep("Signature verification failed");
@@ -61,6 +61,21 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    // IDEMPOTENCY CHECK: Check if this event was already processed
+    const { data: existingEvent } = await supabaseAdmin
+      .from("webhook_events")
+      .select("event_id")
+      .eq("event_id", event.id)
+      .maybeSingle();
+
+    if (existingEvent) {
+      logStep("Duplicate event detected, skipping", { eventId: event.id });
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     // Handle checkout session completed - subscription or one-time payment
     if (event.type === "checkout.session.completed") {
@@ -102,6 +117,41 @@ serve(async (req) => {
         return new Response(JSON.stringify({ received: true }), { status: 200 });
       }
 
+      // Check metadata for product type (streak_freeze handling)
+      const productType = session.metadata?.product_type;
+      
+      if (productType === 'streak_freeze') {
+        logStep("Processing streak freeze purchase");
+        
+        // Increment streak_freezes in profiles
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("streak_freezes")
+          .eq("id", targetUserId)
+          .single();
+        
+        const currentFreezes = profile?.streak_freezes || 0;
+        
+        const { error: freezeError } = await supabaseAdmin
+          .from("profiles")
+          .update({ streak_freezes: currentFreezes + 1 })
+          .eq("id", targetUserId);
+
+        if (freezeError) {
+          logStep("Error updating streak freezes", { error: freezeError.message });
+        } else {
+          logStep("Streak freeze added", { newTotal: currentFreezes + 1 });
+        }
+
+        // Mark event as processed
+        await supabaseAdmin.from("webhook_events").insert({ 
+          event_id: event.id, 
+          event_type: event.type 
+        });
+
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
+
       // Handle LIFETIME / One-time payment
       if (session.mode === 'payment') {
         logStep("Processing lifetime/one-time payment");
@@ -137,6 +187,12 @@ serve(async (req) => {
         } else {
           logStep("Subscriptions table updated for lifetime");
         }
+
+        // Mark event as processed
+        await supabaseAdmin.from("webhook_events").insert({ 
+          event_id: event.id, 
+          event_type: event.type 
+        });
 
         return new Response(JSON.stringify({ received: true }), { status: 200 });
       }
@@ -255,6 +311,16 @@ serve(async (req) => {
 
         logStep("Subscription canceled and user downgraded to free");
       }
+    }
+
+    // Mark event as processed (for events that weren't returned early)
+    try {
+      await supabaseAdmin.from("webhook_events").insert({ 
+        event_id: event.id, 
+        event_type: event.type 
+      });
+    } catch {
+      // Ignore insert errors (might be a duplicate from race condition)
     }
 
     return new Response(JSON.stringify({ received: true }), {

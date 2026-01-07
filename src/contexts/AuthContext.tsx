@@ -12,6 +12,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// TTL for pending diagnostic data (1 hour in milliseconds)
+const PENDING_DIAGNOSTIC_TTL = 3600000;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -62,6 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 const PendingDiagnosticSchema = z.object({
   healthScore: z.number().min(0).max(100),
   answers: z.record(z.any()),
+  timestamp: z.number().optional(),
+  ttl: z.number().optional(),
 });
 
 // Save pending diagnostic from localStorage to Supabase
@@ -72,6 +77,15 @@ async function savePendingDiagnostic(userId: string) {
   try {
     const parsed = JSON.parse(pendingDiagnostic);
     const validated = PendingDiagnosticSchema.parse(parsed);
+    
+    // Check if data has expired (TTL check)
+    if (validated.timestamp && validated.ttl) {
+      if (Date.now() - validated.timestamp > validated.ttl) {
+        // Data expired, clear it
+        localStorage.removeItem('pending_diagnostic');
+        return;
+      }
+    }
     
     const { error } = await supabase
       .from('user_diagnostics')
@@ -88,6 +102,17 @@ async function savePendingDiagnostic(userId: string) {
     // Clear invalid localStorage data to prevent repeated failures
     localStorage.removeItem('pending_diagnostic');
   }
+}
+
+// Helper to store pending diagnostic with TTL
+export function storePendingDiagnostic(healthScore: number, answers: Record<string, unknown>) {
+  const data = {
+    healthScore,
+    answers,
+    timestamp: Date.now(),
+    ttl: PENDING_DIAGNOSTIC_TTL,
+  };
+  localStorage.setItem('pending_diagnostic', JSON.stringify(data));
 }
 
 export function useAuth() {
